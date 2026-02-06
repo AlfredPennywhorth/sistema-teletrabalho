@@ -257,8 +257,9 @@ export function MonthlyCalendar() {
                     if (selectedStatus && dayData?.status !== selectedStatus) return null;
                     if (!dayData && selectedStatus) return null;
 
-                    // Show if: It's a working day OR there is data for this day
-                    if (!isWorkingDay && !dayData) return null;
+                    // Show only if it's a working day (hide weekends/holidays to reduce visual pollution)
+                    if (!isWorkingDay) return null;
+                    if (!dayData) return null;
 
                     return (
                       <button
