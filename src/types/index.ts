@@ -47,13 +47,14 @@ export interface User {
   colaboradorId?: string;
 }
 
-presencial: { label: 'Presencial', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
-teletrabalho: { label: 'Teletrabalho', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-folga: { label: 'Folga', color: 'text-amber-700', bgColor: 'bg-amber-100' },
-ferias: { label: 'Férias', color: 'text-purple-700', bgColor: 'bg-purple-100' },
-atestado: { label: 'Atestado', color: 'text-rose-700', bgColor: 'bg-rose-100' },
-licenca: { label: 'Licença', color: 'text-indigo-700', bgColor: 'bg-indigo-100' },
-outro: { label: 'Outro', color: 'text-gray-700', bgColor: 'bg-gray-100' },
+export const STATUS_CONFIG: Record<StatusType, { label: string; color: string; bgColor: string }> = {
+  presencial: { label: 'Presencial', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+  teletrabalho: { label: 'Teletrabalho', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+  folga: { label: 'Folga', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+  ferias: { label: 'Férias', color: 'text-purple-700', bgColor: 'bg-purple-100' },
+  atestado: { label: 'Atestado', color: 'text-rose-700', bgColor: 'bg-rose-100' },
+  licenca: { label: 'Licença', color: 'text-indigo-700', bgColor: 'bg-indigo-100' },
+  outro: { label: 'Outro', color: 'text-gray-700', bgColor: 'bg-gray-100' },
 };
 
 export const HOLIDAY_TYPE_CONFIG: Record<HolidayType, { label: string; color: string }> = {
