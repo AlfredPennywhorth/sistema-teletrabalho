@@ -176,7 +176,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'teletrabalho-storage',
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version) => {
         let state = persistedState;
 
@@ -195,20 +195,25 @@ export const useStore = create<AppState>()(
         }
 
         if (version === 1) {
-          // Migration from version 1 to 2 (Rotation 2026)
-          const existingStatus = state.statusDiarios || [];
-          const statusMap = new Map(existingStatus.map((s: any) => [s.id, s]));
+          // Migration from version 1 to 2 (Legacy attempt - skipped to 3)
+          version = 2;
+        }
 
-          // Apply new data (upsert)
-          (data2026 as any).forEach((item: any) => {
-            statusMap.set(item.id, item);
-          });
+        if (version === 2) {
+          // Migration from version 2 to 3 (Clean 2026 Data Force Update)
+          const existingStatus = state.statusDiarios || [];
+
+          // 1. Remove ALL 2026 entries to avoid ID conflicts (sample data vs real data)
+          const cleanStatus = existingStatus.filter((s: any) => !s.data.startsWith('2026-'));
+
+          // 2. Insert fresh 2026 data
+          const newData = (data2026 as any[]);
 
           state = {
             ...state,
-            statusDiarios: Array.from(statusMap.values()),
+            statusDiarios: [...cleanStatus, ...newData],
           };
-          version = 2;
+          version = 3;
         }
 
         return state;
