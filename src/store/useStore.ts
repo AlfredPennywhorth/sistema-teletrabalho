@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import data2026 from '../data/data_2026.json';
 import type { Colaborador, StatusDiario, Feriado, User } from '../types';
 
 interface AppState {
@@ -175,23 +176,43 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'teletrabalho-storage',
-      version: 1,
+      version: 2,
       migrate: (persistedState: any, version) => {
+        let state = persistedState;
+
         if (version === 0) {
           // Migration from version 0 (no version) to 1
-          // We need to merge the strictly new holidays from initialFeriados 
-          // into the persisted feriados, ensuring no duplicates.
-          const existingFeriados = persistedState.feriados || [];
+          const existingFeriados = state.feriados || [];
           const existingIds = new Set(existingFeriados.map((f: any) => f.id));
 
           const newFeriados = initialFeriados.filter(f => !existingIds.has(f.id));
 
-          return {
-            ...persistedState,
+          state = {
+            ...state,
             feriados: [...existingFeriados, ...newFeriados],
           };
+          version = 1;
         }
-        return persistedState;
+
+        if (version === 1) {
+          // Migration from version 1 to 2 (Rotation 2026)
+          const existingStatus = state.statusDiarios || [];
+          const statusMap = new Map(existingStatus.map((s: any) => [s.id, s]));
+
+          // Apply new data (upsert)
+          // Explicitly cast data2026 to any to avoid strict type checks here
+          (data2026 as any).forEach((item: any) => {
+            statusMap.set(item.id, item);
+          });
+
+          state = {
+            ...state,
+            statusDiarios: Array.from(statusMap.values()),
+          };
+          version = 2;
+        }
+
+        return state;
       },
     }
   )
