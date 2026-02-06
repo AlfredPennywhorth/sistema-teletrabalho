@@ -34,11 +34,11 @@ interface AppState {
 
 // Real initial data
 const initialColaboradores: Colaborador[] = [
-  { id: 'andre', nome: 'André', matricula: '101', email: 'andre@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
-  { id: 'virginia', nome: 'Virgínia', matricula: '102', email: 'virginia@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
-  { id: 'carol', nome: 'Ana Carolina', matricula: '103', email: 'carol@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
-  { id: 'william', nome: 'William', matricula: '104', email: 'william@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
-  { id: 'iuri', nome: 'Iuri', matricula: '105', email: 'iuri@empresa.com', cargo: 'Chefe', departamento: 'TI', situacao: 'ativo' },
+  { id: 'andre', nome: 'André William de Souza', matricula: '101', email: 'andre@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
+  { id: 'virginia', nome: 'Virginia L. da Silva Borba', matricula: '102', email: 'virginia@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
+  { id: 'carol', nome: 'Ana Carolina Viana', matricula: '103', email: 'carol@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
+  { id: 'william', nome: 'William de Barros', matricula: '104', email: 'william@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
+  { id: 'iuri', nome: 'Iuri Artur Miranda de Andrade', matricula: '105', email: 'iuri@empresa.com', cargo: 'Chefe', departamento: 'TI', situacao: 'ativo' },
 ];
 
 const initialFeriados: Feriado[] = [
@@ -176,7 +176,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'teletrabalho-storage',
-      version: 3,
+      version: 4,
       migrate: (persistedState: any, version) => {
         let state = persistedState;
 
@@ -195,7 +195,7 @@ export const useStore = create<AppState>()(
         }
 
         if (version === 1) {
-          // Migration from version 1 to 2 (Legacy attempt - skipped to 3)
+          // Migration from version 1 to 2 (Legacy attempt - skipped)
           version = 2;
         }
 
@@ -214,6 +214,19 @@ export const useStore = create<AppState>()(
             statusDiarios: [...cleanStatus, ...newData],
           };
           version = 3;
+        }
+
+        if (version === 3) {
+          // Migration from version 3 to 4 (Sync Colaboradores IDs)
+          // The user had custom names but old IDs. We need to:
+          // 1. Force update the colaboradores list to our new 'initialColaboradores' which has correct IDs ('andre', 'william', etc.)
+          // 2. This ensures the 2026 status data (which uses these IDs) matches the UI.
+
+          state = {
+            ...state,
+            colaboradores: initialColaboradores
+          };
+          version = 4;
         }
 
         return state;
