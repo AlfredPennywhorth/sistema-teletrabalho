@@ -32,13 +32,13 @@ interface AppState {
   setSelectedDepartamento: (departamento: string) => void;
 }
 
-// Mock initial data
+// Real initial data
 const initialColaboradores: Colaborador[] = [
-  { id: '1', nome: 'Ana Silva', matricula: '001', email: 'ana.silva@empresa.com', cargo: 'Desenvolvedora', departamento: 'TI', situacao: 'ativo' },
-  { id: '2', nome: 'Carlos Santos', matricula: '002', email: 'carlos.santos@empresa.com', cargo: 'Analista', departamento: 'TI', situacao: 'ativo' },
-  { id: '3', nome: 'Maria Oliveira', matricula: '003', email: 'maria.oliveira@empresa.com', cargo: 'Gerente', departamento: 'RH', situacao: 'ativo' },
-  { id: '4', nome: 'João Costa', matricula: '004', email: 'joao.costa@empresa.com', cargo: 'Coordenador', departamento: 'Financeiro', situacao: 'ativo' },
-  { id: '5', nome: 'Fernanda Lima', matricula: '005', email: 'fernanda.lima@empresa.com', cargo: 'Assistente', departamento: 'RH', situacao: 'ativo' },
+  { id: 'andre', nome: 'André', matricula: '101', email: 'andre@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
+  { id: 'virginia', nome: 'Virgínia', matricula: '102', email: 'virginia@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
+  { id: 'carol', nome: 'Ana Carolina', matricula: '103', email: 'carol@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
+  { id: 'william', nome: 'William', matricula: '104', email: 'william@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
+  { id: 'iuri', nome: 'Iuri', matricula: '105', email: 'iuri@empresa.com', cargo: 'Chefe', departamento: 'TI', situacao: 'ativo' },
 ];
 
 const initialFeriados: Feriado[] = [
@@ -200,7 +200,6 @@ export const useStore = create<AppState>()(
           const statusMap = new Map(existingStatus.map((s: any) => [s.id, s]));
 
           // Apply new data (upsert)
-          // Explicitly cast data2026 to any to avoid strict type checks here
           (data2026 as any).forEach((item: any) => {
             statusMap.set(item.id, item);
           });
