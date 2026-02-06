@@ -246,7 +246,7 @@ export function MonthlyCalendar() {
                     {format(day, 'd')}
                   </span>
                   {holiday && (
-                    <span className="text-[10px] text-red-600 font-medium truncate max-w-[60px]">
+                    <span className="text-[10px] text-red-600 font-medium truncate max-w-[80px] text-left">
                       {holiday.nome}
                     </span>
                   )}
