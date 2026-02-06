@@ -41,14 +41,35 @@ const initialColaboradores: Colaborador[] = [
 ];
 
 const initialFeriados: Feriado[] = [
-  { id: '1', data: '2025-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
-  { id: '2', data: '2025-04-21', nome: 'Tiradentes', tipo: 'nacional' },
-  { id: '3', data: '2025-05-01', nome: 'Dia do Trabalho', tipo: 'nacional' },
-  { id: '4', data: '2025-09-07', nome: 'Independência do Brasil', tipo: 'nacional' },
-  { id: '5', data: '2025-10-12', nome: 'Nossa Senhora Aparecida', tipo: 'nacional' },
-  { id: '6', data: '2025-11-02', nome: 'Finados', tipo: 'nacional' },
-  { id: '7', data: '2025-11-15', nome: 'Proclamação da República', tipo: 'nacional' },
-  { id: '8', data: '2025-12-25', nome: 'Natal', tipo: 'nacional' },
+  // 2025
+  { id: '2025-01-01', data: '2025-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
+  { id: '2025-04-21', data: '2025-04-21', nome: 'Tiradentes', tipo: 'nacional' },
+  { id: '2025-05-01', data: '2025-05-01', nome: 'Dia do Trabalho', tipo: 'nacional' },
+  { id: '2025-09-07', data: '2025-09-07', nome: 'Independência do Brasil', tipo: 'nacional' },
+  { id: '2025-10-12', data: '2025-10-12', nome: 'Nossa Senhora Aparecida', tipo: 'nacional' },
+  { id: '2025-11-02', data: '2025-11-02', nome: 'Finados', tipo: 'nacional' },
+  { id: '2025-11-15', data: '2025-11-15', nome: 'Proclamação da República', tipo: 'nacional' },
+  { id: '2025-12-25', data: '2025-12-25', nome: 'Natal', tipo: 'nacional' },
+  
+  // 2026
+  { id: '2026-01-01', data: '2026-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
+  { id: '2026-04-21', data: '2026-04-21', nome: 'Tiradentes', tipo: 'nacional' },
+  { id: '2026-05-01', data: '2026-05-01', nome: 'Dia do Trabalho', tipo: 'nacional' },
+  { id: '2026-09-07', data: '2026-09-07', nome: 'Independência do Brasil', tipo: 'nacional' },
+  { id: '2026-10-12', data: '2026-10-12', nome: 'Nossa Senhora Aparecida', tipo: 'nacional' },
+  { id: '2026-11-02', data: '2026-11-02', nome: 'Finados', tipo: 'nacional' },
+  { id: '2026-11-15', data: '2026-11-15', nome: 'Proclamação da República', tipo: 'nacional' },
+  { id: '2026-12-25', data: '2026-12-25', nome: 'Natal', tipo: 'nacional' },
+
+  // 2027
+  { id: '2027-01-01', data: '2027-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
+  { id: '2027-04-21', data: '2027-04-21', nome: 'Tiradentes', tipo: 'nacional' },
+  { id: '2027-05-01', data: '2027-05-01', nome: 'Dia do Trabalho', tipo: 'nacional' },
+  { id: '2027-09-07', data: '2027-09-07', nome: 'Independência do Brasil', tipo: 'nacional' },
+  { id: '2027-10-12', data: '2027-10-12', nome: 'Nossa Senhora Aparecida', tipo: 'nacional' },
+  { id: '2027-11-02', data: '2027-11-02', nome: 'Finados', tipo: 'nacional' },
+  { id: '2027-11-15', data: '2027-11-15', nome: 'Proclamação da República', tipo: 'nacional' },
+  { id: '2027-12-25', data: '2027-12-25', nome: 'Natal', tipo: 'nacional' },
 ];
 
 // Generate some sample status data

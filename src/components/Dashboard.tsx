@@ -9,7 +9,7 @@ import {
   TrendingUp,
   AlertCircle,
 } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, addDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useStore } from '../store/useStore';
 import { STATUS_CONFIG, type StatusType } from '../types';
@@ -148,6 +148,22 @@ export function Dashboard() {
             </div>
           );
         })}
+
+        {/* Current Week Card */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Semana Vigente</p>
+              <p className="text-lg font-bold text-slate-900 mt-2 capitalize">
+                {format(startOfWeek(today, { weekStartsOn: 0 }), 'dd/MMM', { locale: ptBR })} - {format(endOfWeek(today, { weekStartsOn: 0 }), 'dd/MMM', { locale: ptBR })}
+              </p>
+              <p className="text-xs text-slate-400 mt-1">Semana {format(today, 'w')}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-orange-50">
+              <Calendar className="w-6 h-6 text-orange-500" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Secondary Section */}
@@ -206,8 +222,8 @@ export function Dashboard() {
                   <span className={cn(
                     'px-2 py-1 text-xs font-medium rounded-full',
                     holiday.tipo === 'nacional' ? 'bg-red-100 text-red-700' :
-                    holiday.tipo === 'municipal' ? 'bg-blue-100 text-blue-700' :
-                    'bg-green-100 text-green-700'
+                      holiday.tipo === 'municipal' ? 'bg-blue-100 text-blue-700' :
+                        'bg-green-100 text-green-700'
                   )}>
                     {holiday.tipo}
                   </span>

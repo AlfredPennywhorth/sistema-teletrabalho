@@ -222,12 +222,13 @@ export function MonthlyCalendar() {
             const isToday = isSameDay(day, new Date());
             const holiday = isHoliday(day);
             const weekend = isWeekend(day);
+            const isWorkingDay = !weekend && !holiday;
 
             return (
               <div
                 key={idx}
                 className={cn(
-                  'min-h-[100px] border-b border-r border-slate-100 p-1',
+                  'min-h-[140px] border-b border-r border-slate-100 p-1',
                   !isCurrentMonth && 'bg-slate-50',
                   holiday && 'bg-red-50',
                   weekend && !holiday && 'bg-slate-50'
@@ -250,11 +251,14 @@ export function MonthlyCalendar() {
                     </span>
                   )}
                 </div>
-                <div className="space-y-0.5 max-h-[60px] overflow-y-auto">
+                <div className="space-y-0.5 max-h-[100px] overflow-y-auto">
                   {filteredColaboradores.map((col) => {
                     const dayData = getDayData(day, col.id);
                     if (selectedStatus && dayData?.status !== selectedStatus) return null;
                     if (!dayData && selectedStatus) return null;
+
+                    // Show if: It's a working day OR there is data for this day
+                    if (!isWorkingDay && !dayData) return null;
 
                     return (
                       <button
