@@ -228,7 +228,7 @@ export function MonthlyCalendar() {
               <div
                 key={idx}
                 className={cn(
-                  'min-h-[140px] border-b border-r border-slate-100 p-1',
+                  'min-h-[120px] h-full border-b border-r border-slate-100 p-1 flex flex-col',
                   !isCurrentMonth && 'bg-slate-50',
                   holiday && 'bg-red-50',
                   weekend && !holiday && 'bg-slate-50'
@@ -251,7 +251,7 @@ export function MonthlyCalendar() {
                     </span>
                   )}
                 </div>
-                <div className="space-y-0.5 max-h-[100px] overflow-y-auto">
+                <div className="space-y-0.5">
                   {filteredColaboradores.map((col) => {
                     const dayData = getDayData(day, col.id);
                     if (selectedStatus && dayData?.status !== selectedStatus) return null;

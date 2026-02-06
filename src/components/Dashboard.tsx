@@ -9,7 +9,7 @@ import {
   TrendingUp,
   AlertCircle,
 } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, addDays, startOfWeek, endOfWeek } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useStore } from '../store/useStore';
 import { STATUS_CONFIG, type StatusType } from '../types';
@@ -164,6 +164,82 @@ export function Dashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Weekly Overview */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Calendar className="w-5 h-5 text-slate-400" />
+          <h2 className="text-lg font-semibold text-slate-900">Visão Geral da Semana</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-3 py-2 text-left font-semibold text-slate-700 min-w-[150px] border-r border-slate-200">
+                  Colaborador
+                </th>
+                {Array.from({ length: 7 }).map((_, idx) => {
+                  const day = addDays(startOfWeek(today, { weekStartsOn: 0 }), idx);
+                  const isToday = isSameDay(day, new Date());
+                  return (
+                    <th key={idx} className={cn("px-2 py-2 text-center border-r border-slate-100 last:border-0", isToday && "bg-blue-50")}>
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs font-medium text-slate-500 uppercase">
+                          {format(day, 'EEE', { locale: ptBR })}
+                        </span>
+                        <span className={cn("text-xs font-bold", isToday ? "text-blue-600" : "text-slate-700")}>
+                          {format(day, 'dd/MM')}
+                        </span>
+                      </div>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {colaboradores.filter(c => c.situacao === 'ativo').map((col) => (
+                <tr key={col.id} className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="px-3 py-2 font-medium text-slate-800 border-r border-slate-200 whitespace-nowrap">
+                    {col.nome}
+                  </td>
+                  {Array.from({ length: 7 }).map((_, idx) => {
+                    const day = addDays(startOfWeek(today, { weekStartsOn: 0 }), idx);
+                    const dateStr = format(day, 'yyyy-MM-dd');
+                    const status = statusDiarios.find(s => s.colaboradorId === col.id && s.data === dateStr);
+                    const holiday = feriados.find(f => f.data === dateStr);
+                    const isToday = isSameDay(day, new Date());
+
+                    let bg = "";
+                    let text = "-";
+                    let title = "";
+
+                    if (holiday) {
+                      bg = "bg-red-50 text-red-600";
+                      text = "Feriado";
+                      title = holiday.nome;
+                    } else if (status) {
+                      const config = STATUS_CONFIG[status.status];
+                      bg = config.bgColor + " " + config.color;
+                      text = config.label;
+                    }
+
+                    return (
+                      <td key={idx} className={cn("px-2 py-2 text-center border-r border-slate-100 last:border-0", isToday && !bg && "bg-blue-50/30")}>
+                        {text !== "-" && (
+                          <span className={cn("inline-block px-2 py-1 rounded text-xs font-medium truncate max-w-[100px]", bg)} title={title || text}>
+                            {text}
+                          </span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
       </div>
 
       {/* Secondary Section */}

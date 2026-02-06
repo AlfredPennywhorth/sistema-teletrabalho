@@ -50,7 +50,7 @@ const initialFeriados: Feriado[] = [
   { id: '2025-11-02', data: '2025-11-02', nome: 'Finados', tipo: 'nacional' },
   { id: '2025-11-15', data: '2025-11-15', nome: 'Proclamação da República', tipo: 'nacional' },
   { id: '2025-12-25', data: '2025-12-25', nome: 'Natal', tipo: 'nacional' },
-  
+
   // 2026
   { id: '2026-01-01', data: '2026-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
   { id: '2026-04-21', data: '2026-04-21', nome: 'Tiradentes', tipo: 'nacional' },
@@ -77,12 +77,12 @@ const generateSampleStatus = (): StatusDiario[] => {
   const statuses: StatusDiario[] = [];
   const statusTypes = ['presencial', 'teletrabalho', 'folga', 'ferias', 'atestado'] as const;
   const today = new Date();
-  
+
   for (let i = 0; i < 30; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
-    
+
     initialColaboradores.forEach((col, idx) => {
       if (Math.random() > 0.3) {
         const statusIndex = (i + idx) % statusTypes.length;
@@ -95,7 +95,7 @@ const generateSampleStatus = (): StatusDiario[] => {
       }
     });
   }
-  
+
   return statuses;
 };
 
@@ -175,6 +175,24 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'teletrabalho-storage',
+      version: 1,
+      migrate: (persistedState: any, version) => {
+        if (version === 0) {
+          // Migration from version 0 (no version) to 1
+          // We need to merge the strictly new holidays from initialFeriados 
+          // into the persisted feriados, ensuring no duplicates.
+          const existingFeriados = persistedState.feriados || [];
+          const existingIds = new Set(existingFeriados.map((f: any) => f.id));
+
+          const newFeriados = initialFeriados.filter(f => !existingIds.has(f.id));
+
+          return {
+            ...persistedState,
+            feriados: [...existingFeriados, ...newFeriados],
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );
