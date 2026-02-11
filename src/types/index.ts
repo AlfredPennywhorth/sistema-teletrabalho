@@ -9,7 +9,7 @@ export type StatusType =
 
 export type SituationType = 'ativo' | 'inativo';
 
-export type HolidayType = 'nacional' | 'municipal' | 'empresa';
+export type HolidayType = 'nacional' | 'estadual' | 'municipal' | 'facultativo' | 'empresa';
 
 export type UserRole = 'admin' | 'gestor' | 'usuario';
 
@@ -48,9 +48,9 @@ export interface User {
 }
 
 export const STATUS_CONFIG: Record<StatusType, { label: string; color: string; bgColor: string }> = {
-  presencial: { label: 'Presencial', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
-  teletrabalho: { label: 'Teletrabalho', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-  folga: { label: 'Folga', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+  presencial: { label: 'Presencial', color: 'text-teal-800', bgColor: 'bg-teal-100' },
+  teletrabalho: { label: 'Teletrabalho', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+  folga: { label: 'Folga', color: 'text-slate-600', bgColor: 'bg-slate-100' },
   ferias: { label: 'Férias', color: 'text-purple-700', bgColor: 'bg-purple-100' },
   atestado: { label: 'Atestado', color: 'text-rose-700', bgColor: 'bg-rose-100' },
   licenca: { label: 'Licença', color: 'text-indigo-700', bgColor: 'bg-indigo-100' },
@@ -59,6 +59,8 @@ export const STATUS_CONFIG: Record<StatusType, { label: string; color: string; b
 
 export const HOLIDAY_TYPE_CONFIG: Record<HolidayType, { label: string; color: string }> = {
   nacional: { label: 'Nacional', color: 'bg-red-500' },
+  estadual: { label: 'Estadual', color: 'bg-orange-500' },
   municipal: { label: 'Municipal', color: 'bg-blue-500' },
+  facultativo: { label: 'Facultativo', color: 'bg-slate-500' },
   empresa: { label: 'Empresa', color: 'bg-green-500' },
 };

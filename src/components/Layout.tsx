@@ -9,9 +9,12 @@ import {
   X,
   LogOut,
   User,
+  KeyRound, // Added icon
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useStore } from '../store/useStore';
+import { auth } from '../lib/firebase';
+import { ChangePasswordModal } from './ChangePasswordModal'; // Added import
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -29,6 +32,7 @@ const navItems = [
 
 export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false); // Added state
   const { currentUser } = useStore();
 
   return (
@@ -105,8 +109,8 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
           </nav>
 
           {/* User Section */}
-          <div className="p-4 border-t border-slate-200">
-            <div className="flex items-center gap-3 mb-3">
+          <div className="p-4 border-t border-slate-200 space-y-1">
+            <div className="flex items-center gap-3 mb-3 px-2">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
                 <User className="w-5 h-5 text-white" />
               </div>
@@ -115,7 +119,19 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
                 <p className="text-xs text-slate-500 capitalize">{currentUser?.role}</p>
               </div>
             </div>
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <KeyRound className="w-4 h-4" />
+              <span className="text-sm">Alterar Senha</span>
+            </button>
+
+            <button
+              onClick={() => auth.signOut()}
+              className="w-full flex items-center gap-2 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            >
               <LogOut className="w-4 h-4" />
               <span className="text-sm">Sair</span>
             </button>
@@ -127,6 +143,12 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
       <main className="lg:ml-64 min-h-screen pt-16 lg:pt-0">
         <div className="p-4 lg:p-8">{children}</div>
       </main>
+
+      {/* Modals */}
+      <ChangePasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </div>
   );
 }

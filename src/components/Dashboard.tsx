@@ -8,6 +8,10 @@ import {
   Clock,
   TrendingUp,
   AlertCircle,
+  Coffee,
+  FileText,
+  HelpCircle,
+  Baby
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -86,37 +90,6 @@ export function Dashboard() {
     };
   }, [colaboradores, statusDiarios, feriados, today]);
 
-  const mainCards = [
-    {
-      title: 'Colaboradores Ativos',
-      value: stats.total,
-      icon: Users,
-      color: 'bg-blue-500',
-      lightColor: 'bg-blue-50',
-    },
-    {
-      title: 'Presencial Hoje',
-      value: stats.todayStatuses.presencial,
-      icon: Briefcase,
-      color: 'bg-emerald-500',
-      lightColor: 'bg-emerald-50',
-    },
-    {
-      title: 'Teletrabalho Hoje',
-      value: stats.todayStatuses.teletrabalho,
-      icon: Home,
-      color: 'bg-indigo-500',
-      lightColor: 'bg-indigo-50',
-    },
-    {
-      title: 'Férias Hoje',
-      value: stats.todayStatuses.ferias,
-      icon: Palmtree,
-      color: 'bg-purple-500',
-      lightColor: 'bg-purple-50',
-    },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -127,43 +100,62 @@ export function Dashboard() {
         </p>
       </div>
 
-      {/* Main Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {mainCards.map((card) => {
-          const Icon = card.icon;
+      {/* Main Stats (Compact) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Current Week Card */}
+        <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-2 opacity-5">
+            <Calendar className="w-12 h-12 text-slate-900" />
+          </div>
+          <div className="relative">
+            <p className="text-xs font-semibold text-slate-500 uppercase">Semana {format(today, 'w')}</p>
+            <p className="text-sm font-bold text-slate-900 mt-1 capitalize leading-tight">
+              {format(startOfWeek(today, { weekStartsOn: 0 }), 'dd/MMM', { locale: ptBR })} - {format(endOfWeek(today, { weekStartsOn: 0 }), 'dd/MMM', { locale: ptBR })}
+            </p>
+          </div>
+        </div>
+
+        {/* Active Collaborators */}
+        <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase">Ativos</p>
+            <p className="text-2xl font-bold text-slate-900 mt-0.5">{stats.total}</p>
+          </div>
+          <div className="p-2 rounded-lg bg-slate-100">
+            <Users className="w-5 h-5 text-slate-600" />
+          </div>
+        </div>
+      </div>
+
+      {/* Status Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+        {[
+          { key: 'presencial', icon: Briefcase },
+          { key: 'teletrabalho', icon: Home },
+          { key: 'folga', icon: Coffee },
+          { key: 'ferias', icon: Palmtree },
+          { key: 'atestado', icon: FileText },
+          { key: 'licenca', icon: Baby },
+          { key: 'outro', icon: HelpCircle },
+        ].map((item) => {
+          const statusKey = item.key as StatusType;
+          const config = STATUS_CONFIG[statusKey];
+          const count = stats.todayStatuses[statusKey];
+          const Icon = item.icon;
+
           return (
             <div
-              key={card.title}
-              className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow"
+              key={statusKey}
+              className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow flex flex-col justify-between min-w-0"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-500">{card.title}</p>
-                  <p className="text-3xl font-bold text-slate-900 mt-2">{card.value}</p>
-                </div>
-                <div className={cn('p-3 rounded-xl', card.lightColor)}>
-                  <Icon className={cn('w-6 h-6', card.color.replace('bg-', 'text-'))} />
-                </div>
+              <div className="flex items-start justify-between mb-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate" title={config.label}>{config.label}</span>
+                <Icon className={cn('w-4 h-4', config.color)} />
               </div>
+              <p className="text-2xl font-bold text-slate-900 leading-none">{count}</p>
             </div>
           );
         })}
-
-        {/* Current Week Card */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Semana Vigente</p>
-              <p className="text-lg font-bold text-slate-900 mt-2 capitalize">
-                {format(startOfWeek(today, { weekStartsOn: 0 }), 'dd/MMM', { locale: ptBR })} - {format(endOfWeek(today, { weekStartsOn: 0 }), 'dd/MMM', { locale: ptBR })}
-              </p>
-              <p className="text-xs text-slate-400 mt-1">Semana {format(today, 'w')}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-orange-50">
-              <Calendar className="w-6 h-6 text-orange-500" />
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Weekly Overview */}
@@ -327,10 +319,13 @@ export function Dashboard() {
               <tr className="border-b border-slate-200">
                 <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Departamento</th>
                 <th className="text-center py-3 px-4 text-sm font-semibold text-slate-600">Total</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-emerald-600">Presencial</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-blue-600">Teletrabalho</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-purple-600">Férias</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-amber-600">Folga</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-teal-800">Presencial</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-orange-700">Teletrabalho</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-purple-700">Férias</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-slate-600">Folga</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-rose-700">Atestado</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-indigo-700">Licença</th>
+                <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Outro</th>
               </tr>
             </thead>
             <tbody>
@@ -347,12 +342,12 @@ export function Dashboard() {
                     <td className="py-3 px-4 font-medium text-slate-900">{dept}</td>
                     <td className="py-3 px-4 text-center text-slate-600">{deptColabs.length}</td>
                     <td className="py-3 px-4 text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-800 font-medium">
                         {deptStatuses.filter((s) => s.status === 'presencial').length}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-medium">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-700 font-medium">
                         {deptStatuses.filter((s) => s.status === 'teletrabalho').length}
                       </span>
                     </td>
@@ -362,8 +357,23 @@ export function Dashboard() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 text-amber-700 font-medium">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-medium">
                         {deptStatuses.filter((s) => s.status === 'folga').length}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-rose-100 text-rose-700 font-medium">
+                        {deptStatuses.filter((s) => s.status === 'atestado').length}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                        {deptStatuses.filter((s) => s.status === 'licenca').length}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-medium">
+                        {deptStatuses.filter((s) => s.status === 'outro').length}
                       </span>
                     </td>
                   </tr>

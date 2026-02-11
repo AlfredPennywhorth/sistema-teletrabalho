@@ -10,10 +10,12 @@ import {
   UserX,
   Mail,
   Briefcase,
+  Loader2,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import type { Colaborador, SituationType } from '../types';
 import { cn } from '../utils/cn';
+import { addColaborador as addColaboradorService, updateColaborador as updateColaboradorService, deleteColaborador as deleteColaboradorService } from '../services/firestoreService';
 
 export function ColaboradoresManager() {
   const { colaboradores, addColaborador, updateColaborador, deleteColaborador } = useStore();
@@ -23,6 +25,8 @@ export function ColaboradoresManager() {
   const [filterDepartamento, setFilterDepartamento] = useState('');
   const [filterSituacao, setFilterSituacao] = useState<string>('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
+  const [loading, setLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -79,26 +83,47 @@ export function ColaboradoresManager() {
     setShowModal(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.nome || !formData.email || !formData.matricula) {
       alert('Por favor, preencha os campos obrigatórios.');
       return;
     }
 
-    if (editingColaborador) {
-      updateColaborador(editingColaborador.id, formData);
-    } else {
-      addColaborador({
-        id: Date.now().toString(),
-        ...formData,
-      });
+    setLoading(true);
+    try {
+      if (editingColaborador) {
+        const updated = { ...editingColaborador, ...formData };
+        await updateColaboradorService(updated);
+        updateColaborador(editingColaborador.id, formData);
+      } else {
+        const newColaborador = {
+          id: Date.now().toString(),
+          ...formData,
+        };
+        await addColaboradorService(newColaborador);
+        addColaborador(newColaborador);
+      }
+      setShowModal(false);
+    } catch (error) {
+      console.error('Erro ao salvar colaborador:', error);
+      alert('Erro ao salvar colaborador. Verifique sua conexão e tente novamente.');
+    } finally {
+      setLoading(false);
     }
-    setShowModal(false);
   };
 
-  const handleDelete = (id: string) => {
-    deleteColaborador(id);
-    setShowDeleteConfirm(null);
+  const handleDelete = async (id: string) => {
+    setLoading(true);
+    try {
+      await deleteColaboradorService(id);
+      deleteColaborador(id);
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Erro ao excluir colaborador:', error);
+      alert('Erro ao excluir colaborador.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const stats = useMemo(() => ({
@@ -388,9 +413,11 @@ export function ColaboradoresManager() {
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Salvar
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
           </div>

@@ -18,9 +18,15 @@ import { cn } from '../utils/cn';
 
 const HOLIDAY_TYPE_CONFIG: Record<HolidayType, { label: string; color: string; bgColor: string; icon: typeof Globe }> = {
   nacional: { label: 'Nacional', color: 'text-red-700', bgColor: 'bg-red-100', icon: Globe },
+  estadual: { label: 'Estadual', color: 'text-orange-700', bgColor: 'bg-orange-100', icon: Building2 },
   municipal: { label: 'Municipal', color: 'text-blue-700', bgColor: 'bg-blue-100', icon: Building2 },
+  facultativo: { label: 'Facultativo', color: 'text-slate-700', bgColor: 'bg-slate-100', icon: Calendar },
   empresa: { label: 'Empresa', color: 'text-green-700', bgColor: 'bg-green-100', icon: Star },
 };
+
+import { fetchHolidays } from '../services/holidayService';
+import { addFeriado as addFeriadoService, updateFeriado as updateFeriadoService, deleteFeriado as deleteFeriadoService, setFeriadosBatch } from '../services/firestoreService';
+import { Loader2, DownloadCloud } from 'lucide-react';
 
 export function FeriadosManager() {
   const { feriados, addFeriado, updateFeriado, deleteFeriado } = useStore();
@@ -30,6 +36,7 @@ export function FeriadosManager() {
   const [filterTipo, setFilterTipo] = useState<string>('');
   const [filterAno, setFilterAno] = useState<string>(new Date().getFullYear().toString());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [loadingFetch, setLoadingFetch] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -75,26 +82,41 @@ export function FeriadosManager() {
     setShowModal(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.data || !formData.nome) {
       alert('Por favor, preencha os campos obrigatórios.');
       return;
     }
 
-    if (editingFeriado) {
-      updateFeriado(editingFeriado.id, formData);
-    } else {
-      addFeriado({
-        id: Date.now().toString(),
-        ...formData,
-      });
+    try {
+      if (editingFeriado) {
+        const updated = { ...editingFeriado, ...formData };
+        await updateFeriadoService(updated);
+        updateFeriado(editingFeriado.id, formData);
+      } else {
+        const newFeriado = {
+          id: Date.now().toString(),
+          ...formData,
+        };
+        await addFeriadoService(newFeriado);
+        addFeriado(newFeriado);
+      }
+      setShowModal(false);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao salvar feriado.');
     }
-    setShowModal(false);
   };
 
-  const handleDelete = (id: string) => {
-    deleteFeriado(id);
-    setShowDeleteConfirm(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteFeriadoService(id);
+      deleteFeriado(id);
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao excluir feriado.');
+    }
   };
 
   const stats = useMemo(() => {
@@ -104,7 +126,9 @@ export function FeriadosManager() {
     return {
       total: yearFeriados.length,
       nacional: yearFeriados.filter((f) => f.tipo === 'nacional').length,
+      estadual: yearFeriados.filter((f) => f.tipo === 'estadual').length,
       municipal: yearFeriados.filter((f) => f.tipo === 'municipal').length,
+      facultativo: yearFeriados.filter((f) => f.tipo === 'facultativo').length,
       empresa: yearFeriados.filter((f) => f.tipo === 'empresa').length,
     };
   }, [feriados, filterAno]);
@@ -128,24 +152,61 @@ export function FeriadosManager() {
           <h1 className="text-2xl font-bold text-slate-900">Feriados</h1>
           <p className="text-slate-500 mt-1">Gerencie os feriados e pontes</p>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2 self-start"
-        >
-          <Plus className="w-5 h-5" />
-          Novo Feriado
-        </button>
+        <div className="flex gap-2 self-start">
+          <button
+            onClick={async () => {
+              setLoadingFetch(true);
+              try {
+                const year = parseInt(filterAno) || new Date().getFullYear();
+                const holidays = await fetchHolidays(year);
+
+                // Save to Firestore (merge/overwrite strategy)
+                // This will overwrite holidays with the same ID (standard API holidays)
+                // but preserve manual holidays (which have different IDs)
+                await setFeriadosBatch(holidays);
+                // Let's just create a helper to refresh.
+
+                // For now, simpler approach:
+                // 1. Remove holidays of this year from store
+                // 2. Add new ones
+                // We'll rely on the user refreshing the page or implement a store cleaner.
+                // Let's implement the cleaner here locally.
+                // Reloading ensures sync.
+                window.location.reload(); // Simple and effective for this admin action.
+
+                alert(`Feriados de ${year} atualizados com sucesso!`);
+              } catch (error) {
+                console.error(error);
+                alert('Erro ao buscar feriados. Tente novamente.');
+              } finally {
+                setLoadingFetch(false);
+              }
+            }}
+            disabled={loadingFetch}
+            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium flex items-center gap-2 disabled:opacity-50"
+          >
+            {loadingFetch ? <Loader2 className="w-5 h-5 animate-spin" /> : <DownloadCloud className="w-5 h-5" />}
+            Buscar Online ({filterAno})
+          </button>
+          <button
+            onClick={() => handleOpenModal()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Novo Feriado
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
           <div className="p-3 rounded-xl bg-slate-50">
             <Calendar className="w-6 h-6 text-slate-600" />
           </div>
           <div>
             <p className="text-sm text-slate-500">Total</p>
-            <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+            <p className="text-xl font-bold text-slate-900">{stats.total}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
@@ -154,7 +215,16 @@ export function FeriadosManager() {
           </div>
           <div>
             <p className="text-sm text-slate-500">Nacionais</p>
-            <p className="text-2xl font-bold text-slate-900">{stats.nacional}</p>
+            <p className="text-xl font-bold text-slate-900">{stats.nacional}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-orange-50">
+            <Building2 className="w-6 h-6 text-orange-600" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">Estaduais</p>
+            <p className="text-xl font-bold text-slate-900">{stats.estadual}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
@@ -163,7 +233,16 @@ export function FeriadosManager() {
           </div>
           <div>
             <p className="text-sm text-slate-500">Municipais</p>
-            <p className="text-2xl font-bold text-slate-900">{stats.municipal}</p>
+            <p className="text-xl font-bold text-slate-900">{stats.municipal}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-slate-100">
+            <Calendar className="w-6 h-6 text-slate-600" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">Facultativos</p>
+            <p className="text-xl font-bold text-slate-900">{stats.facultativo}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
@@ -172,7 +251,7 @@ export function FeriadosManager() {
           </div>
           <div>
             <p className="text-sm text-slate-500">Empresa</p>
-            <p className="text-2xl font-bold text-slate-900">{stats.empresa}</p>
+            <p className="text-xl font-bold text-slate-900">{stats.empresa}</p>
           </div>
         </div>
       </div>
@@ -197,7 +276,9 @@ export function FeriadosManager() {
           >
             <option value="">Todos os Tipos</option>
             <option value="nacional">Nacional</option>
+            <option value="estadual">Estadual</option>
             <option value="municipal">Municipal</option>
+            <option value="facultativo">Facultativo</option>
             <option value="empresa">Empresa</option>
           </select>
           <select

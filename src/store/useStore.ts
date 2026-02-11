@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+
 import data2026 from '../data/data_2026.json';
 import type { Colaborador, StatusDiario, Feriado, User } from '../types';
 
@@ -11,11 +11,13 @@ interface AppState {
   // Colaboradores
   colaboradores: Colaborador[];
   addColaborador: (colaborador: Colaborador) => void;
+  setColaboradores: (colaboradores: Colaborador[]) => void;
   updateColaborador: (id: string, colaborador: Partial<Colaborador>) => void;
   deleteColaborador: (id: string) => void;
 
   // Status Diário
   statusDiarios: StatusDiario[];
+  setStatusDiarios: (status: StatusDiario[]) => void;
   addStatusDiario: (status: StatusDiario) => void;
   updateStatusDiario: (id: string, status: Partial<StatusDiario>) => void;
   deleteStatusDiario: (id: string) => void;
@@ -23,7 +25,9 @@ interface AppState {
 
   // Feriados
   feriados: Feriado[];
+  setFeriados: (feriados: Feriado[]) => void;
   addFeriado: (feriado: Feriado) => void;
+  addFeriados: (feriados: Feriado[]) => void;
   updateFeriado: (id: string, feriado: Partial<Feriado>) => void;
   deleteFeriado: (id: string) => void;
 
@@ -74,163 +78,80 @@ const initialFeriados: Feriado[] = [
 ];
 
 // Generate some sample status data
-const generateSampleStatus = (): StatusDiario[] => {
-  const statuses: StatusDiario[] = [];
-  const statusTypes = ['presencial', 'teletrabalho', 'folga', 'ferias', 'atestado'] as const;
-  const today = new Date();
 
-  for (let i = 0; i < 30; i++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
 
-    initialColaboradores.forEach((col, idx) => {
-      if (Math.random() > 0.3) {
-        const statusIndex = (i + idx) % statusTypes.length;
-        statuses.push({
-          id: `status-${col.id}-${dateStr}`,
-          colaboradorId: col.id,
-          data: dateStr,
-          status: statusTypes[statusIndex],
-        });
-      }
-    });
-  }
+export const useStore = create<AppState>()((set, get) => ({
+  // User
+  currentUser: null,
+  setCurrentUser: (user) => set({ currentUser: user }),
 
-  return statuses;
-};
+  // Colaboradores
+  colaboradores: initialColaboradores,
+  addColaborador: (colaborador) =>
+    set((state) => ({ colaboradores: [...state.colaboradores, colaborador] })),
+  setColaboradores: (colaboradores) => set({ colaboradores }),
+  updateColaborador: (id, colaborador) =>
+    set((state) => ({
+      colaboradores: state.colaboradores.map((c) =>
+        c.id === id ? { ...c, ...colaborador } : c
+      ),
+    })),
+  deleteColaborador: (id) =>
+    set((state) => ({
+      colaboradores: state.colaboradores.filter((c) => c.id !== id),
+    })),
 
-const initialUser: User = {
-  id: 'admin-1',
-  nome: 'Administrador',
-  email: 'admin@empresa.com',
-  role: 'admin',
-};
-
-export const useStore = create<AppState>()(
-  persist(
-    (set, get) => ({
-      // User
-      currentUser: initialUser,
-      setCurrentUser: (user) => set({ currentUser: user }),
-
-      // Colaboradores
-      colaboradores: initialColaboradores,
-      addColaborador: (colaborador) =>
-        set((state) => ({ colaboradores: [...state.colaboradores, colaborador] })),
-      updateColaborador: (id, colaborador) =>
-        set((state) => ({
-          colaboradores: state.colaboradores.map((c) =>
-            c.id === id ? { ...c, ...colaborador } : c
-          ),
-        })),
-      deleteColaborador: (id) =>
-        set((state) => ({
-          colaboradores: state.colaboradores.filter((c) => c.id !== id),
-        })),
-
-      // Status Diário
-      statusDiarios: generateSampleStatus(),
-      addStatusDiario: (status) =>
-        set((state) => {
-          // Remove existing status for same colaborador and date
-          const filtered = state.statusDiarios.filter(
-            (s) => !(s.colaboradorId === status.colaboradorId && s.data === status.data)
-          );
-          return { statusDiarios: [...filtered, status] };
-        }),
-      updateStatusDiario: (id, status) =>
-        set((state) => ({
-          statusDiarios: state.statusDiarios.map((s) =>
-            s.id === id ? { ...s, ...status } : s
-          ),
-        })),
-      deleteStatusDiario: (id) =>
-        set((state) => ({
-          statusDiarios: state.statusDiarios.filter((s) => s.id !== id),
-        })),
-      getStatusByColaboradorAndDate: (colaboradorId, data) => {
-        return get().statusDiarios.find(
-          (s) => s.colaboradorId === colaboradorId && s.data === data
-        );
-      },
-
-      // Feriados
-      feriados: initialFeriados,
-      addFeriado: (feriado) =>
-        set((state) => ({ feriados: [...state.feriados, feriado] })),
-      updateFeriado: (id, feriado) =>
-        set((state) => ({
-          feriados: state.feriados.map((f) =>
-            f.id === id ? { ...f, ...feriado } : f
-          ),
-        })),
-      deleteFeriado: (id) =>
-        set((state) => ({
-          feriados: state.feriados.filter((f) => f.id !== id),
-        })),
-
-      // UI State
-      selectedDepartamento: '',
-      setSelectedDepartamento: (departamento) => set({ selectedDepartamento: departamento }),
+  // Status Diário
+  statusDiarios: data2026 as StatusDiario[],
+  setStatusDiarios: (statusDiarios) => set({ statusDiarios }),
+  addStatusDiario: (status) =>
+    set((state) => {
+      // Remove existing status for same colaborador and date
+      const filtered = state.statusDiarios.filter(
+        (s) => !(s.colaboradorId === status.colaboradorId && s.data === status.data)
+      );
+      return { statusDiarios: [...filtered, status] };
     }),
-    {
-      name: 'teletrabalho-storage',
-      version: 4,
-      migrate: (persistedState: any, version) => {
-        let state = persistedState;
+  updateStatusDiario: (id, status) =>
+    set((state) => ({
+      statusDiarios: state.statusDiarios.map((s) =>
+        s.id === id ? { ...s, ...status } : s
+      ),
+    })),
+  deleteStatusDiario: (id) =>
+    set((state) => ({
+      statusDiarios: state.statusDiarios.filter((s) => s.id !== id),
+    })),
+  getStatusByColaboradorAndDate: (colaboradorId, data) => {
+    return get().statusDiarios.find(
+      (s) => s.colaboradorId === colaboradorId && s.data === data
+    );
+  },
 
-        if (version === 0) {
-          // Migration from version 0 (no version) to 1
-          const existingFeriados = state.feriados || [];
-          const existingIds = new Set(existingFeriados.map((f: any) => f.id));
+  // Feriados
+  feriados: initialFeriados,
+  setFeriados: (feriados) => set({ feriados }),
+  addFeriado: (feriado) =>
+    set((state) => ({ feriados: [...state.feriados, feriado] })),
+  addFeriados: (newFeriados) =>
+    set((state) => {
+      // Filter out duplicates based on date
+      const existingDates = new Set(state.feriados.map((f) => f.data));
+      const uniqueNewFeriados = newFeriados.filter((f) => !existingDates.has(f.data));
+      return { feriados: [...state.feriados, ...uniqueNewFeriados] };
+    }),
+  updateFeriado: (id, feriado) =>
+    set((state) => ({
+      feriados: state.feriados.map((f) =>
+        f.id === id ? { ...f, ...feriado } : f
+      ),
+    })),
+  deleteFeriado: (id) =>
+    set((state) => ({
+      feriados: state.feriados.filter((f) => f.id !== id),
+    })),
 
-          const newFeriados = initialFeriados.filter(f => !existingIds.has(f.id));
-
-          state = {
-            ...state,
-            feriados: [...existingFeriados, ...newFeriados],
-          };
-          version = 1;
-        }
-
-        if (version === 1) {
-          // Migration from version 1 to 2 (Legacy attempt - skipped)
-          version = 2;
-        }
-
-        if (version === 2) {
-          // Migration from version 2 to 3 (Clean 2026 Data Force Update)
-          const existingStatus = state.statusDiarios || [];
-
-          // 1. Remove ALL 2026 entries to avoid ID conflicts (sample data vs real data)
-          const cleanStatus = existingStatus.filter((s: any) => !s.data.startsWith('2026-'));
-
-          // 2. Insert fresh 2026 data
-          const newData = (data2026 as any[]);
-
-          state = {
-            ...state,
-            statusDiarios: [...cleanStatus, ...newData],
-          };
-          version = 3;
-        }
-
-        if (version === 3) {
-          // Migration from version 3 to 4 (Sync Colaboradores IDs)
-          // The user had custom names but old IDs. We need to:
-          // 1. Force update the colaboradores list to our new 'initialColaboradores' which has correct IDs ('andre', 'william', etc.)
-          // 2. This ensures the 2026 status data (which uses these IDs) matches the UI.
-
-          state = {
-            ...state,
-            colaboradores: initialColaboradores
-          };
-          version = 4;
-        }
-
-        return state;
-      },
-    }
-  )
-);
+  // UI State
+  selectedDepartamento: '',
+  setSelectedDepartamento: (departamento) => set({ selectedDepartamento: departamento }),
+}));

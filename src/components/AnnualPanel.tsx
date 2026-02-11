@@ -134,16 +134,16 @@ export function AnnualPanel() {
                       let title = '';
                       let content = '';
 
-                      if (isHol) {
+                      if (status) {
+                        bgColor = STATUS_CONFIG[status.status].bgColor;
+                        title = STATUS_CONFIG[status.status].label;
+                      } else if (isHol) {
                         bgColor = 'bg-red-100 text-red-700 font-bold';
                         title = 'Feriado';
                         content = 'F';
                       } else if (isWknd) {
                         bgColor = 'bg-slate-100';
                         title = 'Fim de semana';
-                      } else if (status) {
-                        bgColor = STATUS_CONFIG[status.status].bgColor;
-                        title = STATUS_CONFIG[status.status].label;
                       }
 
                       return (
@@ -240,15 +240,15 @@ export function AnnualPanel() {
                       let bgColor = 'bg-white';
                       let title = '';
 
-                      if (isHol) {
+                      if (status) {
+                        bgColor = STATUS_CONFIG[status.status].bgColor;
+                        title = STATUS_CONFIG[status.status].label;
+                      } else if (isHol) {
                         bgColor = 'bg-red-100';
                         title = 'Feriado';
                       } else if (isWknd) {
                         bgColor = 'bg-slate-100';
                         title = 'Fim de semana';
-                      } else if (status) {
-                        bgColor = STATUS_CONFIG[status.status].bgColor;
-                        title = STATUS_CONFIG[status.status].label;
                       }
 
                       return (
@@ -386,7 +386,7 @@ export function AnnualPanel() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {filteredColaboradores.slice(0, 3).map((col) => {
+        {filteredColaboradores.map((col) => {
           const stats = getStatsForColaborador(col.id);
           return (
             <div key={col.id} className="bg-white rounded-xl border border-slate-200 p-4">
