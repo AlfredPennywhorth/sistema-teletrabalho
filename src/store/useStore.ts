@@ -2,6 +2,8 @@ import { create } from 'zustand';
 
 import data2026 from '../data/data_2026.json';
 import type { Colaborador, StatusDiario, Feriado, User } from '../types';
+import { calculateRotationMatrix } from '../services/rotationService';
+import { parseISO, endOfYear } from 'date-fns';
 
 interface AppState {
   // User
@@ -34,6 +36,9 @@ interface AppState {
   // UI State
   selectedDepartamento: string;
   setSelectedDepartamento: (departamento: string) => void;
+
+  // Rotation
+  recalculateRotation: (startDate: string) => void;
 }
 
 // Real initial data
@@ -154,4 +159,39 @@ export const useStore = create<AppState>()((set, get) => ({
   // UI State
   selectedDepartamento: '',
   setSelectedDepartamento: (departamento) => set({ selectedDepartamento: departamento }),
+
+  // Rotation Logic
+  recalculateRotation: (startDate: string) =>
+    set((state) => {
+      const start = parseISO(startDate);
+      const end = endOfYear(start); // Recalculate until end of that year
+
+      const newStatuses = calculateRotationMatrix(
+        state.statusDiarios,
+        state.feriados,
+        state.colaboradores,
+        start,
+        end
+      );
+
+      // Merge: Remove old entries overlapping with new ones, then add new ones
+      // Actually, calculateRotationMatrix returns ALL statuses for the valid days in range.
+      // But it only returns generated ones.
+      // The strategy in the service was: 
+      // "newStatuses.push(existingStatus)" for blocking statuses.
+      // So newStatuses contains EVERYTHING for that range for the pool.
+      // We should filter out existing statuses for the pool in that range and replace with newStatuses.
+
+      const poolIds = ['andre', 'virginia', 'carol', 'william', 'iuri']; // Fixed + Pool
+      const rangeDates = new Set(newStatuses.map(s => s.data));
+
+      const keptStatuses = state.statusDiarios.filter(s => {
+        // Keep if NOT in the pool OR NOT in the date range calculated
+        const isInPool = poolIds.includes(s.colaboradorId);
+        const isInRange = rangeDates.has(s.data);
+        return !(isInPool && isInRange);
+      });
+
+      return { statusDiarios: [...keptStatuses, ...newStatuses] };
+    }),
 }));
