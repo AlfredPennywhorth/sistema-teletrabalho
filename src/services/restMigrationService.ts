@@ -3,8 +3,7 @@ import { auth } from '../lib/firebase';
 
 const PROJECT_ID = 'sistema-teletrabalho-v2';
 const REGION = 'southamerica-east1';
-const GLOBAL_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:commit`;
-const REGIONAL_URL = `https://${REGION}-firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:commit`;
+
 
 // Helper to convert JS Object to Firestore Value
 function toFirestoreValue(value: any): any {
@@ -32,6 +31,7 @@ export async function migrateViaRest(
     colaboradores: any[],
     feriados: any[],
     registros: any[],
+    deletes: string[] = [],
     databaseId: string = '(default)',
     onProgress: (msg: string) => void
 ) {
@@ -87,6 +87,18 @@ export async function migrateViaRest(
                     }, {})
                 }
             }
+        });
+    });
+
+    // Prepare Deletes
+    deletes.forEach(id => {
+        // Determine collection based on ID prefix or assume 'registros' if not specified? 
+        // Ideally deletes should be full paths, but let's assume 'registros' for this fix as that's the issue.
+        // Actually, let's make deletes be just IDs for 'registros' as that's safe for now.
+        // Or better: check if ID looks like a date (yyyy-mm-dd-user).
+
+        allWrites.push({
+            delete: `${dbPath}/registros/${id}`
         });
     });
 

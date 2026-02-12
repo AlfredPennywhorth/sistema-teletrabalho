@@ -29,12 +29,12 @@ interface Vacation {
 
 const vacations: Vacation[] = [
     { colaboradorId: 'carol', start: '2026-03-02', days: 12 },
-    { colaboradorId: 'carol', start: '2026-11-14', days: 18 },
+    { colaboradorId: 'carol', start: '2026-11-03', days: 18 }, // Updated from 14/11 to 03/11
     { colaboradorId: 'andre', start: '2026-07-13', days: 12 },
     { colaboradorId: 'andre', start: '2026-12-14', days: 18 },
     { colaboradorId: 'virginia', start: '2026-03-16', days: 15 },
     { colaboradorId: 'virginia', start: '2026-11-23', days: 15 },
-    { colaboradorId: 'iuri', start: '2026-08-03', days: 30 },
+    { colaboradorId: 'iuri', start: '2026-08-06', days: 30 }, // Updated from 03/08 to 06/08
     { colaboradorId: 'william', start: '2026-06-08', days: 30 },
 ];
 
@@ -68,49 +68,93 @@ function generateData() {
         const phase2Start = new Date(2026, 1, 23); // Feb 23 (Month is 0-indexed: 1 = Feb)
         const isPhase2 = day >= phase2Start;
 
+        // Determine who is on vacation TODAY
+        // Map of who is available
+        const vacationers = new Set<string>();
+        colaboradores.forEach(c => {
+            const userVacations = vacations.filter(v => v.colaboradorId === c.id);
+            const isOnVacation = userVacations.some(v => {
+                const start = parseISO(v.start);
+
+                // Calculate end date by counting CALENDAR days (dias corridos)
+                let daysCounted = 0;
+                let d = start;
+                let endDate = d;
+
+                // Max loop to prevent infinite (safety check)
+                let safety = 0;
+                while (daysCounted < v.days && safety < 100) {
+                    safety++;
+
+                    // Count every day as a vacation day used
+                    daysCounted++;
+
+                    // If we reached the count, this is the last day
+                    if (daysCounted === v.days) {
+                        endDate = d;
+                        break;
+                    }
+
+                    // Move to next day
+                    d = addDays(d, 1);
+                }
+
+                return isWithinInterval(day, { start, end: endDate });
+            });
+            if (isOnVacation) vacationers.add(c.id);
+        });
+
         // Determine Presencial Person for Phase 2 Rotation
-        // Only advance rotation index on WORK DAYS
         let rotationPersonId = '';
+        let temporaryFixedPersonId = ''; // Typically empty, but 'carol' if Iuri is away
+
+        // Check if Iuri is on vacation today
+        const isIuriVacation = vacationers.has('iuri');
+
+        if (isIuriVacation) {
+            temporaryFixedPersonId = 'carol';
+        }
+
+        // Effective Rotation Pool
+        // If Carol is fixed (substituting Iuri) OR if someone is on vacation, they are removed from availability for the "rotation slot".
+        const effectivePool = rotationPool.filter(id => id !== temporaryFixedPersonId);
+
         if (!isWknd && !isHol && isPhase2) {
-            rotationPersonId = rotationPool[rotationIndex % rotationPool.length];
-            rotationIndex++;
+            // Find next available person in rotation
+            let attempts = 0;
+            while (attempts < effectivePool.length) {
+                const candidateId = effectivePool[rotationIndex % effectivePool.length];
+                if (!vacationers.has(candidateId)) {
+                    rotationPersonId = candidateId;
+                    rotationIndex++;
+                    break;
+                } else {
+                    rotationIndex++;
+                }
+                attempts++;
+            }
         }
 
         colaboradores.forEach((col) => {
             let status = '';
 
-            // 1. Check Vacation (Priority: Vacation counts on ALL days)
-            const userVacations = vacations.filter(v => v.colaboradorId === col.id);
-            const isOnVacation = userVacations.some(v => {
-                const start = parseISO(v.start);
-                // Vacations are calendar days, including start date
-                const end = addDays(start, v.days - 1);
-                return isWithinInterval(day, { start, end });
-            });
-
-            if (isOnVacation) {
+            if (vacationers.has(col.id)) {
                 status = 'ferias';
             } else {
-                // Not vacation. If weekend or holiday, skip generating entry
                 if (isWknd || isHol) return;
 
-                // Business Day Logic
                 if (!isPhase2) {
-                    // Phase 1: All Presencial
                     status = 'presencial';
                 } else {
                     // Phase 2
                     if (col.id === 'iuri') {
+                        status = 'presencial'; // Iuri is fixed presencial (unless vacation, caught above)
+                    } else if (col.id === temporaryFixedPersonId) {
+                        status = 'presencial'; // Substitution Rule
+                    } else if (col.id === rotationPersonId) {
                         status = 'presencial';
                     } else {
-                        // Rotation logic
-                        // We need to recalculate rotation person for THIS specific col context?
-                        // No, rotationPersonId is global for the day.
-                        if (col.id === rotationPersonId) {
-                            status = 'presencial';
-                        } else {
-                            status = 'teletrabalho';
-                        }
+                        status = 'teletrabalho';
                     }
                 }
             }

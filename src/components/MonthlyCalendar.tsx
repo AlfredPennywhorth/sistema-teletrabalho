@@ -5,6 +5,7 @@ import {
   Filter,
   X,
   Plus,
+  RefreshCw,
 } from 'lucide-react';
 import {
   format,
@@ -18,6 +19,7 @@ import {
   isSameMonth,
   isSameDay,
   isWeekend,
+  parseISO,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useStore } from '../store/useStore';
@@ -25,7 +27,7 @@ import { STATUS_CONFIG, type StatusType, type Colaborador } from '../types';
 import { cn } from '../utils/cn';
 
 export function MonthlyCalendar() {
-  const { colaboradores, statusDiarios, feriados, addStatusDiario, deleteStatusDiario } = useStore();
+  const { colaboradores, statusDiarios, feriados, addStatusDiario, deleteStatusDiario, recalculateRotation } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedColaborador, setSelectedColaborador] = useState<string>('');
   const [selectedDepartamento, setSelectedDepartamento] = useState<string>('');
@@ -35,6 +37,7 @@ export function MonthlyCalendar() {
   const [modalColaborador, setModalColaborador] = useState<string>('');
   const [modalStatus, setModalStatus] = useState<StatusType>('presencial');
   const [modalObservacao, setModalObservacao] = useState('');
+  const [rotationStartDate, setRotationStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],
@@ -114,6 +117,13 @@ export function MonthlyCalendar() {
 
   const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
+  const handleRecalculate = () => {
+    if (confirm(`Deseja recalcular a escala de rodízio a partir de ${format(parseISO(rotationStartDate), 'dd/MM/yyyy')} até o final do ano?`)) {
+      recalculateRotation(rotationStartDate);
+      alert('Rodízio recalculado com sucesso!');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -137,6 +147,33 @@ export function MonthlyCalendar() {
             className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50"
           >
             <ChevronRight className="w-5 h-5 text-slate-600" />
+          </button>
+        </div>
+      </div>
+
+
+
+      {/* Rotation Controls */}
+      <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-2 text-indigo-900">
+          <RefreshCw className="w-5 h-5" />
+          <span className="font-semibold">Gerar Rodízio Automático</span>
+        </div>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <label className="text-sm font-medium text-indigo-700 whitespace-nowrap">
+            A partir de:
+          </label>
+          <input
+            type="date"
+            value={rotationStartDate}
+            onChange={(e) => setRotationStartDate(e.target.value)}
+            className="px-3 py-2 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+          />
+          <button
+            onClick={handleRecalculate}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium whitespace-nowrap"
+          >
+            Recalcular
           </button>
         </div>
       </div>
@@ -246,9 +283,9 @@ export function MonthlyCalendar() {
                     {format(day, 'd')}
                   </span>
                   {holiday && (
-                    <span className="text-[10px] text-red-600 font-medium truncate max-w-[80px] text-left">
+                    <div className="text-[10px] text-red-600 font-medium leading-tight text-right w-full">
                       {holiday.nome}
-                    </span>
+                    </div>
                   )}
                 </div>
                 <div className="space-y-0.5">
@@ -285,90 +322,92 @@ export function MonthlyCalendar() {
       </div>
 
       {/* Modal */}
-      {showModal && modalDate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900">
-                Registrar Status
-              </h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-1 rounded hover:bg-slate-100"
-              >
-                <X className="w-5 h-5 text-slate-500" />
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Data
-                </label>
-                <p className="text-slate-900 capitalize">
-                  {format(modalDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Colaborador
-                </label>
-                <p className="text-slate-900">
-                  {colaboradores.find((c) => c.id === modalColaborador)?.nome}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Status
-                </label>
-                <select
-                  value={modalStatus}
-                  onChange={(e) => setModalStatus(e.target.value as StatusType)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                    <option key={key} value={key}>{config.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Observação
-                </label>
-                <textarea
-                  value={modalObservacao}
-                  onChange={(e) => setModalObservacao(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  placeholder="Adicione uma observação (opcional)"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-4 border-t border-slate-200">
-              <button
-                onClick={handleDeleteStatus}
-                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
-              >
-                Remover
-              </button>
-              <div className="flex gap-2">
+      {
+        showModal && modalDate && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+              <div className="flex items-center justify-between p-4 border-b border-slate-200">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Registrar Status
+                </h3>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition-colors"
+                  className="p-1 rounded hover:bg-slate-100"
                 >
-                  Cancelar
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Data
+                  </label>
+                  <p className="text-slate-900 capitalize">
+                    {format(modalDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Colaborador
+                  </label>
+                  <p className="text-slate-900">
+                    {colaboradores.find((c) => c.id === modalColaborador)?.nome}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={modalStatus}
+                    onChange={(e) => setModalStatus(e.target.value as StatusType)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                      <option key={key} value={key}>{config.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Observação
+                  </label>
+                  <textarea
+                    value={modalObservacao}
+                    onChange={(e) => setModalObservacao(e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    placeholder="Adicione uma observação (opcional)"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-4 border-t border-slate-200">
                 <button
-                  onClick={handleSaveStatus}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2"
+                  onClick={handleDeleteStatus}
+                  className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
                 >
-                  <Plus className="w-4 h-4" />
-                  Salvar
+                  Remover
                 </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSaveStatus}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Salvar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }

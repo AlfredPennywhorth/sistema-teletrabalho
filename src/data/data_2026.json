@@ -1221,7 +1221,7 @@
     "id": "2026-03-03-william",
     "colaboradorId": "william",
     "data": "2026-03-03",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-03-iuri",
@@ -1233,7 +1233,7 @@
     "id": "2026-03-04-andre",
     "colaboradorId": "andre",
     "data": "2026-03-04",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-04-virginia",
@@ -1251,7 +1251,7 @@
     "id": "2026-03-04-william",
     "colaboradorId": "william",
     "data": "2026-03-04",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-04-iuri",
@@ -1263,13 +1263,13 @@
     "id": "2026-03-05-andre",
     "colaboradorId": "andre",
     "data": "2026-03-05",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-05-virginia",
     "colaboradorId": "virginia",
     "data": "2026-03-05",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-05-carol",
@@ -1299,7 +1299,7 @@
     "id": "2026-03-06-virginia",
     "colaboradorId": "virginia",
     "data": "2026-03-06",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-06-carol",
@@ -1311,7 +1311,7 @@
     "id": "2026-03-06-william",
     "colaboradorId": "william",
     "data": "2026-03-06",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-06-iuri",
@@ -1335,7 +1335,7 @@
     "id": "2026-03-09-andre",
     "colaboradorId": "andre",
     "data": "2026-03-09",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-09-virginia",
@@ -1371,7 +1371,7 @@
     "id": "2026-03-10-virginia",
     "colaboradorId": "virginia",
     "data": "2026-03-10",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-10-carol",
@@ -1383,7 +1383,7 @@
     "id": "2026-03-10-william",
     "colaboradorId": "william",
     "data": "2026-03-10",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-10-iuri",
@@ -1395,7 +1395,7 @@
     "id": "2026-03-11-andre",
     "colaboradorId": "andre",
     "data": "2026-03-11",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-11-virginia",
@@ -1413,7 +1413,7 @@
     "id": "2026-03-11-william",
     "colaboradorId": "william",
     "data": "2026-03-11",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-11-iuri",
@@ -1425,13 +1425,13 @@
     "id": "2026-03-12-andre",
     "colaboradorId": "andre",
     "data": "2026-03-12",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-12-virginia",
     "colaboradorId": "virginia",
     "data": "2026-03-12",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-12-carol",
@@ -1461,7 +1461,7 @@
     "id": "2026-03-13-virginia",
     "colaboradorId": "virginia",
     "data": "2026-03-13",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-13-carol",
@@ -1497,13 +1497,13 @@
     "id": "2026-03-16-carol",
     "colaboradorId": "carol",
     "data": "2026-03-16",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-16-william",
     "colaboradorId": "william",
     "data": "2026-03-16",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-16-iuri",
@@ -1515,7 +1515,7 @@
     "id": "2026-03-17-andre",
     "colaboradorId": "andre",
     "data": "2026-03-17",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-17-virginia",
@@ -1533,7 +1533,7 @@
     "id": "2026-03-17-william",
     "colaboradorId": "william",
     "data": "2026-03-17",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-17-iuri",
@@ -1545,7 +1545,7 @@
     "id": "2026-03-18-andre",
     "colaboradorId": "andre",
     "data": "2026-03-18",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-18-virginia",
@@ -1689,7 +1689,7 @@
     "id": "2026-03-24-carol",
     "colaboradorId": "carol",
     "data": "2026-03-24",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-24-william",
@@ -1719,13 +1719,13 @@
     "id": "2026-03-25-carol",
     "colaboradorId": "carol",
     "data": "2026-03-25",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-25-william",
     "colaboradorId": "william",
     "data": "2026-03-25",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-25-iuri",
@@ -1737,7 +1737,7 @@
     "id": "2026-03-26-andre",
     "colaboradorId": "andre",
     "data": "2026-03-26",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-26-virginia",
@@ -1755,7 +1755,7 @@
     "id": "2026-03-26-william",
     "colaboradorId": "william",
     "data": "2026-03-26",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-26-iuri",
@@ -1767,7 +1767,7 @@
     "id": "2026-03-27-andre",
     "colaboradorId": "andre",
     "data": "2026-03-27",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-27-virginia",
@@ -1779,7 +1779,7 @@
     "id": "2026-03-27-carol",
     "colaboradorId": "carol",
     "data": "2026-03-27",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-27-william",
@@ -1827,7 +1827,7 @@
     "id": "2026-03-30-william",
     "colaboradorId": "william",
     "data": "2026-03-30",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-30-iuri",
@@ -1839,7 +1839,7 @@
     "id": "2026-03-31-andre",
     "colaboradorId": "andre",
     "data": "2026-03-31",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-03-31-virginia",
@@ -1851,7 +1851,7 @@
     "id": "2026-03-31-carol",
     "colaboradorId": "carol",
     "data": "2026-03-31",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-03-31-william",
@@ -1875,7 +1875,7 @@
     "id": "2026-04-01-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-01",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-01-carol",
@@ -1887,7 +1887,7 @@
     "id": "2026-04-01-william",
     "colaboradorId": "william",
     "data": "2026-04-01",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-01-iuri",
@@ -1899,7 +1899,7 @@
     "id": "2026-04-02-andre",
     "colaboradorId": "andre",
     "data": "2026-04-02",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-02-virginia",
@@ -1911,7 +1911,7 @@
     "id": "2026-04-02-carol",
     "colaboradorId": "carol",
     "data": "2026-04-02",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-02-william",
@@ -1935,7 +1935,7 @@
     "id": "2026-04-03-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-03",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-03-carol",
@@ -1947,7 +1947,7 @@
     "id": "2026-04-03-william",
     "colaboradorId": "william",
     "data": "2026-04-03",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-03-iuri",
@@ -1959,7 +1959,7 @@
     "id": "2026-04-06-andre",
     "colaboradorId": "andre",
     "data": "2026-04-06",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-06-virginia",
@@ -1971,7 +1971,7 @@
     "id": "2026-04-06-carol",
     "colaboradorId": "carol",
     "data": "2026-04-06",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-06-william",
@@ -1995,7 +1995,7 @@
     "id": "2026-04-07-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-07",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-07-carol",
@@ -2007,7 +2007,7 @@
     "id": "2026-04-07-william",
     "colaboradorId": "william",
     "data": "2026-04-07",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-07-iuri",
@@ -2019,7 +2019,7 @@
     "id": "2026-04-08-andre",
     "colaboradorId": "andre",
     "data": "2026-04-08",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-08-virginia",
@@ -2031,7 +2031,7 @@
     "id": "2026-04-08-carol",
     "colaboradorId": "carol",
     "data": "2026-04-08",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-08-william",
@@ -2055,7 +2055,7 @@
     "id": "2026-04-09-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-09",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-09-carol",
@@ -2067,7 +2067,7 @@
     "id": "2026-04-09-william",
     "colaboradorId": "william",
     "data": "2026-04-09",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-09-iuri",
@@ -2079,7 +2079,7 @@
     "id": "2026-04-10-andre",
     "colaboradorId": "andre",
     "data": "2026-04-10",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-10-virginia",
@@ -2091,7 +2091,7 @@
     "id": "2026-04-10-carol",
     "colaboradorId": "carol",
     "data": "2026-04-10",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-10-william",
@@ -2115,7 +2115,7 @@
     "id": "2026-04-13-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-13",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-13-carol",
@@ -2127,7 +2127,7 @@
     "id": "2026-04-13-william",
     "colaboradorId": "william",
     "data": "2026-04-13",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-13-iuri",
@@ -2139,7 +2139,7 @@
     "id": "2026-04-14-andre",
     "colaboradorId": "andre",
     "data": "2026-04-14",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-14-virginia",
@@ -2151,7 +2151,7 @@
     "id": "2026-04-14-carol",
     "colaboradorId": "carol",
     "data": "2026-04-14",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-14-william",
@@ -2175,7 +2175,7 @@
     "id": "2026-04-15-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-15",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-15-carol",
@@ -2187,7 +2187,7 @@
     "id": "2026-04-15-william",
     "colaboradorId": "william",
     "data": "2026-04-15",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-15-iuri",
@@ -2199,7 +2199,7 @@
     "id": "2026-04-16-andre",
     "colaboradorId": "andre",
     "data": "2026-04-16",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-16-virginia",
@@ -2211,7 +2211,7 @@
     "id": "2026-04-16-carol",
     "colaboradorId": "carol",
     "data": "2026-04-16",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-16-william",
@@ -2235,7 +2235,7 @@
     "id": "2026-04-17-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-17",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-17-carol",
@@ -2247,7 +2247,7 @@
     "id": "2026-04-17-william",
     "colaboradorId": "william",
     "data": "2026-04-17",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-17-iuri",
@@ -2259,7 +2259,7 @@
     "id": "2026-04-20-andre",
     "colaboradorId": "andre",
     "data": "2026-04-20",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-20-virginia",
@@ -2271,7 +2271,7 @@
     "id": "2026-04-20-carol",
     "colaboradorId": "carol",
     "data": "2026-04-20",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-20-william",
@@ -2295,7 +2295,7 @@
     "id": "2026-04-22-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-22",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-22-carol",
@@ -2307,7 +2307,7 @@
     "id": "2026-04-22-william",
     "colaboradorId": "william",
     "data": "2026-04-22",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-22-iuri",
@@ -2319,7 +2319,7 @@
     "id": "2026-04-23-andre",
     "colaboradorId": "andre",
     "data": "2026-04-23",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-23-virginia",
@@ -2331,7 +2331,7 @@
     "id": "2026-04-23-carol",
     "colaboradorId": "carol",
     "data": "2026-04-23",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-23-william",
@@ -2355,7 +2355,7 @@
     "id": "2026-04-24-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-24",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-24-carol",
@@ -2367,7 +2367,7 @@
     "id": "2026-04-24-william",
     "colaboradorId": "william",
     "data": "2026-04-24",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-24-iuri",
@@ -2379,7 +2379,7 @@
     "id": "2026-04-27-andre",
     "colaboradorId": "andre",
     "data": "2026-04-27",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-27-virginia",
@@ -2391,7 +2391,7 @@
     "id": "2026-04-27-carol",
     "colaboradorId": "carol",
     "data": "2026-04-27",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-27-william",
@@ -2415,7 +2415,7 @@
     "id": "2026-04-28-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-28",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-28-carol",
@@ -2427,7 +2427,7 @@
     "id": "2026-04-28-william",
     "colaboradorId": "william",
     "data": "2026-04-28",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-28-iuri",
@@ -2439,7 +2439,7 @@
     "id": "2026-04-29-andre",
     "colaboradorId": "andre",
     "data": "2026-04-29",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-29-virginia",
@@ -2451,7 +2451,7 @@
     "id": "2026-04-29-carol",
     "colaboradorId": "carol",
     "data": "2026-04-29",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-29-william",
@@ -2475,7 +2475,7 @@
     "id": "2026-04-30-virginia",
     "colaboradorId": "virginia",
     "data": "2026-04-30",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-04-30-carol",
@@ -2487,7 +2487,7 @@
     "id": "2026-04-30-william",
     "colaboradorId": "william",
     "data": "2026-04-30",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-04-30-iuri",
@@ -2499,7 +2499,7 @@
     "id": "2026-05-04-andre",
     "colaboradorId": "andre",
     "data": "2026-05-04",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-04-virginia",
@@ -2511,7 +2511,7 @@
     "id": "2026-05-04-carol",
     "colaboradorId": "carol",
     "data": "2026-05-04",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-04-william",
@@ -2535,7 +2535,7 @@
     "id": "2026-05-05-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-05",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-05-carol",
@@ -2547,7 +2547,7 @@
     "id": "2026-05-05-william",
     "colaboradorId": "william",
     "data": "2026-05-05",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-05-iuri",
@@ -2559,7 +2559,7 @@
     "id": "2026-05-06-andre",
     "colaboradorId": "andre",
     "data": "2026-05-06",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-06-virginia",
@@ -2571,7 +2571,7 @@
     "id": "2026-05-06-carol",
     "colaboradorId": "carol",
     "data": "2026-05-06",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-06-william",
@@ -2595,7 +2595,7 @@
     "id": "2026-05-07-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-07",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-07-carol",
@@ -2607,7 +2607,7 @@
     "id": "2026-05-07-william",
     "colaboradorId": "william",
     "data": "2026-05-07",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-07-iuri",
@@ -2619,7 +2619,7 @@
     "id": "2026-05-08-andre",
     "colaboradorId": "andre",
     "data": "2026-05-08",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-08-virginia",
@@ -2631,7 +2631,7 @@
     "id": "2026-05-08-carol",
     "colaboradorId": "carol",
     "data": "2026-05-08",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-08-william",
@@ -2655,7 +2655,7 @@
     "id": "2026-05-11-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-11",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-11-carol",
@@ -2667,7 +2667,7 @@
     "id": "2026-05-11-william",
     "colaboradorId": "william",
     "data": "2026-05-11",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-11-iuri",
@@ -2679,7 +2679,7 @@
     "id": "2026-05-12-andre",
     "colaboradorId": "andre",
     "data": "2026-05-12",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-12-virginia",
@@ -2691,7 +2691,7 @@
     "id": "2026-05-12-carol",
     "colaboradorId": "carol",
     "data": "2026-05-12",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-12-william",
@@ -2715,7 +2715,7 @@
     "id": "2026-05-13-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-13",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-13-carol",
@@ -2727,7 +2727,7 @@
     "id": "2026-05-13-william",
     "colaboradorId": "william",
     "data": "2026-05-13",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-13-iuri",
@@ -2739,7 +2739,7 @@
     "id": "2026-05-14-andre",
     "colaboradorId": "andre",
     "data": "2026-05-14",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-14-virginia",
@@ -2751,7 +2751,7 @@
     "id": "2026-05-14-carol",
     "colaboradorId": "carol",
     "data": "2026-05-14",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-14-william",
@@ -2775,7 +2775,7 @@
     "id": "2026-05-15-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-15",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-15-carol",
@@ -2787,7 +2787,7 @@
     "id": "2026-05-15-william",
     "colaboradorId": "william",
     "data": "2026-05-15",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-15-iuri",
@@ -2799,7 +2799,7 @@
     "id": "2026-05-18-andre",
     "colaboradorId": "andre",
     "data": "2026-05-18",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-18-virginia",
@@ -2811,7 +2811,7 @@
     "id": "2026-05-18-carol",
     "colaboradorId": "carol",
     "data": "2026-05-18",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-18-william",
@@ -2835,7 +2835,7 @@
     "id": "2026-05-19-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-19",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-19-carol",
@@ -2847,7 +2847,7 @@
     "id": "2026-05-19-william",
     "colaboradorId": "william",
     "data": "2026-05-19",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-19-iuri",
@@ -2859,7 +2859,7 @@
     "id": "2026-05-20-andre",
     "colaboradorId": "andre",
     "data": "2026-05-20",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-20-virginia",
@@ -2871,7 +2871,7 @@
     "id": "2026-05-20-carol",
     "colaboradorId": "carol",
     "data": "2026-05-20",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-20-william",
@@ -2895,7 +2895,7 @@
     "id": "2026-05-21-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-21",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-21-carol",
@@ -2907,7 +2907,7 @@
     "id": "2026-05-21-william",
     "colaboradorId": "william",
     "data": "2026-05-21",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-21-iuri",
@@ -2919,7 +2919,7 @@
     "id": "2026-05-22-andre",
     "colaboradorId": "andre",
     "data": "2026-05-22",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-22-virginia",
@@ -2931,7 +2931,7 @@
     "id": "2026-05-22-carol",
     "colaboradorId": "carol",
     "data": "2026-05-22",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-22-william",
@@ -2955,7 +2955,7 @@
     "id": "2026-05-25-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-25",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-25-carol",
@@ -2967,7 +2967,7 @@
     "id": "2026-05-25-william",
     "colaboradorId": "william",
     "data": "2026-05-25",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-25-iuri",
@@ -2979,7 +2979,7 @@
     "id": "2026-05-26-andre",
     "colaboradorId": "andre",
     "data": "2026-05-26",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-26-virginia",
@@ -2991,7 +2991,7 @@
     "id": "2026-05-26-carol",
     "colaboradorId": "carol",
     "data": "2026-05-26",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-26-william",
@@ -3015,7 +3015,7 @@
     "id": "2026-05-27-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-27",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-27-carol",
@@ -3027,7 +3027,7 @@
     "id": "2026-05-27-william",
     "colaboradorId": "william",
     "data": "2026-05-27",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-27-iuri",
@@ -3039,7 +3039,7 @@
     "id": "2026-05-28-andre",
     "colaboradorId": "andre",
     "data": "2026-05-28",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-28-virginia",
@@ -3051,7 +3051,7 @@
     "id": "2026-05-28-carol",
     "colaboradorId": "carol",
     "data": "2026-05-28",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-28-william",
@@ -3075,7 +3075,7 @@
     "id": "2026-05-29-virginia",
     "colaboradorId": "virginia",
     "data": "2026-05-29",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-05-29-carol",
@@ -3087,7 +3087,7 @@
     "id": "2026-05-29-william",
     "colaboradorId": "william",
     "data": "2026-05-29",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-05-29-iuri",
@@ -3099,7 +3099,7 @@
     "id": "2026-06-01-andre",
     "colaboradorId": "andre",
     "data": "2026-06-01",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-01-virginia",
@@ -3111,7 +3111,7 @@
     "id": "2026-06-01-carol",
     "colaboradorId": "carol",
     "data": "2026-06-01",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-01-william",
@@ -3135,7 +3135,7 @@
     "id": "2026-06-02-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-02",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-02-carol",
@@ -3147,7 +3147,7 @@
     "id": "2026-06-02-william",
     "colaboradorId": "william",
     "data": "2026-06-02",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-02-iuri",
@@ -3159,7 +3159,7 @@
     "id": "2026-06-03-andre",
     "colaboradorId": "andre",
     "data": "2026-06-03",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-03-virginia",
@@ -3171,7 +3171,7 @@
     "id": "2026-06-03-carol",
     "colaboradorId": "carol",
     "data": "2026-06-03",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-03-william",
@@ -3195,7 +3195,7 @@
     "id": "2026-06-05-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-05",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-05-carol",
@@ -3207,7 +3207,7 @@
     "id": "2026-06-05-william",
     "colaboradorId": "william",
     "data": "2026-06-05",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-05-iuri",
@@ -3219,7 +3219,7 @@
     "id": "2026-06-08-andre",
     "colaboradorId": "andre",
     "data": "2026-06-08",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-08-virginia",
@@ -3231,7 +3231,7 @@
     "id": "2026-06-08-carol",
     "colaboradorId": "carol",
     "data": "2026-06-08",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-08-william",
@@ -3249,13 +3249,13 @@
     "id": "2026-06-09-andre",
     "colaboradorId": "andre",
     "data": "2026-06-09",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-09-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-09",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-09-carol",
@@ -3285,13 +3285,13 @@
     "id": "2026-06-10-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-10",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-10-carol",
     "colaboradorId": "carol",
     "data": "2026-06-10",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-10-william",
@@ -3321,7 +3321,7 @@
     "id": "2026-06-11-carol",
     "colaboradorId": "carol",
     "data": "2026-06-11",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-11-william",
@@ -3441,7 +3441,7 @@
     "id": "2026-06-17-andre",
     "colaboradorId": "andre",
     "data": "2026-06-17",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-17-virginia",
@@ -3471,13 +3471,13 @@
     "id": "2026-06-18-andre",
     "colaboradorId": "andre",
     "data": "2026-06-18",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-18-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-18",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-18-carol",
@@ -3507,13 +3507,13 @@
     "id": "2026-06-19-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-19",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-19-carol",
     "colaboradorId": "carol",
     "data": "2026-06-19",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-19-william",
@@ -3543,7 +3543,7 @@
     "id": "2026-06-22-andre",
     "colaboradorId": "andre",
     "data": "2026-06-22",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-22-virginia",
@@ -3555,7 +3555,7 @@
     "id": "2026-06-22-carol",
     "colaboradorId": "carol",
     "data": "2026-06-22",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-22-william",
@@ -3579,7 +3579,7 @@
     "id": "2026-06-23-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-23",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-23-carol",
@@ -3603,7 +3603,7 @@
     "id": "2026-06-24-andre",
     "colaboradorId": "andre",
     "data": "2026-06-24",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-24-virginia",
@@ -3615,7 +3615,7 @@
     "id": "2026-06-24-carol",
     "colaboradorId": "carol",
     "data": "2026-06-24",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-24-william",
@@ -3633,13 +3633,13 @@
     "id": "2026-06-25-andre",
     "colaboradorId": "andre",
     "data": "2026-06-25",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-25-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-25",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-25-carol",
@@ -3669,13 +3669,13 @@
     "id": "2026-06-26-virginia",
     "colaboradorId": "virginia",
     "data": "2026-06-26",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-26-carol",
     "colaboradorId": "carol",
     "data": "2026-06-26",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-06-26-william",
@@ -3717,7 +3717,7 @@
     "id": "2026-06-29-carol",
     "colaboradorId": "carol",
     "data": "2026-06-29",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-06-29-william",
@@ -3825,7 +3825,7 @@
     "id": "2026-07-03-andre",
     "colaboradorId": "andre",
     "data": "2026-07-03",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-03-virginia",
@@ -3867,13 +3867,13 @@
     "id": "2026-07-06-andre",
     "colaboradorId": "andre",
     "data": "2026-07-06",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-06-virginia",
     "colaboradorId": "virginia",
     "data": "2026-07-06",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-06-carol",
@@ -3903,13 +3903,13 @@
     "id": "2026-07-07-virginia",
     "colaboradorId": "virginia",
     "data": "2026-07-07",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-07-carol",
     "colaboradorId": "carol",
     "data": "2026-07-07",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-07-william",
@@ -3939,13 +3939,13 @@
     "id": "2026-07-08-carol",
     "colaboradorId": "carol",
     "data": "2026-07-08",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-08-william",
     "colaboradorId": "william",
     "data": "2026-07-08",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-08-iuri",
@@ -3957,7 +3957,7 @@
     "id": "2026-07-09-andre",
     "colaboradorId": "andre",
     "data": "2026-07-09",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-09-virginia",
@@ -3975,7 +3975,7 @@
     "id": "2026-07-09-william",
     "colaboradorId": "william",
     "data": "2026-07-09",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-09-iuri",
@@ -3987,13 +3987,13 @@
     "id": "2026-07-10-andre",
     "colaboradorId": "andre",
     "data": "2026-07-10",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-10-virginia",
     "colaboradorId": "virginia",
     "data": "2026-07-10",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-10-carol",
@@ -4023,13 +4023,13 @@
     "id": "2026-07-13-virginia",
     "colaboradorId": "virginia",
     "data": "2026-07-13",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-13-carol",
     "colaboradorId": "carol",
     "data": "2026-07-13",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-13-william",
@@ -4059,13 +4059,13 @@
     "id": "2026-07-14-carol",
     "colaboradorId": "carol",
     "data": "2026-07-14",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-14-william",
     "colaboradorId": "william",
     "data": "2026-07-14",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-14-iuri",
@@ -4083,7 +4083,7 @@
     "id": "2026-07-15-virginia",
     "colaboradorId": "virginia",
     "data": "2026-07-15",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-15-carol",
@@ -4095,7 +4095,7 @@
     "id": "2026-07-15-william",
     "colaboradorId": "william",
     "data": "2026-07-15",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-15-iuri",
@@ -4119,7 +4119,7 @@
     "id": "2026-07-16-carol",
     "colaboradorId": "carol",
     "data": "2026-07-16",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-16-william",
@@ -4143,7 +4143,7 @@
     "id": "2026-07-17-virginia",
     "colaboradorId": "virginia",
     "data": "2026-07-17",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-17-carol",
@@ -4155,7 +4155,7 @@
     "id": "2026-07-17-william",
     "colaboradorId": "william",
     "data": "2026-07-17",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-17-iuri",
@@ -4185,13 +4185,13 @@
     "id": "2026-07-20-virginia",
     "colaboradorId": "virginia",
     "data": "2026-07-20",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-20-carol",
     "colaboradorId": "carol",
     "data": "2026-07-20",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-20-william",
@@ -4221,13 +4221,13 @@
     "id": "2026-07-21-carol",
     "colaboradorId": "carol",
     "data": "2026-07-21",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-21-william",
     "colaboradorId": "william",
     "data": "2026-07-21",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-07-21-iuri",
@@ -4257,7 +4257,7 @@
     "id": "2026-07-22-william",
     "colaboradorId": "william",
     "data": "2026-07-22",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-07-22-iuri",
@@ -4503,7 +4503,7 @@
     "id": "2026-08-03-iuri",
     "colaboradorId": "iuri",
     "data": "2026-08-03",
-    "status": "ferias"
+    "status": "presencial"
   },
   {
     "id": "2026-08-04-andre",
@@ -4533,7 +4533,7 @@
     "id": "2026-08-04-iuri",
     "colaboradorId": "iuri",
     "data": "2026-08-04",
-    "status": "ferias"
+    "status": "presencial"
   },
   {
     "id": "2026-08-05-andre",
@@ -4563,7 +4563,7 @@
     "id": "2026-08-05-iuri",
     "colaboradorId": "iuri",
     "data": "2026-08-05",
-    "status": "ferias"
+    "status": "presencial"
   },
   {
     "id": "2026-08-06-andre",
@@ -4581,7 +4581,7 @@
     "id": "2026-08-06-carol",
     "colaboradorId": "carol",
     "data": "2026-08-06",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-06-william",
@@ -4611,7 +4611,7 @@
     "id": "2026-08-07-carol",
     "colaboradorId": "carol",
     "data": "2026-08-07",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-07-william",
@@ -4653,7 +4653,7 @@
     "id": "2026-08-10-carol",
     "colaboradorId": "carol",
     "data": "2026-08-10",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-10-william",
@@ -4689,7 +4689,7 @@
     "id": "2026-08-11-william",
     "colaboradorId": "william",
     "data": "2026-08-11",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-11-iuri",
@@ -4701,7 +4701,7 @@
     "id": "2026-08-12-andre",
     "colaboradorId": "andre",
     "data": "2026-08-12",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-12-virginia",
@@ -4713,13 +4713,13 @@
     "id": "2026-08-12-carol",
     "colaboradorId": "carol",
     "data": "2026-08-12",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-12-william",
     "colaboradorId": "william",
     "data": "2026-08-12",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-08-12-iuri",
@@ -4731,19 +4731,19 @@
     "id": "2026-08-13-andre",
     "colaboradorId": "andre",
     "data": "2026-08-13",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-08-13-virginia",
     "colaboradorId": "virginia",
     "data": "2026-08-13",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-13-carol",
     "colaboradorId": "carol",
     "data": "2026-08-13",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-13-william",
@@ -4767,19 +4767,19 @@
     "id": "2026-08-14-virginia",
     "colaboradorId": "virginia",
     "data": "2026-08-14",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-08-14-carol",
     "colaboradorId": "carol",
     "data": "2026-08-14",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-14-william",
     "colaboradorId": "william",
     "data": "2026-08-14",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-14-iuri",
@@ -4803,7 +4803,7 @@
     "id": "2026-08-17-andre",
     "colaboradorId": "andre",
     "data": "2026-08-17",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-17-virginia",
@@ -4839,19 +4839,19 @@
     "id": "2026-08-18-virginia",
     "colaboradorId": "virginia",
     "data": "2026-08-18",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-18-carol",
     "colaboradorId": "carol",
     "data": "2026-08-18",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-18-william",
     "colaboradorId": "william",
     "data": "2026-08-18",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-08-18-iuri",
@@ -4863,7 +4863,7 @@
     "id": "2026-08-19-andre",
     "colaboradorId": "andre",
     "data": "2026-08-19",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-08-19-virginia",
@@ -4875,13 +4875,13 @@
     "id": "2026-08-19-carol",
     "colaboradorId": "carol",
     "data": "2026-08-19",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-19-william",
     "colaboradorId": "william",
     "data": "2026-08-19",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-19-iuri",
@@ -4893,19 +4893,19 @@
     "id": "2026-08-20-andre",
     "colaboradorId": "andre",
     "data": "2026-08-20",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-20-virginia",
     "colaboradorId": "virginia",
     "data": "2026-08-20",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-08-20-carol",
     "colaboradorId": "carol",
     "data": "2026-08-20",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-20-william",
@@ -4929,7 +4929,7 @@
     "id": "2026-08-21-virginia",
     "colaboradorId": "virginia",
     "data": "2026-08-21",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-21-carol",
@@ -4977,7 +4977,7 @@
     "id": "2026-08-24-carol",
     "colaboradorId": "carol",
     "data": "2026-08-24",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-24-william",
@@ -5007,7 +5007,7 @@
     "id": "2026-08-25-carol",
     "colaboradorId": "carol",
     "data": "2026-08-25",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-25-william",
@@ -5037,7 +5037,7 @@
     "id": "2026-08-26-carol",
     "colaboradorId": "carol",
     "data": "2026-08-26",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-26-william",
@@ -5073,7 +5073,7 @@
     "id": "2026-08-27-william",
     "colaboradorId": "william",
     "data": "2026-08-27",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-27-iuri",
@@ -5085,7 +5085,7 @@
     "id": "2026-08-28-andre",
     "colaboradorId": "andre",
     "data": "2026-08-28",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-28-virginia",
@@ -5097,13 +5097,13 @@
     "id": "2026-08-28-carol",
     "colaboradorId": "carol",
     "data": "2026-08-28",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-28-william",
     "colaboradorId": "william",
     "data": "2026-08-28",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-08-28-iuri",
@@ -5127,19 +5127,19 @@
     "id": "2026-08-31-andre",
     "colaboradorId": "andre",
     "data": "2026-08-31",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-08-31-virginia",
     "colaboradorId": "virginia",
     "data": "2026-08-31",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-31-carol",
     "colaboradorId": "carol",
     "data": "2026-08-31",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-08-31-william",
@@ -5163,19 +5163,19 @@
     "id": "2026-09-01-virginia",
     "colaboradorId": "virginia",
     "data": "2026-09-01",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-09-01-carol",
     "colaboradorId": "carol",
     "data": "2026-09-01",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-09-01-william",
     "colaboradorId": "william",
     "data": "2026-09-01",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-09-01-iuri",
@@ -5187,7 +5187,7 @@
     "id": "2026-09-02-andre",
     "colaboradorId": "andre",
     "data": "2026-09-02",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-09-02-virginia",
@@ -5211,7 +5211,7 @@
     "id": "2026-09-02-iuri",
     "colaboradorId": "iuri",
     "data": "2026-09-02",
-    "status": "presencial"
+    "status": "ferias"
   },
   {
     "id": "2026-09-03-andre",
@@ -5223,31 +5223,31 @@
     "id": "2026-09-03-virginia",
     "colaboradorId": "virginia",
     "data": "2026-09-03",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-09-03-carol",
     "colaboradorId": "carol",
     "data": "2026-09-03",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-09-03-william",
     "colaboradorId": "william",
     "data": "2026-09-03",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-09-03-iuri",
     "colaboradorId": "iuri",
     "data": "2026-09-03",
-    "status": "presencial"
+    "status": "ferias"
   },
   {
     "id": "2026-09-04-andre",
     "colaboradorId": "andre",
     "data": "2026-09-04",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-09-04-virginia",
@@ -5259,19 +5259,19 @@
     "id": "2026-09-04-carol",
     "colaboradorId": "carol",
     "data": "2026-09-04",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-09-04-william",
     "colaboradorId": "william",
     "data": "2026-09-04",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-09-04-iuri",
     "colaboradorId": "iuri",
     "data": "2026-09-04",
-    "status": "presencial"
+    "status": "ferias"
   },
   {
     "id": "2026-09-08-andre",
@@ -6429,7 +6429,7 @@
     "id": "2026-11-03-carol",
     "colaboradorId": "carol",
     "data": "2026-11-03",
-    "status": "teletrabalho"
+    "status": "ferias"
   },
   {
     "id": "2026-11-03-william",
@@ -6459,7 +6459,7 @@
     "id": "2026-11-04-carol",
     "colaboradorId": "carol",
     "data": "2026-11-04",
-    "status": "teletrabalho"
+    "status": "ferias"
   },
   {
     "id": "2026-11-04-william",
@@ -6489,7 +6489,7 @@
     "id": "2026-11-05-carol",
     "colaboradorId": "carol",
     "data": "2026-11-05",
-    "status": "teletrabalho"
+    "status": "ferias"
   },
   {
     "id": "2026-11-05-william",
@@ -6519,13 +6519,13 @@
     "id": "2026-11-06-carol",
     "colaboradorId": "carol",
     "data": "2026-11-06",
-    "status": "presencial"
+    "status": "ferias"
   },
   {
     "id": "2026-11-06-william",
     "colaboradorId": "william",
     "data": "2026-11-06",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-06-iuri",
@@ -6534,10 +6534,22 @@
     "status": "presencial"
   },
   {
+    "id": "2026-11-07-carol",
+    "colaboradorId": "carol",
+    "data": "2026-11-07",
+    "status": "ferias"
+  },
+  {
+    "id": "2026-11-08-carol",
+    "colaboradorId": "carol",
+    "data": "2026-11-08",
+    "status": "ferias"
+  },
+  {
     "id": "2026-11-09-andre",
     "colaboradorId": "andre",
     "data": "2026-11-09",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-09-virginia",
@@ -6549,13 +6561,13 @@
     "id": "2026-11-09-carol",
     "colaboradorId": "carol",
     "data": "2026-11-09",
-    "status": "teletrabalho"
+    "status": "ferias"
   },
   {
     "id": "2026-11-09-william",
     "colaboradorId": "william",
     "data": "2026-11-09",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-09-iuri",
@@ -6567,19 +6579,19 @@
     "id": "2026-11-10-andre",
     "colaboradorId": "andre",
     "data": "2026-11-10",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-10-virginia",
     "colaboradorId": "virginia",
     "data": "2026-11-10",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-10-carol",
     "colaboradorId": "carol",
     "data": "2026-11-10",
-    "status": "teletrabalho"
+    "status": "ferias"
   },
   {
     "id": "2026-11-10-william",
@@ -6603,19 +6615,19 @@
     "id": "2026-11-11-virginia",
     "colaboradorId": "virginia",
     "data": "2026-11-11",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-11-carol",
     "colaboradorId": "carol",
     "data": "2026-11-11",
-    "status": "teletrabalho"
+    "status": "ferias"
   },
   {
     "id": "2026-11-11-william",
     "colaboradorId": "william",
     "data": "2026-11-11",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-11-iuri",
@@ -6627,7 +6639,7 @@
     "id": "2026-11-12-andre",
     "colaboradorId": "andre",
     "data": "2026-11-12",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-12-virginia",
@@ -6639,7 +6651,7 @@
     "id": "2026-11-12-carol",
     "colaboradorId": "carol",
     "data": "2026-11-12",
-    "status": "presencial"
+    "status": "ferias"
   },
   {
     "id": "2026-11-12-william",
@@ -6663,19 +6675,19 @@
     "id": "2026-11-13-virginia",
     "colaboradorId": "virginia",
     "data": "2026-11-13",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-13-carol",
     "colaboradorId": "carol",
     "data": "2026-11-13",
-    "status": "teletrabalho"
+    "status": "ferias"
   },
   {
     "id": "2026-11-13-william",
     "colaboradorId": "william",
     "data": "2026-11-13",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-13-iuri",
@@ -6699,7 +6711,7 @@
     "id": "2026-11-16-andre",
     "colaboradorId": "andre",
     "data": "2026-11-16",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-16-virginia",
@@ -6717,7 +6729,7 @@
     "id": "2026-11-16-william",
     "colaboradorId": "william",
     "data": "2026-11-16",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-16-iuri",
@@ -6729,13 +6741,13 @@
     "id": "2026-11-17-andre",
     "colaboradorId": "andre",
     "data": "2026-11-17",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-17-virginia",
     "colaboradorId": "virginia",
     "data": "2026-11-17",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-17-carol",
@@ -6765,7 +6777,7 @@
     "id": "2026-11-18-virginia",
     "colaboradorId": "virginia",
     "data": "2026-11-18",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-18-carol",
@@ -6846,18 +6858,6 @@
     "status": "presencial"
   },
   {
-    "id": "2026-11-21-carol",
-    "colaboradorId": "carol",
-    "data": "2026-11-21",
-    "status": "ferias"
-  },
-  {
-    "id": "2026-11-22-carol",
-    "colaboradorId": "carol",
-    "data": "2026-11-22",
-    "status": "ferias"
-  },
-  {
     "id": "2026-11-23-andre",
     "colaboradorId": "andre",
     "data": "2026-11-23",
@@ -6873,7 +6873,7 @@
     "id": "2026-11-23-carol",
     "colaboradorId": "carol",
     "data": "2026-11-23",
-    "status": "ferias"
+    "status": "presencial"
   },
   {
     "id": "2026-11-23-william",
@@ -6903,13 +6903,13 @@
     "id": "2026-11-24-carol",
     "colaboradorId": "carol",
     "data": "2026-11-24",
-    "status": "ferias"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-24-william",
     "colaboradorId": "william",
     "data": "2026-11-24",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-24-iuri",
@@ -6921,7 +6921,7 @@
     "id": "2026-11-25-andre",
     "colaboradorId": "andre",
     "data": "2026-11-25",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-25-virginia",
@@ -6933,13 +6933,13 @@
     "id": "2026-11-25-carol",
     "colaboradorId": "carol",
     "data": "2026-11-25",
-    "status": "ferias"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-25-william",
     "colaboradorId": "william",
     "data": "2026-11-25",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-25-iuri",
@@ -6951,7 +6951,7 @@
     "id": "2026-11-26-andre",
     "colaboradorId": "andre",
     "data": "2026-11-26",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-26-virginia",
@@ -6963,7 +6963,7 @@
     "id": "2026-11-26-carol",
     "colaboradorId": "carol",
     "data": "2026-11-26",
-    "status": "ferias"
+    "status": "presencial"
   },
   {
     "id": "2026-11-26-william",
@@ -6993,13 +6993,13 @@
     "id": "2026-11-27-carol",
     "colaboradorId": "carol",
     "data": "2026-11-27",
-    "status": "ferias"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-27-william",
     "colaboradorId": "william",
     "data": "2026-11-27",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-27-iuri",
@@ -7014,20 +7014,8 @@
     "status": "ferias"
   },
   {
-    "id": "2026-11-28-carol",
-    "colaboradorId": "carol",
-    "data": "2026-11-28",
-    "status": "ferias"
-  },
-  {
     "id": "2026-11-29-virginia",
     "colaboradorId": "virginia",
-    "data": "2026-11-29",
-    "status": "ferias"
-  },
-  {
-    "id": "2026-11-29-carol",
-    "colaboradorId": "carol",
     "data": "2026-11-29",
     "status": "ferias"
   },
@@ -7035,7 +7023,7 @@
     "id": "2026-11-30-andre",
     "colaboradorId": "andre",
     "data": "2026-11-30",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-11-30-virginia",
@@ -7047,7 +7035,7 @@
     "id": "2026-11-30-carol",
     "colaboradorId": "carol",
     "data": "2026-11-30",
-    "status": "ferias"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-11-30-william",
@@ -7077,13 +7065,13 @@
     "id": "2026-12-01-carol",
     "colaboradorId": "carol",
     "data": "2026-12-01",
-    "status": "ferias"
+    "status": "presencial"
   },
   {
     "id": "2026-12-01-william",
     "colaboradorId": "william",
     "data": "2026-12-01",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-12-01-iuri",
@@ -7095,7 +7083,7 @@
     "id": "2026-12-02-andre",
     "colaboradorId": "andre",
     "data": "2026-12-02",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-12-02-virginia",
@@ -7113,7 +7101,7 @@
     "id": "2026-12-02-william",
     "colaboradorId": "william",
     "data": "2026-12-02",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-02-iuri",
@@ -7125,7 +7113,7 @@
     "id": "2026-12-03-andre",
     "colaboradorId": "andre",
     "data": "2026-12-03",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-03-virginia",
@@ -7353,7 +7341,7 @@
     "id": "2026-12-14-virginia",
     "colaboradorId": "virginia",
     "data": "2026-12-14",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-14-carol",
@@ -7383,13 +7371,13 @@
     "id": "2026-12-15-virginia",
     "colaboradorId": "virginia",
     "data": "2026-12-15",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-12-15-carol",
     "colaboradorId": "carol",
     "data": "2026-12-15",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-15-william",
@@ -7419,13 +7407,13 @@
     "id": "2026-12-16-carol",
     "colaboradorId": "carol",
     "data": "2026-12-16",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-12-16-william",
     "colaboradorId": "william",
     "data": "2026-12-16",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-16-iuri",
@@ -7443,7 +7431,7 @@
     "id": "2026-12-17-virginia",
     "colaboradorId": "virginia",
     "data": "2026-12-17",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-17-carol",
@@ -7455,7 +7443,7 @@
     "id": "2026-12-17-william",
     "colaboradorId": "william",
     "data": "2026-12-17",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-12-17-iuri",
@@ -7479,7 +7467,7 @@
     "id": "2026-12-18-carol",
     "colaboradorId": "carol",
     "data": "2026-12-18",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-18-william",
@@ -7515,7 +7503,7 @@
     "id": "2026-12-21-virginia",
     "colaboradorId": "virginia",
     "data": "2026-12-21",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-12-21-carol",
@@ -7527,7 +7515,7 @@
     "id": "2026-12-21-william",
     "colaboradorId": "william",
     "data": "2026-12-21",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-21-iuri",
@@ -7545,13 +7533,13 @@
     "id": "2026-12-22-virginia",
     "colaboradorId": "virginia",
     "data": "2026-12-22",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-22-carol",
     "colaboradorId": "carol",
     "data": "2026-12-22",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-12-22-william",
@@ -7581,13 +7569,13 @@
     "id": "2026-12-23-carol",
     "colaboradorId": "carol",
     "data": "2026-12-23",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-23-william",
     "colaboradorId": "william",
     "data": "2026-12-23",
-    "status": "presencial"
+    "status": "teletrabalho"
   },
   {
     "id": "2026-12-23-iuri",
@@ -7617,7 +7605,7 @@
     "id": "2026-12-24-william",
     "colaboradorId": "william",
     "data": "2026-12-24",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-24-iuri",
@@ -7743,7 +7731,7 @@
     "id": "2026-12-31-virginia",
     "colaboradorId": "virginia",
     "data": "2026-12-31",
-    "status": "teletrabalho"
+    "status": "presencial"
   },
   {
     "id": "2026-12-31-carol",

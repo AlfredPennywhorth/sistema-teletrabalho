@@ -14,7 +14,9 @@ import {
 import { cn } from '../utils/cn';
 import { useStore } from '../store/useStore';
 import { auth } from '../lib/firebase';
-import { ChangePasswordModal } from './ChangePasswordModal'; // Added import
+import { ChangePasswordModal } from './ChangePasswordModal';
+
+
 
 interface LayoutProps {
   children: React.ReactNode;

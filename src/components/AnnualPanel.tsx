@@ -4,6 +4,7 @@ import { parseISO, getDaysInMonth, isWeekend } from 'date-fns';
 import { useStore } from '../store/useStore';
 import { STATUS_CONFIG, type StatusType } from '../types';
 import { cn } from '../utils/cn';
+import { VacationSummaryModal } from './VacationSummaryModal';
 
 const MONTHS = [
   'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
@@ -16,6 +17,7 @@ export function AnnualPanel() {
   const [selectedColaborador, setSelectedColaborador] = useState<string>('');
   const [selectedDepartamento, setSelectedDepartamento] = useState<string>('');
   const [viewMode, setViewMode] = useState<'heatmap' | 'status'>('heatmap');
+  const [showVacationSummary, setShowVacationSummary] = useState(false);
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],
@@ -316,6 +318,13 @@ export function AnnualPanel() {
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Exportar CSV</span>
           </button>
+          <button
+            onClick={() => setShowVacationSummary(true)}
+            className="ml-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2"
+          >
+            <Filter className="w-4 h-4" />
+            <span className="hidden sm:inline">Resumo Férias</span>
+          </button>
         </div>
       </div>
 
@@ -421,6 +430,10 @@ export function AnnualPanel() {
           );
         })}
       </div>
+      <VacationSummaryModal
+        isOpen={showVacationSummary}
+        onClose={() => setShowVacationSummary(false)}
+      />
     </div>
   );
 }

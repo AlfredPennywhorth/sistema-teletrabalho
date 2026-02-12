@@ -42,15 +42,15 @@ interface AppState {
 }
 
 // Real initial data
-const initialColaboradores: Colaborador[] = [
-  { id: 'andre', nome: 'André William de Souza', matricula: '101', email: 'andre@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
-  { id: 'virginia', nome: 'Virginia L. da Silva Borba', matricula: '102', email: 'virginia@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
-  { id: 'carol', nome: 'Ana Carolina Viana', matricula: '103', email: 'carol@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
-  { id: 'william', nome: 'William de Barros', matricula: '104', email: 'william@empresa.com', cargo: 'Colaborador', departamento: 'TI', situacao: 'ativo' },
-  { id: 'iuri', nome: 'Iuri Artur Miranda de Andrade', matricula: '105', email: 'iuri@empresa.com', cargo: 'Chefe', departamento: 'TI', situacao: 'ativo' },
+export const initialColaboradores: Colaborador[] = [
+  { id: 'andre', nome: 'André William de Souza', matricula: '11.393-0', email: 'andres@cetsp.com.br', cargo: 'Analista de Gestão', departamento: 'Ouvidoria', situacao: 'ativo' },
+  { id: 'virginia', nome: 'Virginia L. da Silva Borba', matricula: '12.824-4', email: 'virginiab@cetsp.com.br', cargo: 'Assistente Administrativo', departamento: 'Ouvidoria', situacao: 'ativo' },
+  { id: 'carol', nome: 'Ana Carolina Viana', matricula: '12.800-7', email: 'anacv@cetsp.com.br', cargo: 'Assistente Administrativo', departamento: 'Ouvidoria', situacao: 'ativo' },
+  { id: 'william', nome: 'William de Barros', matricula: '12.490-7', email: 'williambarros@cetsp.com.br', cargo: 'Assistente Administrativo', departamento: 'Ouvidoria', situacao: 'ativo' },
+  { id: 'iuri', nome: 'Iuri Artur Miranda de Andrade', matricula: '13.864-9', email: 'iuri.andrade@cetsp.com.br', cargo: 'Ouvidor', departamento: 'Ouvidoria', situacao: 'ativo' },
 ];
 
-const initialFeriados: Feriado[] = [
+export const initialFeriados: Feriado[] = [
   // 2025
   { id: '2025-01-01', data: '2025-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
   { id: '2025-04-21', data: '2025-04-21', nome: 'Tiradentes', tipo: 'nacional' },

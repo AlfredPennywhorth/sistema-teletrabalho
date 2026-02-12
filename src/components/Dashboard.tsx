@@ -11,8 +11,7 @@ import {
   Coffee,
   FileText,
   HelpCircle,
-  Baby,
-  RefreshCw
+  Baby
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -21,17 +20,11 @@ import { STATUS_CONFIG, type StatusType } from '../types';
 import { cn } from '../utils/cn';
 
 export function Dashboard() {
-  const { colaboradores, statusDiarios, feriados, recalculateRotation } = useStore();
+  const { colaboradores, statusDiarios, feriados } = useStore();
   const today = new Date();
   const currentMonth = format(today, 'MMMM yyyy', { locale: ptBR });
 
-  const handleRecalculate = () => {
-    if (confirm('Deseja recalcular a escala de rodízio a partir de amanhã até o final do ano? Isso ajustará o rodízio para cobrir ausências, respeitando férias e licenças já marcadas.')) {
-      const tomorrow = addDays(new Date(), 1);
-      recalculateRotation(format(tomorrow, 'yyyy-MM-dd'));
-      alert('Rodízio recalculado com sucesso!');
-    }
-  };
+
 
   const stats = useMemo(() => {
     const start = startOfMonth(today);
@@ -109,15 +102,7 @@ export function Dashboard() {
         </p>
       </div>
 
-      <div className="flex justify-end">
-        <button
-          onClick={handleRecalculate}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Recalcular Rodízio
-        </button>
-      </div>
+
 
       {/* Main Stats (Compact) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
