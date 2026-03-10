@@ -34,7 +34,15 @@ npm run dev
 O sistema estará acessível em `http://localhost:5173`.
 
 ### 4. Fazendo Deploy (Publicar Alterações)
-Para atualizar a versão online (`sistema-teletrabalho-v2.web.app`):
+
+#### Opção A: Vercel (Recomendado)
+Este projeto está configurado para deploy automático na Vercel ao fazer push para o GitHub.
+1.  Acesse o painel da Vercel.
+2.  Em **Settings > Environment Variables**, adicione as mesmas chaves do seu arquivo `.env` (VITE_FIREBASE_...).
+3.  Faça o push para o branch `main`.
+
+#### Opção B: Firebase Hosting
+Para atualizar a versão no Firebase Hosting (`sistema-teletrabalho-v2.web.app`):
 
 1.  Gere a versão de produção:
     ```bash
@@ -47,6 +55,7 @@ Para atualizar a versão online (`sistema-teletrabalho-v2.web.app`):
     npx firebase deploy --only hosting --project sistema-teletrabalho-v2
     ```
     *(Se der erro de permissão, use: `cmd /c "npx firebase deploy --only hosting --project sistema-teletrabalho-v2"`)*
+
 
 ---
 
