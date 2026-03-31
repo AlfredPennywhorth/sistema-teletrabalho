@@ -63,6 +63,7 @@ export const initialFeriados: Feriado[] = [
 
   // 2026
   { id: '2026-01-01', data: '2026-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
+  { id: '2026-04-03', data: '2026-04-03', nome: 'Paixão de Cristo', tipo: 'nacional' },
   { id: '2026-04-21', data: '2026-04-21', nome: 'Tiradentes', tipo: 'nacional' },
   { id: '2026-05-01', data: '2026-05-01', nome: 'Dia do Trabalho', tipo: 'nacional' },
   { id: '2026-09-07', data: '2026-09-07', nome: 'Independência do Brasil', tipo: 'nacional' },

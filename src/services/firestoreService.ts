@@ -2,13 +2,12 @@
 import {
     collection,
     getDocs,
-    addDoc,
-    updateDoc,
     deleteDoc,
     doc,
     setDoc,
     query,
-    where
+    where,
+    writeBatch
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Colaborador, Feriado, StatusDiario } from '../types';
@@ -40,7 +39,6 @@ export async function deleteColaborador(id: string) {
 }
 
 export async function setColaboradoresBatch(colaboradores: Colaborador[]) {
-    const batch = [];
     for (const c of colaboradores) {
         const docRef = doc(db, COLLECTIONS.COLABORADORES, c.id);
         await setDoc(docRef, c);
@@ -91,10 +89,9 @@ export async function getRegistros(year?: number): Promise<StatusDiario[]> {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as StatusDiario));
 }
 
-export async function setRegistrosBatch(registros: StatusDiario[]) {
+export async function setRegistrosBatch(_registros: StatusDiario[]) {
     // Firestore batch limit is 500. For large datasets we need multiple batches.
-    // For simplicity here, we'll confirm migration via specialized script logic or chunks.
-    // Just exporting a function for single status update for now.
+    // For simplicity here, we'll use migrateData for large sets or updateStatusDiario for single updates.
 }
 
 export async function updateStatusDiario(status: StatusDiario) {
@@ -102,9 +99,66 @@ export async function updateStatusDiario(status: StatusDiario) {
     await setDoc(docRef, status);
 }
 
-// --- Migration Helper ---
-import { writeBatch } from 'firebase/firestore';
 
+// --- Data Fixer (One-time) ---
+export async function fixCorruptedData() {
+    const batch = writeBatch(db);
+    let modified = false;
+
+    // 1. Fix Colaboradores
+    const cols = await getColaboradores();
+    cols.forEach(c => {
+        let changed = false;
+        let newCargo = c.cargo;
+        let newDept = c.departamento;
+
+        if (c.cargo === 'dominó') {
+            newCargo = 'Ouvidor';
+            changed = true;
+        }
+        if (c.departamento === 'lyndoria') {
+            newDept = 'Ouvidoria';
+            changed = true;
+        }
+
+        if (changed) {
+            const ref = doc(db, COLLECTIONS.COLABORADORES, c.id);
+            batch.set(ref, { ...c, cargo: newCargo, departamento: newDept });
+            modified = true;
+        }
+    });
+
+    // 2. Fix Missing Holiday (Paixão de Cristo 2026)
+    const holidays = await getFeriados();
+    const hasPaixao = holidays.some(f => f.data === '2026-04-03');
+    if (!hasPaixao) {
+        const holidayRef = doc(db, COLLECTIONS.FERIADOS, '2026-04-03-paixao-de-cristo');
+        batch.set(holidayRef, {
+            id: '2026-04-03-paixao-de-cristo',
+            data: '2026-04-03',
+            nome: 'Paixão de Cristo',
+            tipo: 'nacional'
+        });
+        modified = true;
+    }
+
+    // 3. Clean status for that holiday
+    const registros = await getRegistros(2026);
+    const holidayRegs = registros.filter(r => r.data === '2026-04-03');
+    holidayRegs.forEach(r => {
+        const regRef = doc(db, COLLECTIONS.REGISTROS, r.id);
+        batch.delete(regRef);
+        modified = true;
+    });
+
+    if (modified) {
+        await batch.commit();
+        console.log('Dados corrigidos no Firestore (Colaboradores, Feriado e Escalas).');
+    }
+    return modified;
+}
+
+// --- Migration Helper ---
 export async function migrateData(
     colaboradores: Colaborador[],
     feriados: Feriado[],
@@ -149,7 +203,7 @@ export async function migrateData(
     // 3. Registros
     if (onProgress) onProgress(`Preparando ${registros.length} registros...`);
     for (const r of registros) {
-        if (!r.id) continue; // Skip invalid records
+        if (!r.id) continue;
         const ref = doc(db, COLLECTIONS.REGISTROS, r.id);
         batch.set(ref, r);
         count++;
@@ -157,7 +211,6 @@ export async function migrateData(
         if (count >= batchLimit) await commitBatch();
     }
 
-    // Final commit
     await commitBatch();
     if (onProgress) onProgress('Finalizando...');
 }

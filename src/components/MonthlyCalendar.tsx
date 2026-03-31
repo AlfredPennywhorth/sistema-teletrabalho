@@ -115,7 +115,7 @@ export function MonthlyCalendar() {
     setShowModal(false);
   };
 
-  const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const weekDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
   const handleRecalculate = () => {
     if (confirm(`Deseja recalcular a escala de rodízio a partir de ${format(parseISO(rotationStartDate), 'dd/MM/yyyy')} até o final do ano?`)) {

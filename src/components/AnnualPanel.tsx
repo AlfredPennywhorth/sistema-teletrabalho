@@ -7,8 +7,8 @@ import { cn } from '../utils/cn';
 import { VacationSummaryModal } from './VacationSummaryModal';
 
 const MONTHS = [
-  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
 export function AnnualPanel() {

@@ -9,7 +9,7 @@ import { MonthlyCalendar } from './components/MonthlyCalendar';
 import { AnnualPanel } from './components/AnnualPanel';
 import { ColaboradoresManager } from './components/ColaboradoresManager';
 import { FeriadosManager } from './components/FeriadosManager';
-import { getColaboradores, getFeriados, getRegistros } from './services/firestoreService';
+import { getColaboradores, getFeriados, getRegistros, fixCorruptedData } from './services/firestoreService';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
@@ -28,6 +28,10 @@ export function App() {
       if (user) {
         // Load data from Firestore first to link user
         try {
+
+          // Try to fix corrupted data (one-time check)
+          await fixCorruptedData();
+
           // Parallel fetch
           const [cols, fers, regs] = await Promise.all([
             getColaboradores(),

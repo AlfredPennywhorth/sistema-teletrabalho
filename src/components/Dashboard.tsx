@@ -153,7 +153,7 @@ export function Dashboard() {
               className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow flex flex-col justify-between min-w-0"
             >
               <div className="flex items-start justify-between mb-2">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate" title={config.label}>{config.label}</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate" title={config.label} translate="no">{config.label}</span>
                 <Icon className={cn('w-4 h-4', config.color)} />
               </div>
               <p className="text-2xl font-bold text-slate-900 leading-none">{count}</p>
