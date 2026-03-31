@@ -105,15 +105,15 @@ export function Dashboard() {
 
 
       {/* Main Stats (Compact) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-2 gap-3">
         {/* Current Week Card */}
         <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-2 opacity-5">
+          <div className="hidden sm:block absolute top-0 right-0 p-2 opacity-10">
             <Calendar className="w-12 h-12 text-slate-900" />
           </div>
           <div className="relative">
-            <p className="text-xs font-semibold text-slate-500 uppercase">Semana {format(today, 'w')}</p>
-            <p className="text-sm font-bold text-slate-900 mt-1 capitalize leading-tight">
+            <p className="text-[10px] font-semibold text-slate-500 uppercase">Semana {format(today, 'w')}</p>
+            <p className="text-xs sm:text-sm font-bold text-slate-900 mt-1 capitalize leading-tight">
               {format(startOfWeek(today, { weekStartsOn: 0 }), 'dd/MMM', { locale: ptBR })} - {format(endOfWeek(today, { weekStartsOn: 0 }), 'dd/MMM', { locale: ptBR })}
             </p>
           </div>
@@ -122,17 +122,17 @@ export function Dashboard() {
         {/* Active Collaborators */}
         <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase">Ativos</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{stats.total}</p>
+            <p className="text-[10px] font-semibold text-slate-500 uppercase">Ativos</p>
+            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">{stats.total}</p>
           </div>
-          <div className="p-2 rounded-lg bg-slate-100">
-            <Users className="w-5 h-5 text-slate-600" />
+          <div className="p-1.5 sm:p-2 rounded-lg bg-slate-100">
+            <Users className="w-4 h-4 sm:w-5 h-5 text-slate-600" />
           </div>
         </div>
       </div>
 
       {/* Status Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
         {[
           { key: 'presencial', icon: Briefcase },
           { key: 'teletrabalho', icon: Home },
@@ -150,13 +150,13 @@ export function Dashboard() {
           return (
             <div
               key={statusKey}
-              className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow flex flex-col justify-between min-w-0"
+              className="bg-white rounded-lg border border-slate-200 p-2 sm:p-3 hover:shadow-sm transition-shadow flex flex-col justify-between min-w-0"
             >
-              <div className="flex items-start justify-between mb-2">
-                <span translate="no" className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate" title={config.label}>{config.label}</span>
-                <Icon className={cn('w-4 h-4', config.color)} />
+              <div className="flex items-start justify-between mb-1 sm:mb-2">
+                <span translate="no" className="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate" title={config.label}>{config.label}</span>
+                <Icon className={cn('w-3 h-3 sm:w-4 h-4', config.color)} />
               </div>
-              <p className="text-2xl font-bold text-slate-900 leading-none">{count}</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-900 leading-none">{count}</p>
             </div>
           );
         })}
@@ -317,19 +317,19 @@ export function Dashboard() {
           <Clock className="w-5 h-5 text-slate-400" />
           <h2 className="text-lg font-semibold text-slate-900">Status de Hoje por Departamento</h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+          <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-slate-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Departamento</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-slate-600">Total</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-teal-800">Presencial</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-orange-700">Teletrabalho</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-purple-700">Férias</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-slate-600">Folga</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-rose-700">Atestado</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-indigo-700">Licença</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Outro</th>
+                <th className="text-left py-3 px-2 sm:px-4 font-semibold text-slate-600">Depto</th>
+                <th className="text-center py-3 px-2 sm:px-4 font-semibold text-slate-600">Total</th>
+                <th className="text-center py-3 px-1 sm:px-4 font-semibold text-teal-800">Pre</th>
+                <th className="text-center py-3 px-1 sm:px-4 font-semibold text-orange-700">Tele</th>
+                <th className="hidden sm:table-cell text-center py-3 px-4 font-semibold text-purple-700">Férias</th>
+                <th className="hidden sm:table-cell text-center py-3 px-4 font-semibold text-slate-600">Folga</th>
+                <th className="hidden sm:table-cell text-center py-3 px-4 font-semibold text-rose-700">Atestado</th>
+                <th className="hidden sm:table-cell text-center py-3 px-4 font-semibold text-indigo-700">Licença</th>
+                <th className="hidden sm:table-cell text-center py-3 px-4 font-semibold text-gray-700">Outro</th>
               </tr>
             </thead>
             <tbody>
@@ -342,40 +342,40 @@ export function Dashboard() {
                   (s) => s.data === todayStr && deptColabs.some((c) => c.id === s.colaboradorId)
                 );
                 return (
-                  <tr key={dept} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td translate="no" className="py-3 px-4 font-medium text-slate-900 min-w-[150px]">{dept}</td>
-                    <td className="py-3 px-4 text-center text-slate-600">{deptColabs.length}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-800 font-medium">
+                  <tr key={dept} className="border-b border-slate-100 hover:bg-slate-50 text-[11px] sm:text-sm">
+                    <td translate="no" className="py-3 px-2 sm:px-4 font-medium text-slate-900 truncate max-w-[80px] sm:max-w-none">{dept}</td>
+                    <td className="py-3 px-2 sm:px-4 text-center text-slate-600">{deptColabs.length}</td>
+                    <td className="py-3 px-1 sm:px-4 text-center">
+                      <span className="inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-teal-100 text-teal-800 font-medium">
                         {deptStatuses.filter((s) => s.status === 'presencial').length}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-700 font-medium">
+                    <td className="py-3 px-1 sm:px-4 text-center">
+                      <span className="inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-orange-100 text-orange-700 font-medium">
                         {deptStatuses.filter((s) => s.status === 'teletrabalho').length}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="hidden sm:table-cell py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-medium">
                         {deptStatuses.filter((s) => s.status === 'ferias').length}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="hidden sm:table-cell py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-medium">
                         {deptStatuses.filter((s) => s.status === 'folga').length}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="hidden sm:table-cell py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-rose-100 text-rose-700 font-medium">
                         {deptStatuses.filter((s) => s.status === 'atestado').length}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="hidden sm:table-cell py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-medium">
                         {deptStatuses.filter((s) => s.status === 'licenca').length}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="hidden sm:table-cell py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-medium">
                         {deptStatuses.filter((s) => s.status === 'outro').length}
                       </span>

@@ -16,7 +16,6 @@ export function AnnualPanel() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedColaborador, setSelectedColaborador] = useState<string>('');
   const [selectedDepartamento, setSelectedDepartamento] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'heatmap' | 'status'>('heatmap');
   const [showVacationSummary, setShowVacationSummary] = useState(false);
 
   const departments = useMemo(
@@ -90,28 +89,30 @@ export function AnnualPanel() {
     });
 
     const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `painel-anual-${year}.csv`;
     link.click();
   };
 
-  const renderPersonView = () => {
-    const col = filteredColaboradores[0];
+  const renderIndividualView = (colaboradorId: string) => {
+    const col = colaboradores.find((c) => c.id === colaboradorId);
     if (!col) return null;
 
     return (
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div className="overflow-x-auto custom-scrollbar touch-pan-x">
+          <table className="w-full text-[10px] sm:text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="px-3 py-2 text-left font-semibold text-slate-700 w-24 border-r border-slate-200">
                   Mês
                 </th>
-                {Array.from({ length: 31 }, (_, i) => (
-                  <th translate="no" key={i} className="w-8 h-8 text-center font-normal text-slate-500 border-r border-slate-100 last:border-r-0">
+                {Array.from({ length: 31 }).map((_, i) => (
+                  <th key={i} className="px-1 py-1 text-center font-medium text-slate-500 border-r border-slate-100 min-w-[24px]">
                     {i + 1}
                   </th>
                 ))}
@@ -120,15 +121,14 @@ export function AnnualPanel() {
             <tbody>
               {MONTHS.map((month, monthIndex) => {
                 const daysInMonth = getDaysInMonth(new Date(year, monthIndex));
-
                 return (
                   <tr key={month} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td translate="no" className="px-3 py-2 font-medium text-slate-700 border-r border-slate-200">
+                    <td className="px-3 py-2 font-medium text-slate-700 border-r border-slate-200 bg-slate-50/50">
                       {month}
                     </td>
-                    {Array.from({ length: 31 }, (_, dayIndex) => {
+                    {Array.from({ length: 31 }).map((_, dayIndex) => {
                       if (dayIndex >= daysInMonth) {
-                        return <td key={dayIndex} className="bg-slate-50/[0.3]" />;
+                        return <td key={dayIndex} className="bg-slate-50/20 border-r border-slate-50" />;
                       }
 
                       const status = getStatusForDay(col.id, monthIndex, dayIndex + 1);
@@ -140,9 +140,16 @@ export function AnnualPanel() {
                       let title = '';
                       let content = '';
 
-                      if (status) {
-                        bgColor = STATUS_CONFIG[status.status].bgColor;
-                        title = STATUS_CONFIG[status.status].label;
+                      if (status && STATUS_CONFIG[status.status]) {
+                        const config = STATUS_CONFIG[status.status];
+                        bgColor = config.bgColor + ' ' + config.color;
+                        title = config.label;
+                        content = config.label[0].toUpperCase();
+                      } else if (status) {
+                        // Fallback for unknown status
+                        bgColor = 'bg-slate-200 text-slate-700';
+                        title = 'Status Desconhecido';
+                        content = '?';
                       } else if (isHol) {
                         bgColor = 'bg-red-100 text-red-700 font-bold';
                         title = 'Feriado';
@@ -156,7 +163,7 @@ export function AnnualPanel() {
                         <td
                           key={dayIndex}
                           className={cn(
-                            'border-r border-slate-50 text-center relative transition-colors',
+                            'border-r border-slate-50 text-center relative transition-colors h-8',
                             bgColor,
                             !isWknd && !isHol && !status && 'hover:bg-slate-50'
                           )}
@@ -177,12 +184,12 @@ export function AnnualPanel() {
   };
 
   const renderTeamView = () => (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+      <div className="overflow-x-auto custom-scrollbar touch-pan-x">
+        <table className="w-full text-[10px] sm:text-xs border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="sticky left-0 bg-slate-50 px-3 py-2 text-left font-semibold text-slate-700 min-w-[150px] border-r border-slate-200">
+              <th className="sticky left-0 bg-slate-50 px-3 py-2 text-left font-semibold text-slate-700 min-w-[150px] border-r border-slate-200 z-10">
                 Colaborador
               </th>
               {MONTHS.map((month, idx) => (
@@ -200,7 +207,7 @@ export function AnnualPanel() {
               </th>
             </tr>
             <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="sticky left-0 bg-slate-50 border-r border-slate-200" />
+              <th className="sticky left-0 bg-slate-50 border-r border-slate-200 z-10" />
               {MONTHS.map((_, monthIndex) => {
                 const daysInMonth = getDaysInMonth(new Date(year, monthIndex));
                 return Array.from({ length: daysInMonth }, (_, dayIndex) => {
@@ -211,8 +218,8 @@ export function AnnualPanel() {
                     <th
                       key={`${monthIndex}-${dayIndex}`}
                       className={cn(
-                        'w-5 h-6 text-center text-[10px] font-normal',
-                        isHol ? 'bg-red-100 text-red-600' : isWknd ? 'bg-slate-100 text-slate-400' : 'text-slate-500'
+                        'w-5 h-6 text-center text-[8px] font-normal min-w-[20px]',
+                        isHol ? 'bg-red-100 text-red-600 font-bold' : isWknd ? 'bg-slate-100 text-slate-400' : 'text-slate-500'
                       )}
                     >
                       {dayIndex + 1}
@@ -229,11 +236,11 @@ export function AnnualPanel() {
               const totalDays = Object.values(stats).reduce((a, b) => a + b, 0);
 
               return (
-                <tr key={col.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td translate="no" className="sticky left-0 bg-white px-3 py-2 font-medium text-slate-800 border-r border-slate-200 whitespace-nowrap">
+                <tr key={col.id} className="border-b border-slate-100 hover:bg-slate-50 h-8">
+                  <td translate="no" className="sticky left-0 bg-white px-3 py-2 font-medium text-slate-800 border-r border-slate-200 whitespace-nowrap z-10">
                     <div className="flex flex-col">
-                      <span translate="no">{col.nome}</span>
-                      <span translate="no" className="text-[10px] text-slate-500">{col.departamento}</span>
+                      <span translate="no" className="truncate max-w-[120px]">{col.nome}</span>
+                      <span translate="no" className="text-[8px] text-slate-500">{col.departamento}</span>
                     </div>
                   </td>
                   {MONTHS.map((_, monthIndex) => {
@@ -247,9 +254,12 @@ export function AnnualPanel() {
                       let bgColor = 'bg-white';
                       let title = '';
 
-                      if (status) {
+                      if (status && STATUS_CONFIG[status.status]) {
                         bgColor = STATUS_CONFIG[status.status].bgColor;
                         title = STATUS_CONFIG[status.status].label;
+                      } else if (status) {
+                        bgColor = 'bg-slate-200';
+                        title = 'Status Desconhecido';
                       } else if (isHol) {
                         bgColor = 'bg-red-100';
                         title = 'Feriado';
@@ -267,21 +277,8 @@ export function AnnualPanel() {
                       );
                     });
                   })}
-                  <td className="px-3 py-2 text-center">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold text-slate-800">{totalDays}</span>
-                      <div className="flex gap-1 justify-center">
-                        <span className="text-[10px] text-emerald-600" title="Presencial">
-                          P:{stats.presencial}
-                        </span>
-                        <span className="text-[10px] text-blue-600" title="Teletrabalho">
-                          T:{stats.teletrabalho}
-                        </span>
-                        <span className="text-[10px] text-purple-600" title="Férias">
-                          F:{stats.ferias}
-                        </span>
-                      </div>
-                    </div>
+                  <td className="px-3 py-2 text-center bg-slate-50 z-10">
+                    <span className="font-bold text-slate-800">{totalDays}</span>
                   </td>
                 </tr>
               );
@@ -293,12 +290,12 @@ export function AnnualPanel() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Painel Anual</h1>
-          <p className="text-slate-500 mt-1">Visualização anual de férias e ausências</p>
+          <p className="text-slate-500 mt-1">Visualização anual de ausências</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -318,123 +315,78 @@ export function AnnualPanel() {
           </button>
           <button
             onClick={exportToCSV}
-            className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
+            className="ml-2 p-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
+            title="Exportar CSV"
           >
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Exportar CSV</span>
+            <span className="hidden sm:inline">Exportar</span>
           </button>
           <button
             onClick={() => setShowVacationSummary(true)}
-            className="ml-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2"
+            className="p-2 sm:px-4 sm:py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2"
+            title="Resumo de Férias"
           >
             <Filter className="w-4 h-4" />
-            <span className="hidden sm:inline">Resumo Férias</span>
+            <span className="hidden sm:inline">Férias</span>
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-sm font-medium text-slate-700">Filtros</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <select
             value={selectedDepartamento}
             onChange={(e) => {
               setSelectedDepartamento(e.target.value);
               setSelectedColaborador('');
             }}
-            className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Todos os Departamentos</option>
             {departments.map((dept) => (
-              <option key={dept} value={dept}>{dept}</option>
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
             ))}
           </select>
           <select
             value={selectedColaborador}
             onChange={(e) => setSelectedColaborador(e.target.value)}
-            className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Todos os Colaboradores</option>
-            {colaboradores
-              .filter((c) => c.situacao === 'ativo')
-              .filter((c) => !selectedDepartamento || c.departamento === selectedDepartamento)
-              .map((col) => (
-                <option key={col.id} value={col.id}>{col.nome}</option>
-              ))}
-          </select>
-          <select
-            value={viewMode}
-            onChange={(e) => setViewMode(e.target.value as 'heatmap' | 'status')}
-            className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="heatmap">Visualização Heatmap</option>
-            <option value="status">Visualização por Status</option>
+            <option value="">Todos os Colaboradores (Equipe)</option>
+            {filteredColaboradores.map((col) => (
+              <option key={col.id} value={col.id}>
+                {col.nome}
+              </option>
+            ))}
           </select>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-x-4 gap-y-2 p-1">
         {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-          <div key={key} className="flex items-center gap-2">
-            <div className={cn('w-4 h-4 rounded', config.bgColor)} />
-            <span className="text-sm text-slate-600">{config.label}</span>
+          <div key={key} className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-600">
+            <div className={cn('w-3 h-3 rounded', config.bgColor)} />
+            <span>{config.label}</span>
           </div>
         ))}
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-red-200 border border-red-300" />
-          <span className="text-sm text-slate-600">Feriado</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-slate-200" />
-          <span className="text-sm text-slate-600">Fim de semana</span>
+        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-600">
+          <div className="w-3 h-3 rounded bg-red-200 border border-red-300" />
+          <span>Feriado</span>
         </div>
       </div>
 
       {/* Annual Grid */}
-      {selectedColaborador ? renderPersonView() : renderTeamView()}
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {filteredColaboradores.map((col) => {
-          const stats = getStatsForColaborador(col.id);
-          return (
-            <div key={col.id} className="bg-white rounded-xl border border-slate-200 p-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold">
-                  {col.nome.charAt(0)}
-                </div>
-                <div>
-                  <p translate="no" className="font-semibold text-slate-900">{col.nome}</p>
-                  <p translate="no" className="text-sm text-slate-500">{col.departamento}</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {(Object.entries(stats) as [StatusType, number][])
-                  .filter(([, count]) => count > 0)
-                  .sort(([, a], [, b]) => b - a)
-                  .slice(0, 4)
-                  .map(([status, count]) => {
-                    const config = STATUS_CONFIG[status];
-                    return (
-                      <div key={status} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={cn('w-3 h-3 rounded', config.bgColor)} />
-                          <span className="text-sm text-slate-600">{config.label}</span>
-                        </div>
-                        <span className="font-semibold text-slate-800">{count} dias</span>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          );
-        })}
+      <div className="mt-2">
+        {selectedColaborador 
+          ? renderIndividualView(selectedColaborador) 
+          : renderTeamView()
+        }
       </div>
+
       <VacationSummaryModal
         isOpen={showVacationSummary}
         onClose={() => setShowVacationSummary(false)}

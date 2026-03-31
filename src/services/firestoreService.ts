@@ -104,7 +104,7 @@ export async function setRegistrosBatch(registros: StatusDiario[]) {
         });
         
         await batch.commit();
-        console.log(`Lote de ${chunk.length} registros salvo no Firestore.`);
+        // Registros salvos
     }
 }
 
@@ -205,9 +205,52 @@ export async function fixCorruptedData() {
 
     if (modified) {
         await batch.commit();
-        console.log('Dados normalizados e feriados de 2026 restaurados no Firestore.');
+        console.warn('⚠️ DADOS NORMALIZADOS: Alguns registros foram corrigidos ou migrados no Firestore.');
     }
     return modified;
+}
+
+/**
+ * PURGE LEGACY DATA: Agressively removes any record that doesn't follow the
+ * standard `${colaboradorId}-${data}` ID format.
+ */
+export async function purgeLegacyData() {
+    console.log('🔍 Iniciando Auditoria e Limpeza Agressiva de Registros Legados...');
+    const registros = await getRegistros();
+    const batch = writeBatch(db);
+    let count = 0;
+    let totalPurged = 0;
+
+    for (const r of registros) {
+        const standardId = `${r.colaboradorId}-${r.data}`;
+        
+        // Se o ID atual não bate com o padrão calculado, é lixo ou legado
+        if (r.id !== standardId) {
+            console.warn(`🗑️ Deletando registro legado/inválido: ID=${r.id} (Esperado=${standardId})`);
+            const docRef = doc(db, COLLECTIONS.REGISTROS, r.id);
+            batch.delete(docRef);
+            count++;
+            totalPurged++;
+        }
+
+        // Firestore batch limit is 500
+        if (count >= 400) {
+            await batch.commit();
+            count = 0;
+        }
+    }
+
+    if (totalPurged > 0 && count > 0) {
+        await batch.commit();
+    }
+
+    if (totalPurged > 0) {
+        console.log(`✅ LIMPEZA CONCLUÍDA: ${totalPurged} registros legados removidos.`);
+    } else {
+        console.log('✅ NENHUM registro legado encontrado. Banco de dados está limpo.');
+    }
+
+    return totalPurged;
 }
 
 // --- Migration Helper ---

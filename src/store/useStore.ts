@@ -1,6 +1,4 @@
 import { create } from 'zustand';
-
-import data2026 from '../data/data_2026.json';
 import type { Colaborador, StatusDiario, Feriado, User } from '../types';
 import { 
   addColaborador as fsAddColaborador, updateColaborador as fsUpdateColaborador, deleteColaborador as fsDeleteColaborador,
@@ -45,9 +43,12 @@ interface AppState {
 
   // Rotation
   recalculateRotation: (startDate: string) => Promise<void>;
+
+  // Sync State
+  isSyncing: boolean;
+  setIsSyncing: (syncing: boolean) => void;
 }
 
-// Real initial data
 export const initialColaboradores: Colaborador[] = [
   { id: 'andre', nome: 'André William de Souza', matricula: '11.393-0', email: 'andres@cetsp.com.br', cargo: 'Analista de Gestão', departamento: 'Ouvidoria', situacao: 'ativo' },
   { id: 'virginia', nome: 'Virginia L. da Silva Borba', matricula: '12.824-4', email: 'virginiab@cetsp.com.br', cargo: 'Assistente Administrativo', departamento: 'Ouvidoria', situacao: 'ativo' },
@@ -57,7 +58,6 @@ export const initialColaboradores: Colaborador[] = [
 ];
 
 export const initialFeriados: Feriado[] = [
-  // 2025
   { id: '2025-01-01', data: '2025-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
   { id: '2025-04-21', data: '2025-04-21', nome: 'Tiradentes', tipo: 'nacional' },
   { id: '2025-05-01', data: '2025-05-01', nome: 'Dia do Trabalho', tipo: 'nacional' },
@@ -66,8 +66,6 @@ export const initialFeriados: Feriado[] = [
   { id: '2025-11-02', data: '2025-11-02', nome: 'Finados', tipo: 'nacional' },
   { id: '2025-11-15', data: '2025-11-15', nome: 'Proclamação da República', tipo: 'nacional' },
   { id: '2025-12-25', data: '2025-12-25', nome: 'Natal', tipo: 'nacional' },
-
-  // 2026
   { id: '2026-01-01', data: '2026-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
   { id: '2026-04-03', data: '2026-04-03', nome: 'Paixão de Cristo', tipo: 'nacional' },
   { id: '2026-04-21', data: '2026-04-21', nome: 'Tiradentes', tipo: 'nacional' },
@@ -77,20 +75,7 @@ export const initialFeriados: Feriado[] = [
   { id: '2026-11-02', data: '2026-11-02', nome: 'Finados', tipo: 'nacional' },
   { id: '2026-11-15', data: '2026-11-15', nome: 'Proclamação da República', tipo: 'nacional' },
   { id: '2026-12-25', data: '2026-12-25', nome: 'Natal', tipo: 'nacional' },
-
-  // 2027
-  { id: '2027-01-01', data: '2027-01-01', nome: 'Confraternização Universal', tipo: 'nacional' },
-  { id: '2027-04-21', data: '2027-04-21', nome: 'Tiradentes', tipo: 'nacional' },
-  { id: '2027-05-01', data: '2027-05-01', nome: 'Dia do Trabalho', tipo: 'nacional' },
-  { id: '2027-09-07', data: '2027-09-07', nome: 'Independência do Brasil', tipo: 'nacional' },
-  { id: '2027-10-12', data: '2027-10-12', nome: 'Nossa Senhora Aparecida', tipo: 'nacional' },
-  { id: '2027-11-02', data: '2027-11-02', nome: 'Finados', tipo: 'nacional' },
-  { id: '2027-11-15', data: '2027-11-15', nome: 'Proclamação da República', tipo: 'nacional' },
-  { id: '2027-12-25', data: '2027-12-25', nome: 'Natal', tipo: 'nacional' },
 ];
-
-// Generate some sample status data
-
 
 export const useStore = create<AppState>()((set, get) => ({
   // User
@@ -100,8 +85,13 @@ export const useStore = create<AppState>()((set, get) => ({
   // Colaboradores
   colaboradores: initialColaboradores,
   addColaborador: async (colaborador) => {
-    await fsAddColaborador(colaborador);
-    set((state) => ({ colaboradores: [...state.colaboradores, colaborador] }));
+    set({ isSyncing: true });
+    try {
+      await fsAddColaborador(colaborador);
+      set((state) => ({ colaboradores: [...state.colaboradores, colaborador] }));
+    } finally {
+      set({ isSyncing: false });
+    }
   },
   setColaboradores: (colaboradores) => set({ colaboradores }),
   updateColaborador: async (id, colaborador) => {
@@ -109,44 +99,72 @@ export const useStore = create<AppState>()((set, get) => ({
       c.id === id ? { ...c, ...colaborador } : c
     );
     const target = updated.find(c => c.id === id);
-    if (target) await fsUpdateColaborador(target);
-    set({ colaboradores: updated });
+    if (target) {
+      set({ isSyncing: true });
+      try {
+        await fsUpdateColaborador(target);
+        set({ colaboradores: updated });
+      } finally {
+        set({ isSyncing: false });
+      }
+    }
   },
   deleteColaborador: async (id) => {
-    await fsDeleteColaborador(id);
-    set((state) => ({
-      colaboradores: state.colaboradores.filter((c) => c.id !== id),
-    }));
+    set({ isSyncing: true });
+    try {
+      await fsDeleteColaborador(id);
+      set((state) => ({
+        colaboradores: state.colaboradores.filter((c) => c.id !== id),
+      }));
+    } finally {
+      set({ isSyncing: false });
+    }
   },
 
   // Status Diário
-  statusDiarios: data2026 as StatusDiario[],
+  statusDiarios: [],
   setStatusDiarios: (statusDiarios) => set({ statusDiarios }),
   addStatusDiario: async (status) => {
-    await fsUpdateStatus(status); // Use updateStatus (setDoc) to save
-    set((state) => {
-      const filtered = state.statusDiarios.filter(
-        (s) => !(s.colaboradorId === status.colaboradorId && s.data === status.data)
-      );
-      return { statusDiarios: [...filtered, status] };
-    });
+    set({ isSyncing: true });
+    try {
+      await fsUpdateStatus(status);
+      set((state) => {
+        const filtered = state.statusDiarios.filter(
+          (s) => !(s.colaboradorId === status.colaboradorId && s.data === status.data)
+        );
+        return { statusDiarios: [...filtered, status] };
+      });
+    } finally {
+      set({ isSyncing: false });
+    }
   },
   updateStatusDiario: async (id, status) => {
     const current = get().statusDiarios.find(s => s.id === id);
     if (!current) return;
     const updated = { ...current, ...status };
-    await fsUpdateStatus(updated);
-    set((state) => ({
-      statusDiarios: state.statusDiarios.map((s) =>
-        s.id === id ? updated : s
-      ),
-    }));
+    
+    set({ isSyncing: true });
+    try {
+      await fsUpdateStatus(updated);
+      set((state) => ({
+        statusDiarios: state.statusDiarios.map((s) =>
+          s.id === id ? updated : s
+        ),
+      }));
+    } finally {
+      setTimeout(() => set({ isSyncing: false }), 800);
+    }
   },
   deleteStatusDiario: async (id) => {
-    await fsDeleteStatus(id);
-    set((state) => ({
-      statusDiarios: state.statusDiarios.filter((s) => s.id !== id),
-    }));
+    set({ isSyncing: true });
+    try {
+      await fsDeleteStatus(id);
+      set((state) => ({
+        statusDiarios: state.statusDiarios.filter((s) => s.id !== id),
+      }));
+    } finally {
+      setTimeout(() => set({ isSyncing: false }), 800);
+    }
   },
   getStatusByColaboradorAndDate: (colaboradorId, data) => {
     return get().statusDiarios.find(
@@ -155,16 +173,9 @@ export const useStore = create<AppState>()((set, get) => ({
   },
   syncStatusDiarios: (firestoreStatus) => {
     set((state) => {
-      // Logic: Firestore data is the 'TRUTH'. 
-      // We take the current state (which has the base JSON) and OVERWRITE with firestore matches.
       const statusMap = new Map<string, StatusDiario>();
-      
-      // 1. Start with current state (Base JSON)
       state.statusDiarios.forEach(s => statusMap.set(`${s.colaboradorId}-${s.data}`, s));
-      
-      // 2. Overwrite with Firestore
       firestoreStatus.forEach(fs => statusMap.set(`${fs.colaboradorId}-${fs.data}`, fs));
-      
       return { statusDiarios: Array.from(statusMap.values()) };
     });
   },
@@ -173,33 +184,53 @@ export const useStore = create<AppState>()((set, get) => ({
   feriados: initialFeriados,
   setFeriados: (feriados) => set({ feriados }),
   addFeriado: async (feriado) => {
-    await fsAddFeriado(feriado);
-    set((state) => ({ feriados: [...state.feriados, feriado] }));
+    set({ isSyncing: true });
+    try {
+      await fsAddFeriado(feriado);
+      set((state) => ({ feriados: [...state.feriados, feriado] }));
+    } finally {
+      set({ isSyncing: false });
+    }
   },
   addFeriados: async (newFeriados) => {
-    await fsAddFeriadosBatch(newFeriados);
-    set((state) => {
-      const existingDates = new Set(state.feriados.map((f) => f.data));
-      const uniqueNewFeriados = newFeriados.filter((f) => !existingDates.has(f.data));
-      return { feriados: [...state.feriados, ...uniqueNewFeriados] };
-    });
+    set({ isSyncing: true });
+    try {
+      await fsAddFeriadosBatch(newFeriados);
+      set((state) => {
+        const existingDates = new Set(state.feriados.map((f) => f.data));
+        const uniqueNewFeriados = newFeriados.filter((f) => !existingDates.has(f.data));
+        return { feriados: [...state.feriados, ...uniqueNewFeriados] };
+      });
+    } finally {
+      set({ isSyncing: false });
+    }
   },
   updateFeriado: async (id, feriado) => {
     const current = get().feriados.find(f => f.id === id);
     if (!current) return;
     const updated = { ...current, ...feriado };
-    await fsUpdateFeriado(updated);
-    set((state) => ({
-      feriados: state.feriados.map((f) =>
-        f.id === id ? updated : f
-      ),
-    }));
+    set({ isSyncing: true });
+    try {
+      await fsUpdateFeriado(updated);
+      set((state) => ({
+        feriados: state.feriados.map((f) =>
+          f.id === id ? updated : f
+        ),
+      }));
+    } finally {
+      set({ isSyncing: false });
+    }
   },
   deleteFeriado: async (id) => {
-    await fsDeleteFeriado(id);
-    set((state) => ({
-      feriados: state.feriados.filter((f) => f.id !== id),
-    }));
+    set({ isSyncing: true });
+    try {
+      await fsDeleteFeriado(id);
+      set((state) => ({
+        feriados: state.feriados.filter((f) => f.id !== id),
+      }));
+    } finally {
+      set({ isSyncing: false });
+    }
   },
 
   // UI State
@@ -211,28 +242,35 @@ export const useStore = create<AppState>()((set, get) => ({
     const start = parseISO(startDate);
     const end = endOfYear(start);
 
-    const newStatuses = calculateRotationMatrix(
-      get().statusDiarios,
-      get().feriados,
-      get().colaboradores,
-      start,
-      end
-    );
+    set({ isSyncing: true });
+    try {
+      const newStatuses = calculateRotationMatrix(
+        get().statusDiarios,
+        get().feriados,
+        get().colaboradores,
+        start,
+        end
+      );
 
-    // Save to Firestore in batches
-    await fsSetRegistrosBatch(newStatuses);
+      await fsSetRegistrosBatch(newStatuses);
 
-    // Update local state
-    const affectedColIds = new Set(newStatuses.map(s => s.colaboradorId));
-    const rangeDates = new Set(newStatuses.map(s => s.data));
+      const affectedColIds = new Set(newStatuses.map(s => s.colaboradorId));
+      const rangeDates = new Set(newStatuses.map(s => s.data));
 
-    set((state) => {
-      const keptStatuses = state.statusDiarios.filter(s => {
-        const isAffectedCol = affectedColIds.has(s.colaboradorId);
-        const isInRange = rangeDates.has(s.data);
-        return !(isAffectedCol && isInRange);
+      set((state) => {
+        const keptStatuses = state.statusDiarios.filter(s => {
+          const isAffectedCol = affectedColIds.has(s.colaboradorId);
+          const isInRange = rangeDates.has(s.data);
+          return !(isAffectedCol && isInRange);
+        });
+        return { statusDiarios: [...keptStatuses, ...newStatuses] };
       });
-      return { statusDiarios: [...keptStatuses, ...newStatuses] };
-    });
+    } finally {
+      setTimeout(() => set({ isSyncing: false }), 800);
+    }
   },
+
+  // Sync State
+  isSyncing: false,
+  setIsSyncing: (isSyncing) => set({ isSyncing }),
 }));

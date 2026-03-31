@@ -9,7 +9,7 @@ import { MonthlyCalendar } from './components/MonthlyCalendar';
 import { AnnualPanel } from './components/AnnualPanel';
 import { ColaboradoresManager } from './components/ColaboradoresManager';
 import { FeriadosManager } from './components/FeriadosManager';
-import { getColaboradores, getFeriados, getRegistros, fixCorruptedData } from './services/firestoreService';
+import { getColaboradores, getFeriados, getRegistros, fixCorruptedData, purgeLegacyData } from './services/firestoreService';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
@@ -29,10 +29,10 @@ export function App() {
         // Load data from Firestore first to link user
         try {
 
-          // Try to fix corrupted data (one-time check)
+          // Data Audit & Cleanup
           await fixCorruptedData();
+          await purgeLegacyData();
 
-          // Parallel fetch
           const [cols, fers, regs] = await Promise.all([
             getColaboradores(),
             getFeriados(),
@@ -42,7 +42,7 @@ export function App() {
           if (cols.length > 0) setColaboradores(cols);
           if (fers.length > 0) setFeriados(fers);
           if (regs.length > 0) syncStatusDiarios(regs);
-          console.log('Dados carregados do Firestore:', { cols: cols.length, fers: fers.length, regs: regs.length });
+          // Dados sincronizados
 
           // Link User to Colaborador
           const linkedColaborador = cols.find(c => c.email.toLowerCase() === user.email?.toLowerCase());

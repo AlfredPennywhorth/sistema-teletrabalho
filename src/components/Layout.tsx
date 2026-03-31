@@ -9,14 +9,13 @@ import {
   X,
   LogOut,
   User,
-  KeyRound, // Added icon
+  KeyRound,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useStore } from '../store/useStore';
 import { auth } from '../lib/firebase';
 import { ChangePasswordModal } from './ChangePasswordModal';
-
-
+import { SaveIndicator } from './SaveIndicator';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,7 +33,7 @@ const navItems = [
 
 export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false); // Added state
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const { currentUser } = useStore();
 
   return (
@@ -151,6 +150,9 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
       />
+
+      {/* Visual Feedback */}
+      <SaveIndicator />
     </div>
   );
 }
