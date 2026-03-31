@@ -153,7 +153,7 @@ export function Dashboard() {
               className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow flex flex-col justify-between min-w-0"
             >
               <div className="flex items-start justify-between mb-2">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate" title={config.label} translate="no">{config.label}</span>
+                <span translate="no" className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate" title={config.label}>{config.label}</span>
                 <Icon className={cn('w-4 h-4', config.color)} />
               </div>
               <p className="text-2xl font-bold text-slate-900 leading-none">{count}</p>
@@ -172,7 +172,7 @@ export function Dashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-3 py-2 text-left font-semibold text-slate-700 min-w-[150px] border-r border-slate-200">
+                <th translate="no" className="px-3 py-2 text-left font-semibold text-slate-700 min-w-[150px] border-r border-slate-200">
                   Colaborador
                 </th>
                 {Array.from({ length: 7 }).map((_, idx) => {
@@ -181,7 +181,7 @@ export function Dashboard() {
                   return (
                     <th key={idx} className={cn("px-2 py-2 text-center border-r border-slate-100 last:border-0", isToday && "bg-blue-50")}>
                       <div className="flex flex-col items-center">
-                        <span className="text-xs font-medium text-slate-500 uppercase">
+                        <span translate="no" className="text-xs font-medium text-slate-500 uppercase">
                           {format(day, 'EEE', { locale: ptBR })}
                         </span>
                         <span className={cn("text-xs font-bold", isToday ? "text-blue-600" : "text-slate-700")}>
@@ -223,7 +223,7 @@ export function Dashboard() {
                     return (
                       <td key={idx} className={cn("px-2 py-2 text-center border-r border-slate-100 last:border-0", isToday && !bg && "bg-blue-50/30")}>
                         {text !== "-" && (
-                          <span className={cn("inline-block px-2 py-1 rounded text-xs font-medium truncate max-w-[100px]", bg)} title={title || text}>
+                          <span translate="no" className={cn("inline-block px-2 py-1 rounded text-xs font-medium truncate max-w-[100px]", bg)} title={title || text}>
                             {text}
                           </span>
                         )}
@@ -343,7 +343,7 @@ export function Dashboard() {
                 );
                 return (
                   <tr key={dept} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="py-3 px-4 font-medium text-slate-900">{dept}</td>
+                    <td translate="no" className="py-3 px-4 font-medium text-slate-900">{dept}</td>
                     <td className="py-3 px-4 text-center text-slate-600">{deptColabs.length}</td>
                     <td className="py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-800 font-medium">

@@ -225,12 +225,12 @@ export function ColaboradoresManager() {
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Colaborador</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Matrícula</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Cargo</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Departamento</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-slate-600">Situação</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-slate-600">Ações</th>
+                <th translate="no" className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Colaborador</th>
+                <th translate="no" className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Matrícula</th>
+                <th translate="no" className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Cargo</th>
+                <th translate="no" className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Departamento</th>
+                <th translate="no" className="text-center py-3 px-4 text-sm font-semibold text-slate-600">Situação</th>
+                <th translate="no" className="text-right py-3 px-4 text-sm font-semibold text-slate-600">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -252,8 +252,8 @@ export function ColaboradoresManager() {
                       </div>
                     </td>
                     <td className="py-3 px-4 text-slate-600">{col.matricula}</td>
-                    <td className="py-3 px-4 text-slate-600">{col.cargo}</td>
-                    <td className="py-3 px-4 text-slate-600">{col.departamento}</td>
+                    <td translate="no" className="py-3 px-4 text-slate-600">{col.cargo}</td>
+                    <td translate="no" className="py-3 px-4 text-slate-600">{col.departamento}</td>
                     <td className="py-3 px-4 text-center">
                       <span
                         className={cn(

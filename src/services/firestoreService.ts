@@ -114,11 +114,11 @@ export async function fixCorruptedData() {
         let newCargo = c.cargo;
         let newDept = c.departamento;
 
-        if (c.cargo === 'dominó') {
+        if (c.cargo === 'dominó' || c.cargo === 'Carga') {
             newCargo = 'Ouvidor';
             changed = true;
         }
-        if (c.departamento === 'lyndoria') {
+        if (c.departamento === 'lyndoria' || c.departamento === 'lybdoria' || c.departamento === 'Ouvidoria (lyndoria)') {
             newDept = 'Ouvidoria';
             changed = true;
         }

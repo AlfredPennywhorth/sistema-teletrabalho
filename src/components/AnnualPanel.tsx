@@ -107,7 +107,7 @@ export function AnnualPanel() {
                   Mês
                 </th>
                 {Array.from({ length: 31 }, (_, i) => (
-                  <th key={i} className="w-8 h-8 text-center font-normal text-slate-500 border-r border-slate-100 last:border-r-0">
+                  <th translate="no" key={i} className="w-8 h-8 text-center font-normal text-slate-500 border-r border-slate-100 last:border-r-0">
                     {i + 1}
                   </th>
                 ))}
@@ -119,7 +119,7 @@ export function AnnualPanel() {
 
                 return (
                   <tr key={month} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-3 py-2 font-medium text-slate-700 border-r border-slate-200">
+                    <td translate="no" className="px-3 py-2 font-medium text-slate-700 border-r border-slate-200">
                       {month}
                     </td>
                     {Array.from({ length: 31 }, (_, dayIndex) => {
@@ -184,6 +184,7 @@ export function AnnualPanel() {
               {MONTHS.map((month, idx) => (
                 <th
                   key={month}
+                  translate="no"
                   className="px-1 py-2 text-center font-semibold text-slate-700 border-r border-slate-100"
                   colSpan={getDaysInMonth(new Date(year, idx))}
                 >
@@ -227,8 +228,8 @@ export function AnnualPanel() {
                 <tr key={col.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="sticky left-0 bg-white px-3 py-2 font-medium text-slate-800 border-r border-slate-200 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span>{col.nome}</span>
-                      <span className="text-[10px] text-slate-500">{col.departamento}</span>
+                      <span translate="no">{col.nome}</span>
+                      <span translate="no" className="text-[10px] text-slate-500">{col.departamento}</span>
                     </div>
                   </td>
                   {MONTHS.map((_, monthIndex) => {
@@ -404,8 +405,8 @@ export function AnnualPanel() {
                   {col.nome.charAt(0)}
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900">{col.nome}</p>
-                  <p className="text-sm text-slate-500">{col.departamento}</p>
+                  <p translate="no" className="font-semibold text-slate-900">{col.nome}</p>
+                  <p translate="no" className="text-sm text-slate-500">{col.departamento}</p>
                 </div>
               </div>
               <div className="space-y-2">

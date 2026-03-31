@@ -245,6 +245,7 @@ export function MonthlyCalendar() {
           {weekDays.map((day) => (
             <div
               key={day}
+              translate="no"
               className="py-3 text-center text-sm font-semibold text-slate-600 bg-slate-50"
             >
               {day}
