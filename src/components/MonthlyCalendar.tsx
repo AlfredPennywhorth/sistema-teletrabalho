@@ -100,17 +100,22 @@ export function MonthlyCalendar() {
     setIsSaving(true);
     try {
       const dateStr = format(modalDate, 'yyyy-MM-dd');
-      await addStatusDiario({
+      const statusData: any = {
         id: `${modalColaborador}-${dateStr}`,
         colaboradorId: modalColaborador,
         data: dateStr,
         status: modalStatus,
-        observacao: modalObservacao || undefined,
-      });
+      };
+      
+      if (modalObservacao) {
+        statusData.observacao = modalObservacao;
+      }
+      
+      await addStatusDiario(statusData);
       setShowModal(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar status:', error);
-      alert('Erro ao salvar no banco de dados. Tente novamente.');
+      alert('Erro ao salvar no banco de dados: ' + (error.message || 'Erro desconhecido'));
     } finally {
       setIsSaving(false);
     }
@@ -124,9 +129,9 @@ export function MonthlyCalendar() {
       try {
         await deleteStatusDiario(existingStatus.id);
         setShowModal(false);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao deletar status:', error);
-        alert('Erro ao deletar do banco de dados.');
+        alert('Erro ao deletar do banco de dados: ' + (error.message || 'Erro desconhecido'));
       } finally {
         setIsSaving(false);
       }
