@@ -29,6 +29,7 @@ interface AppState {
   updateStatusDiario: (id: string, status: Partial<StatusDiario>) => Promise<void>;
   deleteStatusDiario: (id: string) => Promise<void>;
   getStatusByColaboradorAndDate: (colaboradorId: string, data: string) => StatusDiario | undefined;
+  syncStatusDiarios: (firestoreStatus: StatusDiario[]) => void;
 
   // Feriados
   feriados: Feriado[];
@@ -152,6 +153,21 @@ export const useStore = create<AppState>()((set, get) => ({
       (s) => s.colaboradorId === colaboradorId && s.data === data
     );
   },
+  syncStatusDiarios: (firestoreStatus) => {
+    set((state) => {
+      // Logic: Firestore data is the 'TRUTH'. 
+      // We take the current state (which has the base JSON) and OVERWRITE with firestore matches.
+      const statusMap = new Map<string, StatusDiario>();
+      
+      // 1. Start with current state (Base JSON)
+      state.statusDiarios.forEach(s => statusMap.set(`${s.colaboradorId}-${s.data}`, s));
+      
+      // 2. Overwrite with Firestore
+      firestoreStatus.forEach(fs => statusMap.set(`${fs.colaboradorId}-${fs.data}`, fs));
+      
+      return { statusDiarios: Array.from(statusMap.values()) };
+    });
+  },
 
   // Feriados
   feriados: initialFeriados,
@@ -207,14 +223,14 @@ export const useStore = create<AppState>()((set, get) => ({
     await fsSetRegistrosBatch(newStatuses);
 
     // Update local state
-    const poolIds = ['andre', 'virginia', 'carol', 'william', 'iuri'];
+    const affectedColIds = new Set(newStatuses.map(s => s.colaboradorId));
     const rangeDates = new Set(newStatuses.map(s => s.data));
 
     set((state) => {
       const keptStatuses = state.statusDiarios.filter(s => {
-        const isInPool = poolIds.includes(s.colaboradorId);
+        const isAffectedCol = affectedColIds.has(s.colaboradorId);
         const isInRange = rangeDates.has(s.data);
-        return !(isInPool && isInRange);
+        return !(isAffectedCol && isInRange);
       });
       return { statusDiarios: [...keptStatuses, ...newStatuses] };
     });

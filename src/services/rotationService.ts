@@ -34,7 +34,7 @@ export const calculateRotationMatrix = (
 
     // Map existing statuses
     const statusMap = new Map<string, StatusDiario>();
-    currentData.forEach(s => statusMap.set(`${s.data}-${s.colaboradorId}`, s));
+    currentData.forEach(s => statusMap.set(`${s.colaboradorId}-${s.data}`, s));
 
     // Initial Rotation Index Estimation (Simplified)
     rotationIndex = 0;
@@ -50,13 +50,13 @@ export const calculateRotationMatrix = (
         // 1. Identify Unavailable Users (Vacation, etc.)
         const unavailableUsers = new Set<string>();
         ROTATION_POOL.forEach(id => {
-            const s = statusMap.get(`${dateStr}-${id}`);
+            const s = statusMap.get(`${id}-${dateStr}`);
             if (s && !['presencial', 'teletrabalho'].includes(s.status)) {
                 unavailableUsers.add(id);
             }
         });
 
-        const iuriStatus = statusMap.get(`${dateStr}-${FIXED_PERSON_ID}`);
+        const iuriStatus = statusMap.get(`${FIXED_PERSON_ID}-${dateStr}`);
         if (iuriStatus && !['presencial', 'teletrabalho'].includes(iuriStatus.status)) {
             unavailableUsers.add(FIXED_PERSON_ID);
         }
@@ -87,7 +87,7 @@ export const calculateRotationMatrix = (
 
         // 5. Generate Statuses
         colaboradores.forEach(col => {
-            const existing = statusMap.get(`${dateStr}-${col.id}`);
+            const existing = statusMap.get(`${col.id}-${dateStr}`);
             if (existing && !['presencial', 'teletrabalho'].includes(existing.status)) {
                 newStatuses.push(existing);
                 return;
@@ -104,7 +104,7 @@ export const calculateRotationMatrix = (
             }
 
             newStatuses.push({
-                id: `${dateStr}-${col.id}`,
+                id: `${col.id}-${dateStr}`,
                 colaboradorId: col.id,
                 data: dateStr,
                 status

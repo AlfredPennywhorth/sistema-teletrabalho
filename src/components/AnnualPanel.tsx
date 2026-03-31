@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Download, Filter } from 'lucide-react';
 import { parseISO, getDaysInMonth, isWeekend } from 'date-fns';
 import { useStore } from '../store/useStore';
-import { STATUS_CONFIG, type StatusType } from '../types';
+import { STATUS_CONFIG, type StatusType, type StatusDiario } from '../types';
 import { cn } from '../utils/cn';
 import { VacationSummaryModal } from './VacationSummaryModal';
 
@@ -35,11 +35,15 @@ export function AnnualPanel() {
     return filtered;
   }, [colaboradores, selectedColaborador, selectedDepartamento]);
 
+  const statusMap = useMemo(() => {
+    const map = new Map<string, StatusDiario>();
+    statusDiarios.forEach(s => map.set(`${s.colaboradorId}-${s.data}`, s));
+    return map;
+  }, [statusDiarios]);
+
   const getStatusForDay = (colaboradorId: string, month: number, day: number) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return statusDiarios.find(
-      (s) => s.data === dateStr && s.colaboradorId === colaboradorId
-    );
+    return statusMap.get(`${colaboradorId}-${dateStr}`);
   };
 
   const isHoliday = (month: number, day: number) => {
@@ -226,7 +230,7 @@ export function AnnualPanel() {
 
               return (
                 <tr key={col.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="sticky left-0 bg-white px-3 py-2 font-medium text-slate-800 border-r border-slate-200 whitespace-nowrap">
+                  <td translate="no" className="sticky left-0 bg-white px-3 py-2 font-medium text-slate-800 border-r border-slate-200 whitespace-nowrap">
                     <div className="flex flex-col">
                       <span translate="no">{col.nome}</span>
                       <span translate="no" className="text-[10px] text-slate-500">{col.departamento}</span>

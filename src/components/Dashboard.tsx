@@ -196,7 +196,7 @@ export function Dashboard() {
             <tbody>
               {colaboradores.filter(c => c.situacao === 'ativo').map((col) => (
                 <tr key={col.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="px-3 py-2 font-medium text-slate-800 border-r border-slate-200 whitespace-nowrap">
+                  <td translate="no" className="px-3 py-2 font-medium text-slate-800 border-r border-slate-200 whitespace-nowrap">
                     {col.nome}
                   </td>
                   {Array.from({ length: 7 }).map((_, idx) => {
@@ -343,7 +343,7 @@ export function Dashboard() {
                 );
                 return (
                   <tr key={dept} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td translate="no" className="py-3 px-4 font-medium text-slate-900">{dept}</td>
+                    <td translate="no" className="py-3 px-4 font-medium text-slate-900 min-w-[150px]">{dept}</td>
                     <td className="py-3 px-4 text-center text-slate-600">{deptColabs.length}</td>
                     <td className="py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-800 font-medium">

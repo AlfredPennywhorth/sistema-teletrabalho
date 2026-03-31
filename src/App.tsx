@@ -14,12 +14,12 @@ import { Loader2 } from 'lucide-react';
 
 export function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const {
+    const {
     currentUser,
     setCurrentUser,
     setColaboradores,
     setFeriados,
-    setStatusDiarios
+    syncStatusDiarios
   } = useStore();
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +41,7 @@ export function App() {
 
           if (cols.length > 0) setColaboradores(cols);
           if (fers.length > 0) setFeriados(fers);
-          if (regs.length > 0) setStatusDiarios(regs);
+          if (regs.length > 0) syncStatusDiarios(regs);
           console.log('Dados carregados do Firestore:', { cols: cols.length, fers: fers.length, regs: regs.length });
 
           // Link User to Colaborador
@@ -73,7 +73,7 @@ export function App() {
     });
 
     return () => unsubscribe();
-  }, [setCurrentUser, setColaboradores, setFeriados, setStatusDiarios]);
+  }, [setCurrentUser, setColaboradores, setFeriados, syncStatusDiarios]);
 
   if (loading) {
     return (

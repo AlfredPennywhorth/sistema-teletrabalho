@@ -173,14 +173,32 @@ export async function fixCorruptedData() {
         modified = true;
     });
 
-    // 4. Clean status for all identified holidays in 2026
+    // 4. Migrate and Clean Status IDs to standard format (colaboradorId-data)
     const registros = await getRegistros(2026);
     const holidayDates = new Set(full2026.map(f => f.data));
     
     registros.forEach(r => {
+        // Check if it's a holiday - holidays should NOT have status records
         if (holidayDates.has(r.data)) {
             const regRef = doc(db, COLLECTIONS.REGISTROS, r.id);
             batch.delete(regRef);
+            modified = true;
+            return;
+        }
+
+        // Check for old ID format (yyyy-mm-dd-colaboradorId)
+        const oldIdFormat = `${r.data}-${r.colaboradorId}`;
+        const newIdFormat = `${r.colaboradorId}-${r.data}`;
+        
+        if (r.id === oldIdFormat) {
+            console.log(`Migrando registro ${r.id} para ${newIdFormat}`);
+            // Delete old
+            const oldRef = doc(db, COLLECTIONS.REGISTROS, r.id);
+            batch.delete(oldRef);
+            
+            // Set new (with same data)
+            const newRef = doc(db, COLLECTIONS.REGISTROS, newIdFormat);
+            batch.set(newRef, { ...r, id: newIdFormat });
             modified = true;
         }
     });
