@@ -52,14 +52,16 @@ export async function getFeriados(): Promise<Feriado[]> {
 }
 
 export async function addFeriado(feriado: Feriado) {
-    // Use custom ID if provided (e.g. date-name slug), otherwise auto-id
-    const docRef = doc(db, COLLECTIONS.FERIADOS, feriado.id || doc(collection(db, COLLECTIONS.FERIADOS)).id);
-    await setDoc(docRef, feriado);
+    // Normalização: USAR SEMPRE A DATA COMO ID (aaaa-mm-dd)
+    const docId = feriado.data;
+    const docRef = doc(db, COLLECTIONS.FERIADOS, docId);
+    await setDoc(docRef, { ...feriado, id: docId });
 }
 
 export async function updateFeriado(feriado: Feriado) {
-    const docRef = doc(db, COLLECTIONS.FERIADOS, feriado.id);
-    await setDoc(docRef, feriado);
+    const docId = feriado.data;
+    const docRef = doc(db, COLLECTIONS.FERIADOS, docId);
+    await setDoc(docRef, { ...feriado, id: docId });
 }
 
 export async function deleteFeriado(id: string) {
@@ -100,12 +102,12 @@ export async function updateStatusDiario(status: StatusDiario) {
 }
 
 
-// --- Data Fixer (One-time) ---
+// --- Data Fixer & Normalizer (One-time) ---
 export async function fixCorruptedData() {
     const batch = writeBatch(db);
     let modified = false;
 
-    // 1. Fix Colaboradores
+    // 1. Fix Colaboradores (Ouvidoria/Ouvidor)
     const cols = await getColaboradores();
     cols.forEach(c => {
         let changed = false;
@@ -128,32 +130,48 @@ export async function fixCorruptedData() {
         }
     });
 
-    // 2. Fix Missing Holiday (Paixão de Cristo 2026)
-    const holidays = await getFeriados();
-    const hasPaixao = holidays.some(f => f.data === '2026-04-03');
-    if (!hasPaixao) {
-        const holidayRef = doc(db, COLLECTIONS.FERIADOS, '2026-04-03-paixao-de-cristo');
-        batch.set(holidayRef, {
-            id: '2026-04-03-paixao-de-cristo',
-            data: '2026-04-03',
-            nome: 'Paixão de Cristo',
-            tipo: 'nacional'
-        });
+    // 2. Normalize Holiday IDs (aaaa-mm-dd)
+    const currentHolidays = await getFeriados();
+    
+    // Identificar feriados com IDs fora do padrão (aaaa-mm-dd tem exatamente 10 caracteres)
+    const strangeHolidays = currentHolidays.filter(f => f.id.length !== 10 || !/^\d{4}-\d{2}-\d{2}$/.test(f.id));
+    
+    strangeHolidays.forEach(f => {
+        // Deletar o ID estranho
+        const deleteRef = doc(db, COLLECTIONS.FERIADOS, f.id);
+        batch.delete(deleteRef);
+        
+        // Re-inserir com o ID correto (data)
+        const correctRef = doc(db, COLLECTIONS.FERIADOS, f.data);
+        batch.set(correctRef, { ...f, id: f.data });
         modified = true;
-    }
+    });
 
-    // 3. Clean status for that holiday
-    const registros = await getRegistros(2026);
-    const holidayRegs = registros.filter(r => r.data === '2026-04-03');
-    holidayRegs.forEach(r => {
-        const regRef = doc(db, COLLECTIONS.REGISTROS, r.id);
-        batch.delete(regRef);
+    // 3. Restore 2026 (including bridges and facultativos)
+    const { fetchHolidays } = await import('./holidayService');
+    const full2026 = await fetchHolidays(2026);
+    
+    full2026.forEach(f => {
+        const ref = doc(db, COLLECTIONS.FERIADOS, f.data);
+        batch.set(ref, { ...f, id: f.data });
         modified = true;
+    });
+
+    // 4. Clean status for all identified holidays in 2026
+    const registros = await getRegistros(2026);
+    const holidayDates = new Set(full2026.map(f => f.data));
+    
+    registros.forEach(r => {
+        if (holidayDates.has(r.data)) {
+            const regRef = doc(db, COLLECTIONS.REGISTROS, r.id);
+            batch.delete(regRef);
+            modified = true;
+        }
     });
 
     if (modified) {
         await batch.commit();
-        console.log('Dados corrigidos no Firestore (Colaboradores, Feriado e Escalas).');
+        console.log('Dados normalizados e feriados de 2026 restaurados no Firestore.');
     }
     return modified;
 }

@@ -35,18 +35,27 @@ const NATIONAL_HOLIDAYS_FALLBACK: Record<string, { date: string; name: string }[
     ],
     '2026': [
         { date: '01-01', name: 'Confraternização Universal' },
+        { date: '01-25', name: 'Aniversário de São Paulo' },
         { date: '02-16', name: 'Carnaval' },
         { date: '02-17', name: 'Carnaval' },
-        { date: '04-03', name: 'Sexta-feira Santa' },
+        { date: '02-18', name: 'Quarta-feira de Cinzas' },
+        { date: '04-03', name: 'Paixão de Cristo' },
+        { date: '04-20', name: 'Suspensão de Expediente (Ponte)' },
         { date: '04-21', name: 'Tiradentes' },
         { date: '05-01', name: 'Dia do Trabalho' },
         { date: '06-04', name: 'Corpus Christi' },
+        { date: '06-05', name: 'Suspensão de Expediente (Ponte)' },
+        { date: '07-09', name: 'Revolução Constitucionalista' },
+        { date: '07-10', name: 'Suspensão de Expediente (Ponte)' },
         { date: '09-07', name: 'Independência do Brasil' },
         { date: '10-12', name: 'Nossa Senhora Aparecida' },
+        { date: '10-30', name: 'Dia do Servidor Público' },
         { date: '11-02', name: 'Finados' },
         { date: '11-15', name: 'Proclamação da República' },
         { date: '11-20', name: 'Dia da Consciência Negra' },
-        { date: '12-25', name: 'Natal' }
+        { date: '12-24', name: 'Véspera de Natal' },
+        { date: '12-25', name: 'Natal' },
+        { date: '12-31', name: 'Véspera de Ano-Novo' }
     ],
     '2027': [
         { date: '01-01', name: 'Confraternização Universal' },
@@ -67,7 +76,6 @@ const NATIONAL_HOLIDAYS_FALLBACK: Record<string, { date: string; name: string }[
 
 export async function fetchHolidays(year: number): Promise<Feriado[]> {
     let feriados: Feriado[] = [];
-    let usedFallback = false;
 
     // 1. Tentar buscar feriados nacionais (BrasilAPI)
     try {
@@ -86,7 +94,6 @@ export async function fetchHolidays(year: number): Promise<Feriado[]> {
         }
     } catch (error) {
         console.warn('BrasilAPI falhou ou está offline. Usando dados locais de fallback.', error);
-        usedFallback = true;
 
         // Usar fallback se disponível
         const fallbackList = NATIONAL_HOLIDAYS_FALLBACK[year.toString()];

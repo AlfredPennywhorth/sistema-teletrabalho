@@ -90,12 +90,12 @@ export function FeriadosManager() {
 
     try {
       if (editingFeriado) {
-        const updated = { ...editingFeriado, ...formData };
+        const updated = { ...editingFeriado, ...formData, id: formData.data };
         await updateFeriadoService(updated);
-        updateFeriado(editingFeriado.id, formData);
+        updateFeriado(editingFeriado.id, updated);
       } else {
         const newFeriado = {
-          id: Date.now().toString(),
+          id: formData.data,
           ...formData,
         };
         await addFeriadoService(newFeriado);
@@ -158,23 +158,29 @@ export function FeriadosManager() {
               setLoadingFetch(true);
               try {
                 const year = parseInt(filterAno) || new Date().getFullYear();
-                const holidays = await fetchHolidays(year);
+                const onlineHolidays = await fetchHolidays(year);
 
-                // Save to Firestore (merge/overwrite strategy)
-                // This will overwrite holidays with the same ID (standard API holidays)
-                // but preserve manual holidays (which have different IDs)
-                await setFeriadosBatch(holidays);
-                // Let's just create a helper to refresh.
+                // Normalizar IDs para aaaa-mm-dd
+                const normalizedHolidays = onlineHolidays.map(h => ({
+                  ...h,
+                  id: h.data
+                }));
 
-                // For now, simpler approach:
-                // 1. Remove holidays of this year from store
-                // 2. Add new ones
-                // We'll rely on the user refreshing the page or implement a store cleaner.
-                // Let's implement the cleaner here locally.
-                // Reloading ensures sync.
-                window.location.reload(); // Simple and effective for this admin action.
+                // Mesclar com os feriados existentes para não perder pontes manuais
+                const allHolidays = [...feriados];
+                normalizedHolidays.forEach(newH => {
+                  const existsIdx = allHolidays.findIndex(h => h.data === newH.data);
+                  if (existsIdx >= 0) {
+                    allHolidays[existsIdx] = { ...allHolidays[existsIdx], ...newH };
+                  } else {
+                    allHolidays.push(newH);
+                  }
+                });
 
-                alert(`Feriados de ${year} atualizados com sucesso!`);
+                await setFeriadosBatch(allHolidays);
+                
+                alert(`Feriados de ${year} sincronizados com sucesso!`);
+                window.location.reload(); 
               } catch (error) {
                 console.error(error);
                 alert('Erro ao buscar feriados. Tente novamente.');
