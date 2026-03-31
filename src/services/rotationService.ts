@@ -3,8 +3,6 @@ import {
     isSaturday,
     isSunday,
     format,
-    parseISO,
-    isWithinInterval,
     startOfDay
 } from 'date-fns';
 import { StatusDiario, Feriado, Colaborador } from '../types';
@@ -12,13 +10,6 @@ import { StatusDiario, Feriado, Colaborador } from '../types';
 // Configuration
 const ROTATION_POOL = ['andre', 'virginia', 'carol', 'william'];
 const FIXED_PERSON_ID = 'iuri';
-
-interface RotationEfficient {
-    currentData: StatusDiario[];
-    feriados: Feriado[];
-    startDate: Date;
-    endDate: Date;
-}
 
 export const calculateRotationMatrix = (
     currentData: StatusDiario[],
@@ -34,9 +25,10 @@ export const calculateRotationMatrix = (
     const end = startOfDay(endDate);
 
     // Helpers
+    const holidaySet = new Set(feriados.map(f => f.data));
     const isHoliday = (date: Date) => {
         const dateStr = format(date, 'yyyy-MM-dd');
-        return feriados.some(f => f.data === dateStr);
+        return holidaySet.has(dateStr);
     };
     const isWeekendDay = (date: Date) => isSaturday(date) || isSunday(date);
 
@@ -45,7 +37,6 @@ export const calculateRotationMatrix = (
     currentData.forEach(s => statusMap.set(`${s.data}-${s.colaboradorId}`, s));
 
     // Initial Rotation Index Estimation (Simplified)
-    // We start at 0. Ideally we would look back to find the last person.
     rotationIndex = 0;
 
     while (currentDate <= end) {
@@ -60,27 +51,23 @@ export const calculateRotationMatrix = (
         const unavailableUsers = new Set<string>();
         ROTATION_POOL.forEach(id => {
             const s = statusMap.get(`${dateStr}-${id}`);
-            // If status exists and is NOT 'presencial'/'teletrabalho', they are busy/vacation
             if (s && !['presencial', 'teletrabalho'].includes(s.status)) {
                 unavailableUsers.add(id);
             }
         });
 
-        // Check Iuri's availability explicitly
         const iuriStatus = statusMap.get(`${dateStr}-${FIXED_PERSON_ID}`);
         if (iuriStatus && !['presencial', 'teletrabalho'].includes(iuriStatus.status)) {
             unavailableUsers.add(FIXED_PERSON_ID);
         }
 
         // 2. Determine Substitution Rule
-        // If Iuri is unavailable, Carol becomes fixed presencial.
         let temporaryFixedPersonId = '';
         if (unavailableUsers.has(FIXED_PERSON_ID)) {
             temporaryFixedPersonId = 'carol';
         }
 
         // 3. Effective Pool
-        // Remove substitution person from rotation pool for this day
         const effectivePool = ROTATION_POOL.filter(id => id !== temporaryFixedPersonId);
 
         // 4. Determine Rotation Person
@@ -100,7 +87,6 @@ export const calculateRotationMatrix = (
 
         // 5. Generate Statuses
         colaboradores.forEach(col => {
-            // Preserve existing blocking statuses
             const existing = statusMap.get(`${dateStr}-${col.id}`);
             if (existing && !['presencial', 'teletrabalho'].includes(existing.status)) {
                 newStatuses.push(existing);

@@ -91,14 +91,30 @@ export async function getRegistros(year?: number): Promise<StatusDiario[]> {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as StatusDiario));
 }
 
-export async function setRegistrosBatch(_registros: StatusDiario[]) {
-    // Firestore batch limit is 500. For large datasets we need multiple batches.
-    // For simplicity here, we'll use migrateData for large sets or updateStatusDiario for single updates.
+export async function setRegistrosBatch(registros: StatusDiario[]) {
+    // Firestore batch limit is 500.
+    const CHUNK_SIZE = 450; // Using a slightly smaller size for safety
+    for (let i = 0; i < registros.length; i += CHUNK_SIZE) {
+        const chunk = registros.slice(i, i + CHUNK_SIZE);
+        const batch = writeBatch(db);
+        
+        chunk.forEach(r => {
+            const docRef = doc(db, COLLECTIONS.REGISTROS, r.id);
+            batch.set(docRef, r);
+        });
+        
+        await batch.commit();
+        console.log(`Lote de ${chunk.length} registros salvo no Firestore.`);
+    }
 }
 
 export async function updateStatusDiario(status: StatusDiario) {
-    const docRef = doc(db, COLLECTIONS.REGISTROS, status.id); // Assuming ID is date-colaboradorId
+    const docRef = doc(db, COLLECTIONS.REGISTROS, status.id);
     await setDoc(docRef, status);
+}
+
+export async function deleteStatusDiario(id: string) {
+    await deleteDoc(doc(db, COLLECTIONS.REGISTROS, id));
 }
 
 

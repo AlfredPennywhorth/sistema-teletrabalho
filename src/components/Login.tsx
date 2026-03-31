@@ -34,13 +34,13 @@ export function Login() {
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
                 <div className="p-8">
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-slate-900">Bem-vindo</h1>
-                        <p className="text-slate-500 mt-2">Faça login para acessar o sistema</p>
+                        <h1 translate="no" className="text-3xl font-bold text-slate-900">Bem-vindo</h1>
+                        <p translate="no" className="text-slate-500 mt-2">Faça login para acessar o sistema</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                            <label translate="no" className="block text-sm font-medium text-slate-700 mb-2">
                                 E-mail
                             </label>
                             <div className="relative">
@@ -57,7 +57,7 @@ export function Login() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                            <label translate="no" className="block text-sm font-medium text-slate-700 mb-2">
                                 Senha
                             </label>
                             <div className="relative">

@@ -6,6 +6,7 @@ import {
   X,
   Plus,
   RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import {
   format,
@@ -38,6 +39,7 @@ export function MonthlyCalendar() {
   const [modalStatus, setModalStatus] = useState<StatusType>('presencial');
   const [modalObservacao, setModalObservacao] = useState('');
   const [rotationStartDate, setRotationStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
+  const [isSaving, setIsSaving] = useState(false);
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],
@@ -93,26 +95,44 @@ export function MonthlyCalendar() {
     setShowModal(true);
   };
 
-  const handleSaveStatus = () => {
+  const handleSaveStatus = async () => {
     if (!modalDate || !modalColaborador) return;
-    const dateStr = format(modalDate, 'yyyy-MM-dd');
-    addStatusDiario({
-      id: `${modalColaborador}-${dateStr}`,
-      colaboradorId: modalColaborador,
-      data: dateStr,
-      status: modalStatus,
-      observacao: modalObservacao || undefined,
-    });
-    setShowModal(false);
+    setIsSaving(true);
+    try {
+      const dateStr = format(modalDate, 'yyyy-MM-dd');
+      await addStatusDiario({
+        id: `${modalColaborador}-${dateStr}`,
+        colaboradorId: modalColaborador,
+        data: dateStr,
+        status: modalStatus,
+        observacao: modalObservacao || undefined,
+      });
+      setShowModal(false);
+    } catch (error) {
+      console.error('Erro ao salvar status:', error);
+      alert('Erro ao salvar no banco de dados. Tente novamente.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDeleteStatus = () => {
+  const handleDeleteStatus = async () => {
     if (!modalDate || !modalColaborador) return;
     const existingStatus = getDayData(modalDate, modalColaborador);
     if (existingStatus) {
-      deleteStatusDiario(existingStatus.id);
+      setIsSaving(true);
+      try {
+        await deleteStatusDiario(existingStatus.id);
+        setShowModal(false);
+      } catch (error) {
+        console.error('Erro ao deletar status:', error);
+        alert('Erro ao deletar do banco de dados.');
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+        setShowModal(false);
     }
-    setShowModal(false);
   };
 
   const weekDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -381,6 +401,12 @@ export function MonthlyCalendar() {
                     placeholder="Adicione uma observação (opcional)"
                   />
                 </div>
+                {isSaving && (
+                  <div className="flex items-center gap-2 text-blue-600 text-sm font-medium animate-pulse">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Salvando no banco de dados...
+                  </div>
+                )}
               </div>
               <div className="flex items-center justify-between p-4 border-t border-slate-200">
                 <button
@@ -398,10 +424,15 @@ export function MonthlyCalendar() {
                   </button>
                   <button
                     onClick={handleSaveStatus}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2"
+                    disabled={isSaving}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
                   >
-                    <Plus className="w-4 h-4" />
-                    Salvar
+                    {isSaving ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <Plus className="w-4 h-4" />
+                    )}
+                    {isSaving ? 'Salvando...' : 'Salvar'}
                   </button>
                 </div>
               </div>

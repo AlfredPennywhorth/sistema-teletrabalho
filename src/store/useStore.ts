@@ -2,6 +2,11 @@ import { create } from 'zustand';
 
 import data2026 from '../data/data_2026.json';
 import type { Colaborador, StatusDiario, Feriado, User } from '../types';
+import { 
+  addColaborador as fsAddColaborador, updateColaborador as fsUpdateColaborador, deleteColaborador as fsDeleteColaborador,
+  addFeriado as fsAddFeriado, setFeriadosBatch as fsAddFeriadosBatch, updateFeriado as fsUpdateFeriado, deleteFeriado as fsDeleteFeriado,
+  updateStatusDiario as fsUpdateStatus, deleteStatusDiario as fsDeleteStatus, setRegistrosBatch as fsSetRegistrosBatch
+} from '../services/firestoreService';
 import { calculateRotationMatrix } from '../services/rotationService';
 import { parseISO, endOfYear } from 'date-fns';
 
@@ -12,33 +17,33 @@ interface AppState {
 
   // Colaboradores
   colaboradores: Colaborador[];
-  addColaborador: (colaborador: Colaborador) => void;
+  addColaborador: (colaborador: Colaborador) => Promise<void>;
   setColaboradores: (colaboradores: Colaborador[]) => void;
-  updateColaborador: (id: string, colaborador: Partial<Colaborador>) => void;
-  deleteColaborador: (id: string) => void;
+  updateColaborador: (id: string, colaborador: Partial<Colaborador>) => Promise<void>;
+  deleteColaborador: (id: string) => Promise<void>;
 
   // Status Diário
   statusDiarios: StatusDiario[];
   setStatusDiarios: (status: StatusDiario[]) => void;
-  addStatusDiario: (status: StatusDiario) => void;
-  updateStatusDiario: (id: string, status: Partial<StatusDiario>) => void;
-  deleteStatusDiario: (id: string) => void;
+  addStatusDiario: (status: StatusDiario) => Promise<void>;
+  updateStatusDiario: (id: string, status: Partial<StatusDiario>) => Promise<void>;
+  deleteStatusDiario: (id: string) => Promise<void>;
   getStatusByColaboradorAndDate: (colaboradorId: string, data: string) => StatusDiario | undefined;
 
   // Feriados
   feriados: Feriado[];
   setFeriados: (feriados: Feriado[]) => void;
-  addFeriado: (feriado: Feriado) => void;
-  addFeriados: (feriados: Feriado[]) => void;
-  updateFeriado: (id: string, feriado: Partial<Feriado>) => void;
-  deleteFeriado: (id: string) => void;
+  addFeriado: (feriado: Feriado) => Promise<void>;
+  addFeriados: (feriados: Feriado[]) => Promise<void>;
+  updateFeriado: (id: string, feriado: Partial<Feriado>) => Promise<void>;
+  deleteFeriado: (id: string) => Promise<void>;
 
   // UI State
   selectedDepartamento: string;
   setSelectedDepartamento: (departamento: string) => void;
 
   // Rotation
-  recalculateRotation: (startDate: string) => void;
+  recalculateRotation: (startDate: string) => Promise<void>;
 }
 
 // Real initial data
@@ -93,41 +98,55 @@ export const useStore = create<AppState>()((set, get) => ({
 
   // Colaboradores
   colaboradores: initialColaboradores,
-  addColaborador: (colaborador) =>
-    set((state) => ({ colaboradores: [...state.colaboradores, colaborador] })),
+  addColaborador: async (colaborador) => {
+    await fsAddColaborador(colaborador);
+    set((state) => ({ colaboradores: [...state.colaboradores, colaborador] }));
+  },
   setColaboradores: (colaboradores) => set({ colaboradores }),
-  updateColaborador: (id, colaborador) =>
-    set((state) => ({
-      colaboradores: state.colaboradores.map((c) =>
-        c.id === id ? { ...c, ...colaborador } : c
-      ),
-    })),
-  deleteColaborador: (id) =>
+  updateColaborador: async (id, colaborador) => {
+    const updated = get().colaboradores.map((c) =>
+      c.id === id ? { ...c, ...colaborador } : c
+    );
+    const target = updated.find(c => c.id === id);
+    if (target) await fsUpdateColaborador(target);
+    set({ colaboradores: updated });
+  },
+  deleteColaborador: async (id) => {
+    await fsDeleteColaborador(id);
     set((state) => ({
       colaboradores: state.colaboradores.filter((c) => c.id !== id),
-    })),
+    }));
+  },
 
   // Status Diário
   statusDiarios: data2026 as StatusDiario[],
   setStatusDiarios: (statusDiarios) => set({ statusDiarios }),
-  addStatusDiario: (status) =>
+  addStatusDiario: async (status) => {
+    await fsUpdateStatus(status); // Use updateStatus (setDoc) to save
     set((state) => {
-      // Remove existing status for same colaborador and date
       const filtered = state.statusDiarios.filter(
         (s) => !(s.colaboradorId === status.colaboradorId && s.data === status.data)
       );
       return { statusDiarios: [...filtered, status] };
-    }),
-  updateStatusDiario: (id, status) =>
+    });
+  },
+  updateStatusDiario: async (id, status) => {
+    const current = get().statusDiarios.find(s => s.id === id);
+    if (!current) return;
+    const updated = { ...current, ...status };
+    await fsUpdateStatus(updated);
     set((state) => ({
       statusDiarios: state.statusDiarios.map((s) =>
-        s.id === id ? { ...s, ...status } : s
+        s.id === id ? updated : s
       ),
-    })),
-  deleteStatusDiario: (id) =>
+    }));
+  },
+  deleteStatusDiario: async (id) => {
+    await fsDeleteStatus(id);
     set((state) => ({
       statusDiarios: state.statusDiarios.filter((s) => s.id !== id),
-    })),
+    }));
+  },
   getStatusByColaboradorAndDate: (colaboradorId, data) => {
     return get().statusDiarios.find(
       (s) => s.colaboradorId === colaboradorId && s.data === data
@@ -137,62 +156,67 @@ export const useStore = create<AppState>()((set, get) => ({
   // Feriados
   feriados: initialFeriados,
   setFeriados: (feriados) => set({ feriados }),
-  addFeriado: (feriado) =>
-    set((state) => ({ feriados: [...state.feriados, feriado] })),
-  addFeriados: (newFeriados) =>
+  addFeriado: async (feriado) => {
+    await fsAddFeriado(feriado);
+    set((state) => ({ feriados: [...state.feriados, feriado] }));
+  },
+  addFeriados: async (newFeriados) => {
+    await fsAddFeriadosBatch(newFeriados);
     set((state) => {
-      // Filter out duplicates based on date
       const existingDates = new Set(state.feriados.map((f) => f.data));
       const uniqueNewFeriados = newFeriados.filter((f) => !existingDates.has(f.data));
       return { feriados: [...state.feriados, ...uniqueNewFeriados] };
-    }),
-  updateFeriado: (id, feriado) =>
+    });
+  },
+  updateFeriado: async (id, feriado) => {
+    const current = get().feriados.find(f => f.id === id);
+    if (!current) return;
+    const updated = { ...current, ...feriado };
+    await fsUpdateFeriado(updated);
     set((state) => ({
       feriados: state.feriados.map((f) =>
-        f.id === id ? { ...f, ...feriado } : f
+        f.id === id ? updated : f
       ),
-    })),
-  deleteFeriado: (id) =>
+    }));
+  },
+  deleteFeriado: async (id) => {
+    await fsDeleteFeriado(id);
     set((state) => ({
       feriados: state.feriados.filter((f) => f.id !== id),
-    })),
+    }));
+  },
 
   // UI State
   selectedDepartamento: '',
   setSelectedDepartamento: (departamento) => set({ selectedDepartamento: departamento }),
 
   // Rotation Logic
-  recalculateRotation: (startDate: string) =>
+  recalculateRotation: async (startDate: string) => {
+    const start = parseISO(startDate);
+    const end = endOfYear(start);
+
+    const newStatuses = calculateRotationMatrix(
+      get().statusDiarios,
+      get().feriados,
+      get().colaboradores,
+      start,
+      end
+    );
+
+    // Save to Firestore in batches
+    await fsSetRegistrosBatch(newStatuses);
+
+    // Update local state
+    const poolIds = ['andre', 'virginia', 'carol', 'william', 'iuri'];
+    const rangeDates = new Set(newStatuses.map(s => s.data));
+
     set((state) => {
-      const start = parseISO(startDate);
-      const end = endOfYear(start); // Recalculate until end of that year
-
-      const newStatuses = calculateRotationMatrix(
-        state.statusDiarios,
-        state.feriados,
-        state.colaboradores,
-        start,
-        end
-      );
-
-      // Merge: Remove old entries overlapping with new ones, then add new ones
-      // Actually, calculateRotationMatrix returns ALL statuses for the valid days in range.
-      // But it only returns generated ones.
-      // The strategy in the service was: 
-      // "newStatuses.push(existingStatus)" for blocking statuses.
-      // So newStatuses contains EVERYTHING for that range for the pool.
-      // We should filter out existing statuses for the pool in that range and replace with newStatuses.
-
-      const poolIds = ['andre', 'virginia', 'carol', 'william', 'iuri']; // Fixed + Pool
-      const rangeDates = new Set(newStatuses.map(s => s.data));
-
       const keptStatuses = state.statusDiarios.filter(s => {
-        // Keep if NOT in the pool OR NOT in the date range calculated
         const isInPool = poolIds.includes(s.colaboradorId);
         const isInRange = rangeDates.has(s.data);
         return !(isInPool && isInRange);
       });
-
       return { statusDiarios: [...keptStatuses, ...newStatuses] };
-    }),
+    });
+  },
 }));
