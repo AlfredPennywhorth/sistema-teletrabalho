@@ -1,5 +1,16 @@
-import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Download, Filter } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Download, 
+  Filter,
+  Briefcase,
+  Home,
+  Coffee,
+  Palmtree,
+  FileText,
+  Baby,
+  HelpCircle
+} from 'lucide-react';
 import { parseISO, getDaysInMonth, isWeekend } from 'date-fns';
 import { useStore } from '../store/useStore';
 import { STATUS_CONFIG, type StatusType, type StatusDiario } from '../types';
@@ -97,6 +108,27 @@ export function AnnualPanel() {
     link.download = `painel-anual-${year}.csv`;
     link.click();
   };
+
+  const aggregateStats = useMemo(() => {
+    const counts: Record<StatusType, number> = {
+      presencial: 0,
+      teletrabalho: 0,
+      folga: 0,
+      ferias: 0,
+      atestado: 0,
+      licenca: 0,
+      outro: 0,
+    };
+
+    filteredColaboradores.forEach(col => {
+      const personalStats = getStatsForColaborador(col.id);
+      (Object.keys(counts) as StatusType[]).forEach(status => {
+        counts[status] += personalStats[status];
+      });
+    });
+
+    return counts;
+  }, [filteredColaboradores, statusDiarios, year]);
 
   const renderIndividualView = (colaboradorId: string) => {
     const col = colaboradores.find((c) => c.id === colaboradorId);
@@ -385,6 +417,47 @@ export function AnnualPanel() {
           ? renderIndividualView(selectedColaborador) 
           : renderTeamView()
         }
+      </div>
+
+      {/* Summary Cards */}
+      <div className="mt-8">
+        <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+          {selectedColaborador ? 'Resumo Individual' : 'Resumo da Equipe'} ({year})
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          {[
+            { key: 'presencial', icon: Briefcase },
+            { key: 'teletrabalho', icon: Home },
+            { key: 'folga', icon: Coffee },
+            { key: 'ferias', icon: Palmtree },
+            { key: 'atestado', icon: FileText },
+            { key: 'licenca', icon: Baby },
+            { key: 'outro', icon: HelpCircle },
+          ].map((item) => {
+            const statusKey = item.key as StatusType;
+            const config = STATUS_CONFIG[statusKey];
+            const count = aggregateStats[statusKey];
+            const Icon = item.icon;
+
+            return (
+              <div
+                key={statusKey}
+                className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between transition-all hover:shadow-md"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <span translate="no" className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate" title={config.label}>
+                    {config.label}
+                  </span>
+                  <Icon className={cn('w-4 h-4', config.color)} />
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <p className="text-2xl font-bold text-slate-900">{count}</p>
+                  <span className="text-[10px] text-slate-400 font-medium uppercase">dias</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <VacationSummaryModal
