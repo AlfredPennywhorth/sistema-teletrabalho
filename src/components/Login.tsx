@@ -1,14 +1,21 @@
-
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { 
+    auth, 
+    setPersistence, 
+    browserLocalPersistence, 
+    browserSessionPersistence 
+} from '../lib/firebase';
 import { Lock, Mail, Loader2 } from 'lucide-react';
+import { ForgotPasswordModal } from './ForgotPasswordModal';
 
 export function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -16,11 +23,19 @@ export function Login() {
         setError('');
 
         try {
+            // Definir persistência ANTES do login
+            await setPersistence(
+                auth, 
+                rememberMe ? browserLocalPersistence : browserSessionPersistence
+            );
+            
             await signInWithEmailAndPassword(auth, email, password);
         } catch (err: any) {
             console.error(err);
             if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
                 setError('E-mail ou senha inválidos.');
+            } else if (err.code === 'auth/too-many-requests') {
+                setError('Muitas tentativas sem sucesso. Tente novamente mais tarde.');
             } else {
                 setError('Ocorreu um erro ao tentar fazer login. Tente novamente.');
             }
@@ -57,9 +72,18 @@ export function Login() {
                         </div>
 
                         <div>
-                            <label translate="no" className="block text-sm font-medium text-slate-700 mb-2">
-                                Senha
-                            </label>
+                            <div className="flex items-center justify-between mb-2">
+                                <label translate="no" className="block text-sm font-medium text-slate-700">
+                                    Senha
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsForgotModalOpen(true)}
+                                    className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                                >
+                                    Esqueci minha senha
+                                </button>
+                            </div>
                             <div className="relative">
                                 <input
                                     type="password"
@@ -71,6 +95,19 @@ export function Login() {
                                 />
                                 <Lock className="w-5 h-5 text-slate-400 absolute left-3 top-2.5" />
                             </div>
+                        </div>
+
+                        <div className="flex items-center">
+                            <input
+                                id="remember-me"
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                            />
+                            <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700">
+                                Lembrar-meneste dispositivo
+                            </label>
                         </div>
 
                         {error && (
@@ -99,6 +136,11 @@ export function Login() {
                     Sistema de Gestão de Teletrabalho
                 </div>
             </div>
+
+            <ForgotPasswordModal 
+                isOpen={isForgotModalOpen} 
+                onClose={() => setIsForgotModalOpen(false)} 
+            />
         </div>
     );
 }

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, parseActionCodeURL } from 'firebase/auth';
 import { auth } from './lib/firebase';
 import { useStore } from './store/useStore';
 import { Login } from './components/Login';
+import { ResetPassword } from './components/ResetPassword';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { MonthlyCalendar } from './components/MonthlyCalendar';
@@ -14,6 +15,8 @@ import { Loader2 } from 'lucide-react';
 
 export function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [resetCode, setResetCode] = useState<string | null>(null);
+  
     const {
     currentUser,
     setCurrentUser,
@@ -24,6 +27,12 @@ export function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Verificar se é um link de ação do Firebase (ex: reset password)
+    const actionCodeUrl = parseActionCodeURL(window.location.href);
+    if (actionCodeUrl && actionCodeUrl.mode === 'resetPassword') {
+      setResetCode(actionCodeUrl.oobCode);
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Load data from Firestore first to link user
@@ -81,6 +90,15 @@ export function App() {
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
+  }
+
+  // Se houver código de reset, renderiza a tela de redefinição indepentende de estar logado ou não
+  if (resetCode) {
+    return <ResetPassword oobCode={resetCode} onGoToLogin={() => {
+      setResetCode(null);
+      // Limpa os parâmetros da URL sem recarregar a página
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }} />;
   }
 
   if (!currentUser) {
