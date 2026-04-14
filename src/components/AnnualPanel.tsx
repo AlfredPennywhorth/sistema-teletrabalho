@@ -216,6 +216,62 @@ export function AnnualPanel() {
     );
   };
 
+  const renderColaboradorCards = () => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {filteredColaboradores.map((col) => {
+          const stats = getStatsForColaborador(col.id);
+          const totalDays = Object.values(stats).reduce((a, b) => a + b, 0);
+
+          return (
+            <div key={col.id} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-all">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
+                    {col.nome.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 translate="no" className="font-bold text-slate-900 truncate max-w-[150px]">{col.nome}</h3>
+                    <p translate="no" className="text-xs text-slate-500">{col.departamento}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xl font-bold text-slate-900">{totalDays}</span>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Dias</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {(Object.entries(stats) as [StatusType, number][]).map(([key, count]) => {
+                  const config = STATUS_CONFIG[key];
+                  const Icon = {
+                    presencial: Briefcase,
+                    teletrabalho: Home,
+                    folga: Coffee,
+                    ferias: Palmtree,
+                    atestado: FileText,
+                    licenca: Baby,
+                    outro: HelpCircle
+                  }[key];
+
+                  return (
+                    <div key={key} className={cn("flex items-center justify-between p-2 rounded-lg border", count > 0 ? "bg-slate-50 border-slate-100" : "bg-white border-slate-50 opacity-40")}>
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <Icon className={cn("w-3.5 h-3.5 shrink-0", config.color)} />
+                        <span translate="no" className="text-[10px] font-medium text-slate-600 truncate">{config.label}</span>
+                      </div>
+                      <span className="text-xs font-bold text-slate-900">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderTeamView = () => (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
       <div className="overflow-x-auto custom-scrollbar touch-pan-x">
@@ -420,10 +476,18 @@ export function AnnualPanel() {
         }
       </div>
 
-      {/* Summary Cards */}
+      {/* Seção de Cards Individuais */}
       <div className="mt-8">
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          {selectedColaborador ? 'Resumo Individual' : 'Resumo da Equipe'} ({year})
+          Resumo Individual {selectedColaborador ? '' : 'da Equipe'}
+        </h2>
+        {renderColaboradorCards()}
+      </div>
+
+      {/* Summary Aggregate (Equipe/Individual) */}
+      <div className="mt-8">
+        <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+          {selectedColaborador ? 'Distribuição de Status' : 'Distribuição Total da Equipe'} ({year})
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
           {[
