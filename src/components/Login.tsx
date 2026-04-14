@@ -106,7 +106,7 @@ export function Login() {
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
                             />
                             <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700">
-                                Lembrar-meneste dispositivo
+                                Lembrar-me neste dispositivo
                             </label>
                         </div>
 
