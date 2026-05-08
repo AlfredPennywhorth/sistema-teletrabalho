@@ -8,7 +8,9 @@ import {
     query,
     where,
     writeBatch,
-    onSnapshot
+    onSnapshot,
+    type QuerySnapshot,
+    type DocumentData
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Colaborador, Feriado, StatusDiario } from '../types';
@@ -125,8 +127,8 @@ interface SubscribeDataChangesHandlers {
     onAnyChange?: () => void;
 }
 
-function mapSnapshotDocs<T>(snapshot: any): T[] {
-    return snapshot.docs.map((item: any) => ({ id: item.id, ...item.data() } as T));
+function mapSnapshotDocs<T>(snapshot: QuerySnapshot<DocumentData>): T[] {
+    return snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as T));
 }
 
 export function subscribeToDataChanges(handlers: SubscribeDataChangesHandlers) {

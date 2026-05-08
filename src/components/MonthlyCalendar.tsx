@@ -447,7 +447,7 @@ export function MonthlyCalendar() {
                     Salvando no banco de dados...
                   </div>
                 )}
-                <div role="alert" className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
+                <div role="alert" aria-live="polite" className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
                   Exclusão de colaboradores na escala está bloqueada. Use apenas a edição para correções.
                 </div>
               </div>

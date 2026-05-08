@@ -13,6 +13,8 @@ import { FeriadosManager } from './components/FeriadosManager';
 import { getColaboradores, getFeriados, getRegistros, fixCorruptedData, purgeLegacyData, subscribeToDataChanges } from './services/firestoreService';
 import { Loader2 } from 'lucide-react';
 
+const SYNC_NOTIFICATION_DEBOUNCE_MS = 1500;
+
 export function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [resetCode, setResetCode] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export function App() {
             onRegistros: (updatedRegs) => syncStatusDiarios(updatedRegs),
             onAnyChange: () => {
               const now = Date.now();
-              if (now - lastNoticeAtRef.current < 1500) return;
+              if (now - lastNoticeAtRef.current < SYNC_NOTIFICATION_DEBOUNCE_MS) return;
               lastNoticeAtRef.current = now;
               const at = new Intl.DateTimeFormat('pt-BR', {
                 hour: '2-digit',

@@ -48,7 +48,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
             } else if (err.code === 'auth/network-request-failed') {
                 setError('Falha na rede. Verifique sua conexão e tente novamente.');
             } else if (err.code === 'auth/too-many-requests') {
-                setError('Muitas tentativas em sequência. Aguarde cerca de 5 a 10 minutos e tente novamente.');
+                setError('Muitas tentativas em sequência. Aguarde alguns minutos e tente novamente.');
             } else {
                 // Para outros erros, mostramos a mensagem de sucesso para manter a segurança,
                 // ou uma genérica se for algo impeditivo.
