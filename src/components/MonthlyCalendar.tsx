@@ -5,6 +5,7 @@ import {
   Filter,
   X,
   Plus,
+  Pencil,
   RefreshCw,
   Loader2,
 } from 'lucide-react';
@@ -28,7 +29,7 @@ import { STATUS_CONFIG, type StatusType, type Colaborador } from '../types';
 import { cn } from '../utils/cn';
 
 export function MonthlyCalendar() {
-  const { colaboradores, statusDiarios, feriados, addStatusDiario, deleteStatusDiario, recalculateRotation } = useStore();
+  const { colaboradores, statusDiarios, feriados, addStatusDiario, recalculateRotation } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedColaborador, setSelectedColaborador] = useState<string>('');
   const [selectedDepartamento, setSelectedDepartamento] = useState<string>('');
@@ -43,6 +44,10 @@ export function MonthlyCalendar() {
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],
+    [colaboradores]
+  );
+  const activeColaboradores = useMemo(
+    () => colaboradores.filter((c) => c.situacao === 'ativo'),
     [colaboradores]
   );
 
@@ -95,6 +100,25 @@ export function MonthlyCalendar() {
     setShowModal(true);
   };
 
+  const handleEditDayClick = (date: Date) => {
+    setModalDate(date);
+    const defaultColaboradorId =
+      selectedColaborador ||
+      filteredColaboradores[0]?.id ||
+      activeColaboradores[0]?.id ||
+      '';
+    setModalColaborador(defaultColaboradorId);
+    const existingStatus = defaultColaboradorId ? getDayData(date, defaultColaboradorId) : undefined;
+    if (existingStatus) {
+      setModalStatus(existingStatus.status);
+      setModalObservacao(existingStatus.observacao || '');
+    } else {
+      setModalStatus('presencial');
+      setModalObservacao('');
+    }
+    setShowModal(true);
+  };
+
   const handleSaveStatus = async () => {
     if (!modalDate || !modalColaborador) return;
     setIsSaving(true);
@@ -118,25 +142,6 @@ export function MonthlyCalendar() {
       alert('Erro ao salvar no banco de dados: ' + (error.message || 'Erro desconhecido'));
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleDeleteStatus = async () => {
-    if (!modalDate || !modalColaborador) return;
-    const existingStatus = getDayData(modalDate, modalColaborador);
-    if (existingStatus) {
-      setIsSaving(true);
-      try {
-        await deleteStatusDiario(existingStatus.id);
-        setShowModal(false);
-      } catch (error: any) {
-        console.error('Erro ao deletar status:', error);
-        alert('Erro ao deletar do banco de dados: ' + (error.message || 'Erro desconhecido'));
-      } finally {
-        setIsSaving(false);
-      }
-    } else {
-        setShowModal(false);
     }
   };
 
@@ -308,6 +313,15 @@ export function MonthlyCalendar() {
                   >
                     {format(day, 'd')}
                   </span>
+                  {isWorkingDay && (
+                    <button
+                      onClick={() => handleEditDayClick(day)}
+                      className="p-1 rounded hover:bg-slate-200/70 transition-colors"
+                      title="Editar escala do dia"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-slate-500" />
+                    </button>
+                  )}
                   {holiday && (
                     <div className="text-[10px] text-red-600 font-medium leading-tight text-right w-full">
                       {holiday.nome}
@@ -354,7 +368,7 @@ export function MonthlyCalendar() {
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
               <div className="flex items-center justify-between p-4 border-b border-slate-200">
                 <h3 className="text-lg font-semibold text-slate-900">
-                  Registrar Status
+                  Editar Escala do Dia
                 </h3>
                 <button
                   onClick={() => setShowModal(false)}
@@ -376,9 +390,27 @@ export function MonthlyCalendar() {
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Colaborador
                   </label>
-                  <p className="text-slate-900">
-                    {colaboradores.find((c) => c.id === modalColaborador)?.nome}
-                  </p>
+                  <select
+                    value={modalColaborador}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setModalColaborador(selectedId);
+                      if (!modalDate || !selectedId) return;
+                      const existingStatus = getDayData(modalDate, selectedId);
+                      if (existingStatus) {
+                        setModalStatus(existingStatus.status);
+                        setModalObservacao(existingStatus.observacao || '');
+                      } else {
+                        setModalStatus('presencial');
+                        setModalObservacao('');
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {activeColaboradores.map((col) => (
+                      <option key={col.id} value={col.id}>{col.nome}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -412,14 +444,11 @@ export function MonthlyCalendar() {
                     Salvando no banco de dados...
                   </div>
                 )}
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
+                  Exclusão de colaboradores na escala está bloqueada. Use apenas a edição para correções.
+                </p>
               </div>
-              <div className="flex items-center justify-between p-4 border-t border-slate-200">
-                <button
-                  onClick={handleDeleteStatus}
-                  className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
-                >
-                  Remover
-                </button>
+              <div className="flex items-center justify-end p-4 border-t border-slate-200">
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowModal(false)}
@@ -429,7 +458,7 @@ export function MonthlyCalendar() {
                   </button>
                   <button
                     onClick={handleSaveStatus}
-                    disabled={isSaving}
+                    disabled={isSaving || !modalColaborador}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
                   >
                     {isSaving ? (

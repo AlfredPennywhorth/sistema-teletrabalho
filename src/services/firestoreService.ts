@@ -7,7 +7,8 @@ import {
     setDoc,
     query,
     where,
-    writeBatch
+    writeBatch,
+    onSnapshot
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Colaborador, Feriado, StatusDiario } from '../types';
@@ -115,6 +116,55 @@ export async function updateStatusDiario(status: StatusDiario) {
 
 export async function deleteStatusDiario(id: string) {
     await deleteDoc(doc(db, COLLECTIONS.REGISTROS, id));
+}
+
+interface SubscribeDataChangesHandlers {
+    onColaboradores: (colaboradores: Colaborador[]) => void;
+    onFeriados: (feriados: Feriado[]) => void;
+    onRegistros: (registros: StatusDiario[]) => void;
+    onAnyChange?: () => void;
+}
+
+export function subscribeToDataChanges(handlers: SubscribeDataChangesHandlers) {
+    let initializedColaboradores = false;
+    let initializedFeriados = false;
+    let initializedRegistros = false;
+
+    const unsubscribeColaboradores = onSnapshot(
+        collection(db, COLLECTIONS.COLABORADORES),
+        (snapshot) => {
+            const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as Colaborador));
+            handlers.onColaboradores(data);
+            if (initializedColaboradores) handlers.onAnyChange?.();
+            initializedColaboradores = true;
+        }
+    );
+
+    const unsubscribeFeriados = onSnapshot(
+        collection(db, COLLECTIONS.FERIADOS),
+        (snapshot) => {
+            const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as Feriado));
+            handlers.onFeriados(data);
+            if (initializedFeriados) handlers.onAnyChange?.();
+            initializedFeriados = true;
+        }
+    );
+
+    const unsubscribeRegistros = onSnapshot(
+        collection(db, COLLECTIONS.REGISTROS),
+        (snapshot) => {
+            const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as StatusDiario));
+            handlers.onRegistros(data);
+            if (initializedRegistros) handlers.onAnyChange?.();
+            initializedRegistros = true;
+        }
+    );
+
+    return () => {
+        unsubscribeColaboradores();
+        unsubscribeFeriados();
+        unsubscribeRegistros();
+    };
 }
 
 

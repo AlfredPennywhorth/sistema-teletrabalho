@@ -10,12 +10,13 @@ import { MonthlyCalendar } from './components/MonthlyCalendar';
 import { AnnualPanel } from './components/AnnualPanel';
 import { ColaboradoresManager } from './components/ColaboradoresManager';
 import { FeriadosManager } from './components/FeriadosManager';
-import { getColaboradores, getFeriados, getRegistros, fixCorruptedData, purgeLegacyData } from './services/firestoreService';
+import { getColaboradores, getFeriados, getRegistros, fixCorruptedData, purgeLegacyData, subscribeToDataChanges } from './services/firestoreService';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [resetCode, setResetCode] = useState<string | null>(null);
+  const [syncNotice, setSyncNotice] = useState<string | null>(null);
   
     const {
     currentUser,
@@ -27,6 +28,14 @@ export function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!syncNotice) return;
+    const timeout = setTimeout(() => setSyncNotice(null), 5000);
+    return () => clearTimeout(timeout);
+  }, [syncNotice]);
+
+  useEffect(() => {
+    let unsubscribeDataChanges: (() => void) | null = null;
+
     // Verificar se é um link de ação do Firebase (ex: reset password)
     const actionCodeUrl = parseActionCodeURL(window.location.href);
     if (actionCodeUrl && actionCodeUrl.mode === 'resetPassword') {
@@ -53,6 +62,15 @@ export function App() {
           if (regs.length > 0) syncStatusDiarios(regs);
           // Dados sincronizados
 
+          unsubscribeDataChanges?.();
+          unsubscribeDataChanges = subscribeToDataChanges({
+            onColaboradores: (updatedCols) => setColaboradores(updatedCols),
+            onFeriados: (updatedFers) => setFeriados(updatedFers),
+            onRegistros: (updatedRegs) => syncStatusDiarios(updatedRegs),
+            onAnyChange: () =>
+              setSyncNotice(`Dados atualizados automaticamente às ${new Date().toLocaleTimeString('pt-BR')}`),
+          });
+
           // Link User to Colaborador
           const linkedColaborador = cols.find(c => c.email.toLowerCase() === user.email?.toLowerCase());
 
@@ -76,12 +94,17 @@ export function App() {
         }
 
       } else {
+        unsubscribeDataChanges?.();
+        unsubscribeDataChanges = null;
         setCurrentUser(null);
       }
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeDataChanges?.();
+      unsubscribe();
+    };
   }, [setCurrentUser, setColaboradores, setFeriados, syncStatusDiarios]);
 
   if (loading) {
@@ -123,8 +146,15 @@ export function App() {
   };
 
   return (
-    <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
-      {renderPage()}
-    </Layout>
+    <>
+      {syncNotice && (
+        <div className="fixed top-20 lg:top-4 right-4 z-[70] bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-lg shadow-md text-sm font-medium">
+          {syncNotice}
+        </div>
+      )}
+      <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
+        {renderPage()}
+      </Layout>
+    </>
   );
 }

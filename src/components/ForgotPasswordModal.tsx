@@ -21,7 +21,9 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
         setError('');
         setSuccess(false);
 
-        if (!email) {
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!normalizedEmail) {
             setError('Por favor, informe seu e-mail.');
             return;
         }
@@ -31,10 +33,10 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
         try {
             const actionCodeSettings = {
                 url: window.location.origin,
-                handleCodeInApp: true,
+                handleCodeInApp: false,
             };
 
-            await sendPasswordResetEmail(auth, email, actionCodeSettings);
+            await sendPasswordResetEmail(auth, normalizedEmail, actionCodeSettings);
             setSuccess(true);
             setEmail('');
         } catch (err: any) {
@@ -45,6 +47,8 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
                 setError('Por favor, insira um e-mail válido.');
             } else if (err.code === 'auth/network-request-failed') {
                 setError('Falha na rede. Verifique sua conexão e tente novamente.');
+            } else if (err.code === 'auth/too-many-requests') {
+                setError('Muitas tentativas em sequência. Aguarde alguns minutos e tente novamente.');
             } else {
                 // Para outros erros, mostramos a mensagem de sucesso para manter a segurança,
                 // ou uma genérica se for algo impeditivo.
@@ -82,6 +86,9 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
                                 <h4 className="text-lg font-semibold text-slate-900">E-mail enviado!</h4>
                                 <p className="text-slate-600">
                                     Se houver uma conta vinculada a este e-mail, as instruções foram enviadas.
+                                </p>
+                                <p className="text-slate-500 text-sm">
+                                    Se não encontrar a mensagem, verifique também a caixa de spam/lixo eletrônico.
                                 </p>
                             </div>
                             <button
