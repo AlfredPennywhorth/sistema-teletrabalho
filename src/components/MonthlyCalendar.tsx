@@ -81,6 +81,13 @@ export function MonthlyCalendar() {
     );
   };
 
+  const getDefaultColaboradorId = () => (
+    selectedColaborador ||
+    filteredColaboradores[0]?.id ||
+    activeColaboradores[0]?.id ||
+    ''
+  );
+
   const isHoliday = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return feriados.find((f) => f.data === dateStr);
@@ -102,11 +109,7 @@ export function MonthlyCalendar() {
 
   const handleEditDayClick = (date: Date) => {
     setModalDate(date);
-    const defaultColaboradorId =
-      selectedColaborador ||
-      filteredColaboradores[0]?.id ||
-      activeColaboradores[0]?.id ||
-      '';
+    const defaultColaboradorId = getDefaultColaboradorId();
     setModalColaborador(defaultColaboradorId);
     const existingStatus = defaultColaboradorId ? getDayData(date, defaultColaboradorId) : undefined;
     if (existingStatus) {
@@ -444,9 +447,9 @@ export function MonthlyCalendar() {
                     Salvando no banco de dados...
                   </div>
                 )}
-                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
+                <div role="alert" className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
                   Exclusão de colaboradores na escala está bloqueada. Use apenas a edição para correções.
-                </p>
+                </div>
               </div>
               <div className="flex items-center justify-end p-4 border-t border-slate-200">
                 <div className="flex gap-2">

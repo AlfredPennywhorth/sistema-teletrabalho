@@ -125,6 +125,10 @@ interface SubscribeDataChangesHandlers {
     onAnyChange?: () => void;
 }
 
+function mapSnapshotDocs<T>(snapshot: any): T[] {
+    return snapshot.docs.map((item: any) => ({ id: item.id, ...item.data() } as T));
+}
+
 export function subscribeToDataChanges(handlers: SubscribeDataChangesHandlers) {
     let initializedColaboradores = false;
     let initializedFeriados = false;
@@ -133,7 +137,7 @@ export function subscribeToDataChanges(handlers: SubscribeDataChangesHandlers) {
     const unsubscribeColaboradores = onSnapshot(
         collection(db, COLLECTIONS.COLABORADORES),
         (snapshot) => {
-            const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as Colaborador));
+            const data = mapSnapshotDocs<Colaborador>(snapshot);
             handlers.onColaboradores(data);
             if (initializedColaboradores) handlers.onAnyChange?.();
             initializedColaboradores = true;
@@ -143,7 +147,7 @@ export function subscribeToDataChanges(handlers: SubscribeDataChangesHandlers) {
     const unsubscribeFeriados = onSnapshot(
         collection(db, COLLECTIONS.FERIADOS),
         (snapshot) => {
-            const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as Feriado));
+            const data = mapSnapshotDocs<Feriado>(snapshot);
             handlers.onFeriados(data);
             if (initializedFeriados) handlers.onAnyChange?.();
             initializedFeriados = true;
@@ -153,7 +157,7 @@ export function subscribeToDataChanges(handlers: SubscribeDataChangesHandlers) {
     const unsubscribeRegistros = onSnapshot(
         collection(db, COLLECTIONS.REGISTROS),
         (snapshot) => {
-            const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as StatusDiario));
+            const data = mapSnapshotDocs<StatusDiario>(snapshot);
             handlers.onRegistros(data);
             if (initializedRegistros) handlers.onAnyChange?.();
             initializedRegistros = true;

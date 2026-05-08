@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, parseActionCodeURL } from 'firebase/auth';
 import { auth } from './lib/firebase';
 import { useStore } from './store/useStore';
@@ -17,6 +17,7 @@ export function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [resetCode, setResetCode] = useState<string | null>(null);
   const [syncNotice, setSyncNotice] = useState<string | null>(null);
+  const lastNoticeAtRef = useRef(0);
   
     const {
     currentUser,
@@ -67,8 +68,17 @@ export function App() {
             onColaboradores: (updatedCols) => setColaboradores(updatedCols),
             onFeriados: (updatedFers) => setFeriados(updatedFers),
             onRegistros: (updatedRegs) => syncStatusDiarios(updatedRegs),
-            onAnyChange: () =>
-              setSyncNotice(`Dados atualizados automaticamente às ${new Date().toLocaleTimeString('pt-BR')}`),
+            onAnyChange: () => {
+              const now = Date.now();
+              if (now - lastNoticeAtRef.current < 1500) return;
+              lastNoticeAtRef.current = now;
+              const at = new Intl.DateTimeFormat('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              }).format(now);
+              setSyncNotice(`Dados atualizados automaticamente às ${at}`);
+            },
           });
 
           // Link User to Colaborador
