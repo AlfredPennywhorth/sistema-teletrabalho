@@ -14,6 +14,11 @@ import { getColaboradores, getFeriados, getRegistros, fixCorruptedData, purgeLeg
 import { Loader2 } from 'lucide-react';
 
 const SYNC_NOTIFICATION_DEBOUNCE_MS = 1500;
+const SYNC_NOTICE_TIME_FORMATTER = new Intl.DateTimeFormat('pt-BR', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+});
 
 export function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -74,11 +79,7 @@ export function App() {
               const now = Date.now();
               if (now - lastNoticeAtRef.current < SYNC_NOTIFICATION_DEBOUNCE_MS) return;
               lastNoticeAtRef.current = now;
-              const at = new Intl.DateTimeFormat('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-              }).format(now);
+              const at = SYNC_NOTICE_TIME_FORMATTER.format(now);
               setSyncNotice(`Dados atualizados automaticamente às ${at}`);
             },
           });
