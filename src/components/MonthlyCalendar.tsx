@@ -40,6 +40,11 @@ export function MonthlyCalendar() {
   const [modalObservacao, setModalObservacao] = useState('');
   const [rotationStartDate, setRotationStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Novos estados para Gerenciamento do Dia
+  const [viewMode, setViewMode] = useState<'day' | 'edit'>('day');
+  const [newColaboradorId, setNewColaboradorId] = useState('');
+  const [newStatus, setNewStatus] = useState<StatusType>('presencial');
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],
@@ -84,6 +89,7 @@ export function MonthlyCalendar() {
   const handleDayClick = (date: Date, colaborador: Colaborador) => {
     setModalDate(date);
     setModalColaborador(colaborador.id);
+    setViewMode('edit');
     const existingStatus = getDayData(date, colaborador.id);
     if (existingStatus) {
       setModalStatus(existingStatus.status);
@@ -92,6 +98,15 @@ export function MonthlyCalendar() {
       setModalStatus('presencial');
       setModalObservacao('');
     }
+    setShowModal(true);
+  };
+
+  const handleManageDay = (date: Date) => {
+    setModalDate(date);
+    setModalColaborador('');
+    setViewMode('day');
+    setNewColaboradorId('');
+    setNewStatus('presencial');
     setShowModal(true);
   };
 
@@ -121,14 +136,21 @@ export function MonthlyCalendar() {
     }
   };
 
-  const handleDeleteStatus = async () => {
-    if (!modalDate || !modalColaborador) return;
-    const existingStatus = getDayData(modalDate, modalColaborador);
+  const handleDeleteStatus = async (colId?: string) => {
+    const targetColId = colId || modalColaborador;
+    if (!modalDate || !targetColId) return;
+
+    const existingStatus = getDayData(modalDate, targetColId);
     if (existingStatus) {
+      const colName = colaboradores.find(c => c.id === targetColId)?.nome || 'este colaborador';
+      if (!confirm(`Tem certeza que deseja remover o registro de "${colName}" nesta data?\n\nEssa ação remove apenas o status do dia, não exclui o colaborador do cadastro.`)) {
+        return;
+      }
+
       setIsSaving(true);
       try {
         await deleteStatusDiario(existingStatus.id);
-        setShowModal(false);
+        if (viewMode === 'edit') setShowModal(false);
       } catch (error: any) {
         console.error('Erro ao deletar status:', error);
         alert('Erro ao deletar do banco de dados: ' + (error.message || 'Erro desconhecido'));
@@ -136,7 +158,31 @@ export function MonthlyCalendar() {
         setIsSaving(false);
       }
     } else {
-        setShowModal(false);
+      if (viewMode === 'edit') setShowModal(false);
+    }
+  };
+
+  const handleAddColaboradorToDay = async () => {
+    if (!modalDate || !newColaboradorId) return;
+    
+    setIsSaving(true);
+    try {
+      const dateStr = format(modalDate, 'yyyy-MM-dd');
+      const statusData: any = {
+        id: `${newColaboradorId}-${dateStr}`,
+        colaboradorId: newColaboradorId,
+        data: dateStr,
+        status: newStatus,
+      };
+      
+      await addStatusDiario(statusData);
+      setNewColaboradorId('');
+      setNewStatus('presencial');
+    } catch (error: any) {
+      console.error('Erro ao adicionar colaborador:', error);
+      alert('Erro ao adicionar no banco de dados.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -298,18 +344,20 @@ export function MonthlyCalendar() {
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span
+                  <button
+                    onClick={() => handleManageDay(day)}
                     className={cn(
-                      'w-7 h-7 flex items-center justify-center text-sm rounded-full',
-                      isToday && 'bg-blue-600 text-white font-bold',
+                      'w-7 h-7 flex items-center justify-center text-sm rounded-full transition-colors hover:bg-blue-50',
+                      isToday && 'bg-blue-600 text-white font-bold hover:bg-blue-700',
                       !isToday && !isCurrentMonth && 'text-slate-400',
                       !isToday && isCurrentMonth && 'text-slate-700'
                     )}
+                    title="Gerenciar colaboradores deste dia"
                   >
                     {format(day, 'd')}
-                  </span>
+                  </button>
                   {holiday && (
-                    <div className="text-[10px] text-red-600 font-medium leading-tight text-right w-full">
+                    <div className="text-[10px] text-red-600 font-medium leading-tight text-right w-full pr-1">
                       {holiday.nome}
                     </div>
                   )}
@@ -351,10 +399,10 @@ export function MonthlyCalendar() {
       {
         showModal && modalDate && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-              <div className="flex items-center justify-between p-4 border-b border-slate-200">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+              <div className="flex items-center justify-between p-4 border-b border-slate-200 shrink-0">
                 <h3 className="text-lg font-semibold text-slate-900">
-                  Registrar Status
+                  {viewMode === 'edit' ? 'Registrar Status' : 'Gerenciar Dia'}
                 </h3>
                 <button
                   onClick={() => setShowModal(false)}
@@ -363,83 +411,204 @@ export function MonthlyCalendar() {
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
-              <div className="p-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Data
-                  </label>
-                  <p className="text-slate-900 capitalize">
-                    {format(modalDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Colaborador
-                  </label>
-                  <p className="text-slate-900">
-                    {colaboradores.find((c) => c.id === modalColaborador)?.nome}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={modalStatus}
-                    onChange={(e) => setModalStatus(e.target.value as StatusType)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                      <option key={key} value={key}>{config.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Observação
-                  </label>
-                  <textarea
-                    value={modalObservacao}
-                    onChange={(e) => setModalObservacao(e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                    placeholder="Adicione uma observação (opcional)"
-                  />
-                </div>
+              
+              <div className="p-4 border-b border-slate-100 shrink-0">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  Data Selecionada
+                </label>
+                <p className="text-slate-900 font-medium capitalize">
+                  {format(modalDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </p>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                {viewMode === 'edit' ? (
+                  // MODO EDIÇÃO INDIVIDUAL
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Colaborador
+                      </label>
+                      <p className="text-slate-900 font-semibold bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        {colaboradores.find((c) => c.id === modalColaborador)?.nome}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Status
+                      </label>
+                      <select
+                        value={modalStatus}
+                        onChange={(e) => setModalStatus(e.target.value as StatusType)}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                          <option key={key} value={key}>{config.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Observação
+                      </label>
+                      <textarea
+                        value={modalObservacao}
+                        onChange={(e) => setModalObservacao(e.target.value)}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        placeholder="Adicione uma observação (opcional)"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  // MODO GESTÃO DO DIA
+                  <div className="space-y-6">
+                    {/* Lista de Colaboradores Existentes */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                        Colaboradores no Dia
+                      </label>
+                      <div className="space-y-2">
+                        {colaboradores
+                          .filter(c => getDayData(modalDate, c.id))
+                          .map(col => {
+                            const data = getDayData(modalDate, col.id);
+                            if (!data) return null;
+                            return (
+                              <div key={col.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium text-slate-900">{col.nome}</span>
+                                  <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-full w-fit mt-1", STATUS_CONFIG[data.status].bgColor, STATUS_CONFIG[data.status].color)}>
+                                    {STATUS_CONFIG[data.status].label}
+                                  </span>
+                                </div>
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => {
+                                      setModalColaborador(col.id);
+                                      setModalStatus(data.status);
+                                      setModalObservacao(data.observacao || '');
+                                      setViewMode('edit');
+                                    }}
+                                    className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                                    title="Editar status"
+                                  >
+                                    <RefreshCw className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteStatus(col.id)}
+                                    className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors"
+                                    title="Remover deste dia"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        {colaboradores.filter(c => getDayData(modalDate, c.id)).length === 0 && (
+                          <p className="text-sm text-slate-400 italic text-center py-4">Nenhum colaborador registrado para este dia.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Formulário de Adição */}
+                    <div className="pt-4 border-t border-slate-100">
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                        Adicionar Colaborador ao Dia
+                      </label>
+                      <div className="space-y-3 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                        <select
+                          value={newColaboradorId}
+                          onChange={(e) => setNewColaboradorId(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
+                        >
+                          <option value="">Selecione um colaborador...</option>
+                          {colaboradores
+                            .filter(c => c.situacao === 'ativo')
+                            .filter(c => !getDayData(modalDate, c.id)) // Apenas quem não está no dia
+                            .sort((a, b) => a.nome.localeCompare(b.nome))
+                            .map(c => (
+                              <option key={c.id} value={c.id}>{c.nome}</option>
+                            ))
+                          }
+                        </select>
+                        <div className="flex gap-2">
+                          <select
+                            value={newStatus}
+                            onChange={(e) => setNewStatus(e.target.value as StatusType)}
+                            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
+                          >
+                            {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                              <option key={key} value={key}>{config.label}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={handleAddColaboradorToDay}
+                            disabled={!newColaboradorId || isSaving}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm disabled:opacity-50 flex items-center gap-1"
+                          >
+                            <Plus className="w-4 h-4" />
+                            Adicionar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {isSaving && (
-                  <div className="flex items-center gap-2 text-blue-600 text-sm font-medium animate-pulse">
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Salvando no banco de dados...
+                  <div className="flex items-center gap-2 text-blue-600 text-xs font-medium animate-pulse">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Processando...
                   </div>
                 )}
               </div>
-              <div className="flex items-center justify-between p-4 border-t border-slate-200">
-                <button
-                  onClick={handleDeleteStatus}
-                  className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
-                >
-                  Remover
-                </button>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleSaveStatus}
-                    disabled={isSaving}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
-                  >
-                    {isSaving ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                        <Plus className="w-4 h-4" />
-                    )}
-                    {isSaving ? 'Salvando...' : 'Salvar'}
-                  </button>
-                </div>
+
+              <div className="flex items-center justify-between p-4 border-t border-slate-200 shrink-0">
+                {viewMode === 'edit' ? (
+                  <>
+                    <button
+                      onClick={() => handleDeleteStatus()}
+                      disabled={isSaving}
+                      className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                    >
+                      Remover deste dia
+                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          if (modalColaborador) setViewMode('day');
+                          else setShowModal(false);
+                        }}
+                        className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition-colors text-sm"
+                      >
+                        Voltar
+                      </button>
+                      <button
+                        onClick={handleSaveStatus}
+                        disabled={isSaving}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50 text-sm"
+                      >
+                        {isSaving ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Plus className="w-4 h-4" />
+                        )}
+                        Salvar
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full flex justify-end">
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium transition-colors text-sm"
+                    >
+                      Concluído
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
