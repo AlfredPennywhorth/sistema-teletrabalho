@@ -178,12 +178,15 @@ export async function fixCorruptedData() {
     const holidayDates = new Set(full2026.map(f => f.data));
     
     registros.forEach(r => {
-        // Check if it's a holiday - holidays should NOT have status records
+        // Check if it's a holiday - holidays should NOT have work records (presencial/teletrabalho)
+        // But VACATIONS (ferias) and other leaves MUST remain.
         if (holidayDates.has(r.data)) {
-            const regRef = doc(db, COLLECTIONS.REGISTROS, r.id);
-            batch.delete(regRef);
-            modified = true;
-            return;
+            if (['presencial', 'teletrabalho'].includes(r.status)) {
+                const regRef = doc(db, COLLECTIONS.REGISTROS, r.id);
+                batch.delete(regRef);
+                modified = true;
+                return;
+            }
         }
 
         // Check for old ID format (yyyy-mm-dd-colaboradorId)
@@ -308,4 +311,66 @@ export async function migrateData(
 
     await commitBatch();
     if (onProgress) onProgress('Finalizando...');
+}
+
+/**
+ * REPARO DE DADOS: Backfill de registros de férias faltantes.
+ * Garante que todos os dias de um período de férias existam no banco.
+ */
+import { addDays, eachDayOfInterval, format, parseISO } from 'date-fns';
+
+export async function backfillVacationRecords() {
+    console.log('👷 Iniciando Backfill de Registros de Férias...');
+    
+    // Cronograma oficial (conforme definido no plano de negócio)
+    const officialVacations = [
+        { colaboradorId: 'carol', start: '2026-03-02', days: 12 },
+        { colaboradorId: 'carol', start: '2026-11-03', days: 18 },
+        { colaboradorId: 'andre', start: '2026-07-13', days: 12 },
+        { colaboradorId: 'andre', start: '2026-12-14', days: 18 },
+        { colaboradorId: 'virginia', start: '2026-03-16', days: 15 },
+        { colaboradorId: 'virginia', start: '2026-11-23', days: 15 },
+        { colaboradorId: 'iuri', start: '2026-08-06', days: 30 },
+        { colaboradorId: 'william', start: '2026-06-08', days: 30 },
+    ];
+
+    let currentBatch = writeBatch(db);
+    let totalCount = 0;
+    let batchCount = 0;
+
+    for (const v of officialVacations) {
+        const start = parseISO(v.start);
+        const end = addDays(start, v.days - 1);
+        const interval = eachDayOfInterval({ start, end });
+
+        for (const day of interval) {
+            const dateStr = format(day, 'yyyy-MM-dd');
+            const docId = `${v.colaboradorId}-${dateStr}`;
+            const docRef = doc(db, COLLECTIONS.REGISTROS, docId);
+            
+            // Força a criação do registro de férias para este dia.
+            currentBatch.set(docRef, {
+                id: docId,
+                colaboradorId: v.colaboradorId,
+                data: dateStr,
+                status: 'ferias'
+            });
+
+            totalCount++;
+            batchCount++;
+
+            if (batchCount >= 450) {
+                await currentBatch.commit();
+                currentBatch = writeBatch(db);
+                batchCount = 0;
+            }
+        }
+    }
+
+    if (batchCount > 0) {
+        await currentBatch.commit();
+    }
+
+    console.log(`✅ BACKFILL CONCLUÍDO: ${totalCount} registros de férias garantidos.`);
+    return totalCount;
 }

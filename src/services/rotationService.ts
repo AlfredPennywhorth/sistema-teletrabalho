@@ -41,8 +41,18 @@ export const calculateRotationMatrix = (
 
     while (currentDate <= end) {
         const dateStr = format(currentDate, 'yyyy-MM-dd');
+        const isWknd = isWeekendDay(currentDate);
+        const isHol = isHoliday(currentDate);
 
-        if (isWeekendDay(currentDate) || isHoliday(currentDate)) {
+        if (isWknd || isHol) {
+            // Em finais de semana e feriados, não há rodízio.
+            // Mas PRECISAMOS preservar os status de férias/folga/etc que já existem.
+            colaboradores.forEach(col => {
+                const existing = statusMap.get(`${col.id}-${dateStr}`);
+                if (existing && !['presencial', 'teletrabalho'].includes(existing.status)) {
+                    newStatuses.push(existing);
+                }
+            });
             currentDate = addDays(currentDate, 1);
             continue;
         }
