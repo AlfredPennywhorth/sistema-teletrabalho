@@ -639,8 +639,6 @@ export function MonthlyCalendar() {
                   </div>
                 )}
               </div>
-
-              </div>
             </div>
           </div>
         )
