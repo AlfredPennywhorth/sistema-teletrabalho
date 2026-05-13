@@ -5,6 +5,7 @@ import {
   Filter,
   X,
   Plus,
+  Pencil,
   RefreshCw,
   Loader2,
 } from 'lucide-react';
@@ -28,7 +29,7 @@ import { STATUS_CONFIG, type StatusType, type Colaborador } from '../types';
 import { cn } from '../utils/cn';
 
 export function MonthlyCalendar() {
-  const { colaboradores, statusDiarios, feriados, addStatusDiario, deleteStatusDiario, recalculateRotation } = useStore();
+  const { colaboradores, statusDiarios, feriados, addStatusDiario, recalculateRotation } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedColaborador, setSelectedColaborador] = useState<string>('');
   const [selectedDepartamento, setSelectedDepartamento] = useState<string>('');
@@ -48,6 +49,10 @@ export function MonthlyCalendar() {
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],
+    [colaboradores]
+  );
+  const activeColaboradores = useMemo(
+    () => colaboradores.filter((c) => c.situacao === 'ativo'),
     [colaboradores]
   );
 
@@ -81,6 +86,13 @@ export function MonthlyCalendar() {
     );
   };
 
+  const getDefaultColaboradorId = () => (
+    selectedColaborador ||
+    filteredColaboradores[0]?.id ||
+    activeColaboradores[0]?.id ||
+    ''
+  );
+
   const isHoliday = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return feriados.find((f) => f.data === dateStr);
@@ -108,6 +120,10 @@ export function MonthlyCalendar() {
     setNewColaboradorId('');
     setNewStatus('presencial');
     setShowModal(true);
+  };
+
+  const handleEditDayClick = (date: Date) => {
+    handleManageDay(date);
   };
 
   const handleSaveStatus = async () => {
@@ -356,6 +372,16 @@ export function MonthlyCalendar() {
                   >
                     {format(day, 'd')}
                   </button>
+                  {isWorkingDay && (
+                    <button
+                      onClick={() => handleEditDayClick(day)}
+                      className="p-1 rounded hover:bg-slate-200/70 transition-colors"
+                      title="Editar escala do dia"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-slate-500" />
+                    </button>
+                  )}
+
                   {holiday && (
                     <div className="text-[10px] text-red-600 font-medium leading-tight text-right w-full pr-1">
                       {holiday.nome}
@@ -403,6 +429,7 @@ export function MonthlyCalendar() {
               <div className="flex items-center justify-between p-4 border-b border-slate-200 shrink-0">
                 <h3 className="text-lg font-semibold text-slate-900">
                   {viewMode === 'edit' ? 'Registrar Status' : 'Gerenciar Dia'}
+
                 </h3>
                 <button
                   onClick={() => setShowModal(false)}
@@ -563,8 +590,10 @@ export function MonthlyCalendar() {
                     Processando...
                   </div>
                 )}
+                <div role="alert" className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
+                  Exclusão de colaboradores na escala está bloqueada. Use apenas a edição para correções.
+                </div>
               </div>
-
               <div className="flex items-center justify-between p-4 border-t border-slate-200 shrink-0">
                 {viewMode === 'edit' ? (
                   <>
@@ -609,6 +638,8 @@ export function MonthlyCalendar() {
                     </button>
                   </div>
                 )}
+              </div>
+
               </div>
             </div>
           </div>
