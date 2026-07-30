@@ -66,25 +66,12 @@ export const calculateRotationMatrix = (
             }
         });
 
-        const iuriStatus = statusMap.get(`${FIXED_PERSON_ID}-${dateStr}`);
-        if (iuriStatus && !['presencial', 'teletrabalho'].includes(iuriStatus.status)) {
-            unavailableUsers.add(FIXED_PERSON_ID);
-        }
-
-        // 2. Determine Substitution Rule
-        let temporaryFixedPersonId = '';
-        if (unavailableUsers.has(FIXED_PERSON_ID)) {
-            temporaryFixedPersonId = 'carol';
-        }
-
-        // 3. Effective Pool
-        const effectivePool = ROTATION_POOL.filter(id => id !== temporaryFixedPersonId);
-
-        // 4. Determine Rotation Person
+        // 2. Determine Rotation Person (the ONE who gets teletrabalho)
         let rotationPersonId = '';
         let attempts = 0;
-        while (attempts < effectivePool.length) {
-            const candidateId = effectivePool[rotationIndex % effectivePool.length];
+        
+        while (attempts < ROTATION_POOL.length) {
+            const candidateId = ROTATION_POOL[rotationIndex % ROTATION_POOL.length];
             if (!unavailableUsers.has(candidateId)) {
                 rotationPersonId = candidateId;
                 rotationIndex++;
@@ -95,21 +82,24 @@ export const calculateRotationMatrix = (
             attempts++;
         }
 
-        // 5. Generate Statuses
+        // 3. Generate Statuses
         colaboradores.forEach(col => {
             const existing = statusMap.get(`${col.id}-${dateStr}`);
+            // Preserva registros manuais ou ausências
             if (existing && !['presencial', 'teletrabalho'].includes(existing.status)) {
                 newStatuses.push(existing);
                 return;
             }
 
-            let status: 'presencial' | 'teletrabalho' = 'teletrabalho';
+            // Padrão é presencial. Apenas o rotationPersonId ganha teletrabalho.
+            let status: 'presencial' | 'teletrabalho' = 'presencial';
 
+            if (col.id === rotationPersonId) {
+                status = 'teletrabalho';
+            }
+
+            // O Ouvidor nunca pode estar em teletrabalho, mesmo que estivesse no pool
             if (col.id === FIXED_PERSON_ID) {
-                status = 'presencial';
-            } else if (col.id === temporaryFixedPersonId) {
-                status = 'presencial';
-            } else if (col.id === rotationPersonId) {
                 status = 'presencial';
             }
 
@@ -117,7 +107,9 @@ export const calculateRotationMatrix = (
                 id: `${col.id}-${dateStr}`,
                 colaboradorId: col.id,
                 data: dateStr,
-                status
+                status,
+                // Preserva a observação se já existia (registro manual)
+                observacao: existing?.observacao
             });
         });
 

@@ -10,6 +10,7 @@ import { MonthlyCalendar } from './components/MonthlyCalendar';
 import { AnnualPanel } from './components/AnnualPanel';
 import { ColaboradoresManager } from './components/ColaboradoresManager';
 import { FeriadosManager } from './components/FeriadosManager';
+import { FeriasManager } from './components/FeriasManager';
 import { getColaboradores, getFeriados, getRegistros, fixCorruptedData, purgeLegacyData, subscribeToDataChanges } from './services/firestoreService';
 import { Loader2 } from 'lucide-react';
 
@@ -153,6 +154,8 @@ export function App() {
         return <ColaboradoresManager />;
       case 'feriados':
         return <FeriadosManager />;
+      case 'ferias':
+        return <FeriasManager />;
       default:
         return <Dashboard />;
     }

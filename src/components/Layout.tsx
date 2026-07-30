@@ -27,6 +27,7 @@ const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'calendario', label: 'Calendário Mensal', icon: Calendar },
   { id: 'painel-anual', label: 'Painel Anual', icon: CalendarDays },
+  { id: 'ferias', label: 'Gestão de Férias', icon: Star },
   { id: 'colaboradores', label: 'Colaboradores', icon: Users },
   { id: 'feriados', label: 'Feriados', icon: Star },
 ];

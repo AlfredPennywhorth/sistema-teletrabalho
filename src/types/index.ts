@@ -47,6 +47,31 @@ export interface User {
   colaboradorId?: string;
 }
 
+export type FeriasStatus = 'rascunho' | 'programado' | 'aprovado' | 'concluido' | 'cancelado';
+
+export interface ParcelaFerias {
+  dataInicio: string; // YYYY-MM-DD
+  dataFim: string; // YYYY-MM-DD
+  dias: number;
+}
+
+export interface Ferias {
+  id: string;
+  colaboradorId: string;
+  periodoAquisitivoInicio: string; // YYYY-MM-DD
+  periodoAquisitivoFim: string; // YYYY-MM-DD
+  diasDireito: number;
+  abonoPecuniario: boolean;
+  diasAbono: number;
+  diasDescanso: number;
+  antecipar13: boolean;
+  parcelas: ParcelaFerias[];
+  status: FeriasStatus;
+  observacao?: string;
+  createdAt?: string; // YYYY-MM-DDTHH:mm:ss
+  updatedAt?: string; // YYYY-MM-DDTHH:mm:ss
+}
+
 export const STATUS_CONFIG: Record<StatusType, { label: string; color: string; bgColor: string }> = {
   presencial: { label: 'Presencial', color: 'text-teal-800', bgColor: 'bg-teal-100' },
   teletrabalho: { label: 'Teletrabalho', color: 'text-orange-700', bgColor: 'bg-orange-100' },
