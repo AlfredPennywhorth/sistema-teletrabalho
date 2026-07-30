@@ -76,13 +76,40 @@ export function FeriasManager() {
         let totalDias = 0;
         let has14Days = false;
         
-        parcelas.forEach((p, i) => {
+        // Ordena parcelas por data de início para validar sobreposição
+        const parcelasValidas = parcelas.filter(p => p.dataInicio && p.dataFim);
+        
+        if (parcelasValidas.length !== parcelas.length) {
+            newErrors.push('Todas as parcelas devem ter data de início e fim preenchidas.');
+        }
+
+        const parcelasOrdenadas = [...parcelasValidas].sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
+
+        parcelasOrdenadas.forEach((p, i) => {
+            const dInicio = parseISO(p.dataInicio);
+            const dFim = parseISO(p.dataFim);
+
+            if (isValid(dInicio) && isValid(dFim)) {
+                if (isBefore(dFim, dInicio)) {
+                    newErrors.push(`Parcela ${i + 1}: Data fim não pode ser anterior à data de início.`);
+                }
+            }
+
             totalDias += p.dias;
             if (p.dias >= 14) has14Days = true;
             if (p.dias > 0 && p.dias < 5) newErrors.push(`Parcela ${i + 1} deve ter no mínimo 5 dias.`);
             
+            if (i > 0) {
+                const prevFim = parseISO(parcelasOrdenadas[i - 1].dataFim);
+                if (isValid(prevFim) && isValid(dInicio)) {
+                    if (dInicio <= prevFim) {
+                        newErrors.push('Há sobreposição entre períodos de férias. Ajuste as datas antes de salvar.');
+                    }
+                }
+            }
+
             if (p.dataInicio) {
-                const date = parseISO(p.dataInicio);
+                const date = dInicio;
                 const dayOfWeek = getDay(date); // 0=Sun, 1=Mon, ..., 6=Sat
                 if (dayOfWeek === 0 || dayOfWeek === 6) newErrors.push(`Parcela ${i + 1} não pode iniciar no fim de semana.`);
                 if (dayOfWeek === 4 || dayOfWeek === 5) newErrors.push(`Parcela ${i + 1} não pode iniciar em quinta ou sexta-feira.`);
