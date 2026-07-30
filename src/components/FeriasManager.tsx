@@ -185,6 +185,18 @@ export function FeriasManager() {
         }
     };
 
+    const handleCancel = async (id: string) => {
+        if (!window.confirm('Tem certeza que deseja cancelar esta programação de férias?')) return;
+        try {
+            await cancelFerias(id);
+            setFeriasList(prev => prev.map(f => f.id === id ? { ...f, status: 'cancelado' } : f));
+            alert('Programação de férias cancelada com sucesso!');
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao cancelar férias.');
+        }
+    };
+
     const handleRegerarEscala = async () => {
         const programadas = feriasList.filter(f => f.status === 'programado' || f.status === 'aprovado');
         
@@ -351,6 +363,88 @@ export function FeriasManager() {
                             <p className={cn("text-2xl font-bold", diasProgramados === diasDescanso ? 'text-green-600' : 'text-red-600')}>
                                 {diasProgramados}
                             </p>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-6">
+                        <h4 className="font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                            <CalendarIcon className="w-5 h-5 text-blue-600" />
+                            Férias Agendadas ({feriasList.filter(f => f.status !== 'cancelado').length})
+                        </h4>
+                        
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+                            {feriasList.length === 0 ? (
+                                <p className="text-sm text-slate-400 italic text-center py-6 bg-slate-50/50 rounded-lg">
+                                    Nenhuma programação de férias encontrada.
+                                </p>
+                            ) : (
+                                [...feriasList]
+                                    .sort((a, b) => {
+                                        const dateA = a.parcelas?.[0]?.dataInicio || a.periodoAquisitivoInicio || '';
+                                        const dateB = b.parcelas?.[0]?.dataInicio || b.periodoAquisitivoInicio || '';
+                                        return dateB.localeCompare(dateA);
+                                    })
+                                    .map(f => {
+                                        const colaborador = colaboradores.find(c => c.id === f.colaboradorId);
+                                        return (
+                                            <div key={f.id} className={cn(
+                                                "p-4 rounded-xl border transition-all text-sm",
+                                                f.status === 'cancelado' 
+                                                    ? "bg-slate-50/70 border-slate-200 opacity-60" 
+                                                    : "bg-white border-slate-200 hover:border-slate-300 shadow-sm"
+                                            )}>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h5 className="font-semibold text-slate-900">{colaborador?.nome || 'Colaborador não encontrado'}</h5>
+                                                        <p className="text-xs text-slate-500">
+                                                            Período aquisitivo: {f.periodoAquisitivoInicio ? format(parseISO(f.periodoAquisitivoInicio), 'dd/MM/yyyy') : '-'} até {f.periodoAquisitivoFim ? format(parseISO(f.periodoAquisitivoFim), 'dd/MM/yyyy') : '-'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={cn(
+                                                            "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase",
+                                                            f.status === 'programado' && "bg-blue-50 text-blue-700 border border-blue-100",
+                                                            f.status === 'aprovado' && "bg-green-50 text-green-700 border border-green-100",
+                                                            f.status === 'cancelado' && "bg-rose-50 text-rose-700 border border-rose-100"
+                                                        )}>
+                                                            {f.status}
+                                                        </span>
+                                                        {f.status !== 'cancelado' && (
+                                                            <button
+                                                                onClick={() => handleCancel(f.id)}
+                                                                className="p-1 text-slate-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-colors"
+                                                                title="Cancelar férias"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-2">
+                                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Parcelas</p>
+                                                    {f.parcelas?.map((p, idx) => (
+                                                        <div key={idx} className="flex justify-between text-xs text-slate-700">
+                                                            <span>Parcela {idx + 1}: {p.dataInicio ? format(parseISO(p.dataInicio), 'dd/MM/yyyy') : '-'} a {p.dataFim ? format(parseISO(p.dataFim), 'dd/MM/yyyy') : '-'}</span>
+                                                            <span className="font-medium text-slate-900">{p.dias} dias</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                                                    <span>Dias de descanso: <strong className="text-slate-800">{f.diasDescanso}</strong></span>
+                                                    {f.abonoPecuniario && <span>Abono: <strong className="text-amber-700">{f.diasAbono} dias</strong></span>}
+                                                    {f.antecipar13 && <span className="text-blue-600 font-medium">Antecipa 13º</span>}
+                                                </div>
+                                                {f.observacao && (
+                                                    <p className="text-xs text-slate-500 italic mt-2 border-t border-slate-100 pt-1.5">
+                                                        Obs: {f.observacao}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        );
+                                    })
+                            )}
                         </div>
                     </div>
                 </div>
