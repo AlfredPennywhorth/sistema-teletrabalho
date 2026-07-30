@@ -29,7 +29,7 @@ import { STATUS_CONFIG, type StatusType, type Colaborador } from '../types';
 import { cn } from '../utils/cn';
 
 export function MonthlyCalendar() {
-  const { colaboradores, statusDiarios, feriados, addStatusDiario, recalculateRotation } = useStore();
+  const { colaboradores, statusDiarios, feriados, addStatusDiario, deleteStatusDiario, recalculateRotation } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedColaborador, setSelectedColaborador] = useState<string>('');
   const [selectedDepartamento, setSelectedDepartamento] = useState<string>('');
@@ -638,7 +638,6 @@ export function MonthlyCalendar() {
                     </button>
                   </div>
                 )}
-              </div>
               </div>
             </div>
           </div>
