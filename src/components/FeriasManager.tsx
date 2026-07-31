@@ -2,17 +2,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { Ferias, FeriasStatus, ParcelaFerias } from '../types';
 import { getFerias, saveFerias, cancelFerias } from '../services/feriasService';
-import { setRegistrosBatch } from '../services/firestoreService';
-import { Loader2, Calendar as CalendarIcon, AlertTriangle, RefreshCcw, Plus, Trash2 } from 'lucide-react';
-import { calculateRotationMatrix } from '../services/rotationService';
+import { Loader2, Calendar as CalendarIcon, AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { addDays, differenceInDays, format, getDay, isBefore, isValid, parseISO } from 'date-fns';
 
 export function FeriasManager() {
-    const { colaboradores, feriados, statusDiarios, syncStatusDiarios } = useStore();
+    const { colaboradores } = useStore();
     const [feriasList, setFeriasList] = useState<Ferias[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showRegerarModal, setShowRegerarModal] = useState(false);
-    const [modalMaxTeletrabalho, setModalMaxTeletrabalho] = useState(1);
     
     // Form state
     const [selectedColaborador, setSelectedColaborador] = useState('');
@@ -181,7 +177,7 @@ export function FeriasManager() {
         try {
             await saveFerias(newFerias);
             setFeriasList([...feriasList, newFerias]);
-            alert('Férias salvas com sucesso!');
+            alert('Férias programadas com sucesso. Recalcule o rodízio na aba Calendário Mensal para aplicar as mudanças.');
         } catch (error) {
             alert('Erro ao salvar férias.');
         }
@@ -192,42 +188,10 @@ export function FeriasManager() {
         try {
             await cancelFerias(id);
             setFeriasList(prev => prev.map(f => f.id === id ? { ...f, status: 'cancelado' } : f));
-            alert('Programação de férias cancelada com sucesso!');
+            alert('Férias canceladas. Recalcule o rodízio na aba Calendário Mensal para atualizar a escala.');
         } catch (error) {
             console.error(error);
             alert('Erro ao cancelar férias.');
-        }
-    };
-
-    const handleRegerarEscala = async () => {
-        const programadas = feriasList.filter(f => f.status === 'programado' || f.status === 'aprovado');
-        
-        if (!window.confirm(`Isso irá aplicar ${programadas.length} agendamentos de férias e recalcular o rodízio. Registros manuais (folga/atestado/etc) serão preservados. Deseja continuar?`)) return;
-        
-        setLoading(true);
-        try {
-            const startDate = new Date();
-            const endDate = addDays(startDate, 90);
-            
-            const newMatrix = calculateRotationMatrix(
-                statusDiarios,
-                feriados,
-                colaboradores,
-                startDate,
-                endDate,
-                programadas,
-                modalMaxTeletrabalho
-            );
-            
-            await setRegistrosBatch(newMatrix);
-            syncStatusDiarios(newMatrix);
-            setShowRegerarModal(false);
-            alert("Escala regerada com sucesso!");
-        } catch (error) {
-            console.error(error);
-            alert("Erro ao salvar escala no banco de dados.");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -245,45 +209,7 @@ export function FeriasManager() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-slate-800">Gestão de Férias</h2>
-                <button
-                    onClick={() => setShowRegerarModal(true)}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    <RefreshCcw className="w-4 h-4" />
-                    Regerar Escala
-                </button>
             </div>
-
-            {showRegerarModal && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full">
-                        <h3 className="text-lg font-bold text-slate-900 mb-4">Confirmar Recálculo da Escala</h3>
-                        <div className="bg-amber-50 text-amber-800 p-4 rounded-lg mb-4 text-sm flex gap-3">
-                            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-                            <p>Serão aplicadas as férias com status 'programado' e 'aprovado'. Registros manuais sensíveis não serão perdidos.</p>
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
-                                Limite de Colaboradores em Teletrabalho
-                            </label>
-                            <select
-                                value={modalMaxTeletrabalho}
-                                onChange={e => setModalMaxTeletrabalho(Number(e.target.value))}
-                                className="w-full border-slate-300 rounded-lg text-sm"
-                            >
-                                <option value={1}>1 Colaborador por dia</option>
-                                <option value={2}>2 Colaboradores por dia</option>
-                                <option value={3}>3 Colaboradores por dia</option>
-                                <option value={4}>4 Colaboradores por dia</option>
-                            </select>
-                        </div>
-                        <div className="flex justify-end gap-3">
-                            <button onClick={() => setShowRegerarModal(false)} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg">Cancelar</button>
-                            <button onClick={handleRegerarEscala} className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">Confirmar e Regerar</button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Formulário de Cadastro Compacto */}

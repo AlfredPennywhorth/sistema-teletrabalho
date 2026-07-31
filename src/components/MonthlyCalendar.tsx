@@ -137,6 +137,7 @@ export function MonthlyCalendar() {
         colaboradorId: modalColaborador,
         data: dateStr,
         status: modalStatus,
+        isManual: true,
       };
       
       if (modalObservacao) {
@@ -190,6 +191,7 @@ export function MonthlyCalendar() {
         colaboradorId: newColaboradorId,
         data: dateStr,
         status: newStatus,
+        isManual: true,
       };
       
       await addStatusDiario(statusData);
@@ -205,10 +207,30 @@ export function MonthlyCalendar() {
 
   const weekDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-  const handleRecalculate = () => {
-    if (confirm(`Deseja recalcular a escala de rodízio a partir de ${format(parseISO(rotationStartDate), 'dd/MM/yyyy')} até o final do ano?`)) {
-      recalculateRotation(rotationStartDate, maxTeletrabalho);
+  const handleRecalculate = async () => {
+    const confirmRecalc = window.confirm(
+      `Deseja recalcular o rodízio a partir de ${format(parseISO(rotationStartDate), 'dd/MM/yyyy')} até o final do ano?\n\n` +
+      `• As férias ativas (programadas/aprovadas) serão importadas do Firestore e respeitadas.\n` +
+      `• O limite atual é de no máximo 1 pessoa em teletrabalho por dia útil.\n` +
+      `• Férias, folgas, licenças, atestados e observações manuais serão preservados.`
+    );
+    if (!confirmRecalc) return;
+
+    const sobrescreverManual = window.confirm(
+      `Deseja SOBRESCREVER também os ajustes manuais de Presencial/Teletrabalho feitos anteriormente no modo 'Gerenciar Dia'?\n\n` +
+      `• Clique em 'OK' para SOBRESCREVER e recalcular todos os dias.\n` +
+      `• Clique em 'Cancelar' para MANTER e PRESERVAR seus ajustes manuais.`
+    );
+
+    setIsSaving(true);
+    try {
+      await recalculateRotation(rotationStartDate, 1, sobrescreverManual);
       alert('Rodízio recalculado com sucesso!');
+    } catch (error: any) {
+      console.error(error);
+      alert('Erro ao recalcular rodízio: ' + (error.message || 'Erro desconhecido'));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -261,14 +283,11 @@ export function MonthlyCalendar() {
             Limite Teletrabalho:
           </label>
           <select
-            value={maxTeletrabalho}
-            onChange={(e) => setMaxTeletrabalho(Number(e.target.value))}
-            className="px-3 py-2 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+            value={1}
+            disabled
+            className="px-3 py-2 border border-indigo-200 rounded-lg text-sm bg-indigo-50 text-indigo-800 font-semibold cursor-not-allowed"
           >
-            <option value={1}>1 Colaborador</option>
-            <option value={2}>2 Colaboradores</option>
-            <option value={3}>3 Colaboradores</option>
-            <option value={4}>4 Colaboradores</option>
+            <option value={1}>1 Colaborador (Regra)</option>
           </select>
           <button
             onClick={handleRecalculate}

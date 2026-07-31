@@ -30,6 +30,7 @@ export interface StatusDiario {
   data: string; // YYYY-MM-DD
   status: StatusType;
   observacao?: string;
+  isManual?: boolean;
 }
 
 export interface Feriado {

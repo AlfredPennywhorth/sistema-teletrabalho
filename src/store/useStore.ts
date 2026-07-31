@@ -6,6 +6,7 @@ import {
   updateStatusDiario as fsUpdateStatus, deleteStatusDiario as fsDeleteStatus, setRegistrosBatch as fsSetRegistrosBatch
 } from '../services/firestoreService';
 import { calculateRotationMatrix } from '../services/rotationService';
+import { getFerias } from '../services/feriasService';
 import { parseISO, endOfYear } from 'date-fns';
 
 interface AppState {
@@ -42,7 +43,7 @@ interface AppState {
   setSelectedDepartamento: (departamento: string) => void;
 
   // Rotation
-  recalculateRotation: (startDate: string, maxTeletrabalho?: number) => Promise<void>;
+  recalculateRotation: (startDate: string, maxTeletrabalho?: number, sobrescreverManual?: boolean) => Promise<void>;
   
   // Sync State
   isSyncing: boolean;
@@ -238,20 +239,30 @@ export const useStore = create<AppState>()((set, get) => ({
   setSelectedDepartamento: (departamento) => set({ selectedDepartamento: departamento }),
 
   // Rotation Logic
-  recalculateRotation: async (startDate: string, maxTeletrabalho: number = 1) => {
+  recalculateRotation: async (startDate: string, maxTeletrabalho: number = 1, sobrescreverManual: boolean = false) => {
     const start = parseISO(startDate);
     const end = endOfYear(start);
 
     set({ isSyncing: true });
     try {
+      // 1. Fetch vacations from Firestore
+      const allFerias = await getFerias();
+      
+      // 2. Filter active vacations (programado or aprovado)
+      const activeFerias = allFerias.filter(f => f.status === 'programado' || f.status === 'aprovado');
+
+      // 3. Limit telework count to maximum 1
+      const finalMaxTeletrabalho = Math.min(maxTeletrabalho, 1);
+
       const newStatuses = calculateRotationMatrix(
         get().statusDiarios,
         get().feriados,
         get().colaboradores,
         start,
         end,
-        undefined,
-        maxTeletrabalho
+        activeFerias,
+        finalMaxTeletrabalho,
+        sobrescreverManual
       );
 
       await fsSetRegistrosBatch(newStatuses);
