@@ -41,7 +41,7 @@ export const calculateRotationMatrix = (
     currentData.forEach(s => statusMap.set(`${s.colaboradorId}-${s.data}`, s));
 
     let currentWeekKey = '';
-    const weekTeleworkCount = new Map<string, number>();
+    const weekTeleworkAssignments = new Map<string, string>(); // dateStr -> collaboratorId
 
     while (currentDate <= end) {
         const dateStr = format(currentDate, 'yyyy-MM-dd');
@@ -61,91 +61,82 @@ export const calculateRotationMatrix = (
             continue;
         }
 
-        // Track and reset weekly telework counts
+        // Track and reset weekly telework counts and pre-calculate assignments
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Monday
         const weekKey = format(weekStart, 'yyyy-MM-dd');
         
         if (weekKey !== currentWeekKey) {
             currentWeekKey = weekKey;
-            weekTeleworkCount.clear();
-            
-            // Scan current week's Mon-Fri for any manual/preserved telework days
+            weekTeleworkAssignments.clear();
+
+            // 1. Gather all working days of this week (Monday to Friday) that are not holidays
+            const availableDays: Date[] = [];
             for (let offset = 0; offset < 5; offset++) {
                 const dayOfWk = addDays(weekStart, offset);
-                const dayOfWkStr = format(dayOfWk, 'yyyy-MM-dd');
+                if (!isHoliday(dayOfWk)) {
+                    availableDays.push(dayOfWk);
+                }
+            }
+
+            // 2. Identify manual telework and general leaves for each collaborator this week
+            const assignedCols = new Set<string>();
+            const assignedDates = new Set<string>();
+
+            // Lock in manual/preserved teleworks first
+            availableDays.forEach(day => {
+                const dayStr = format(day, 'yyyy-MM-dd');
                 ROTATION_POOL.forEach(id => {
-                    const s = statusMap.get(`${id}-${dayOfWkStr}`);
+                    const s = statusMap.get(`${id}-${dayStr}`);
                     if (s) {
                         const checkManual = s.isManual && !sobrescreverManual;
                         if (checkManual && s.status === 'teletrabalho') {
-                            weekTeleworkCount.set(id, (weekTeleworkCount.get(id) || 0) + 1);
+                            weekTeleworkAssignments.set(dayStr, id);
+                            assignedCols.add(id);
+                            assignedDates.add(dayStr);
                         }
                     }
                 });
-            }
-        }
-
-        // 1. Identify Unavailable Users (Vacation, etc.) and Manual Teleworkers
-        const unavailableUsers = new Set<string>();
-        const manualTeleworkers = new Set<string>();
-
-        // Exclude collaborators who already reached 1 telework this week
-        ROTATION_POOL.forEach(id => {
-            if ((weekTeleworkCount.get(id) || 0) >= 1) {
-                unavailableUsers.add(id);
-            }
-        });
-
-        ROTATION_POOL.forEach(id => {
-            const s = statusMap.get(`${id}-${dateStr}`);
-            if (s) {
-                const checkManual = s.isManual && !sobrescreverManual;
-                if (checkManual && s.status === 'teletrabalho') {
-                    manualTeleworkers.add(id);
-                } else if (checkManual || !['presencial', 'teletrabalho'].includes(s.status)) {
-                    unavailableUsers.add(id);
-                }
-            }
-        });
-
-        // Also check vacation bookings (feriasProgramadas)
-        if (feriasProgramadas) {
-            feriasProgramadas.forEach(f => {
-                if (f.status !== 'cancelado' && f.parcelas) {
-                    f.parcelas.forEach((p: any) => {
-                        if (p.dataInicio && p.dataFim) {
-                            if (dateStr >= p.dataInicio && dateStr <= p.dataFim) {
-                                unavailableUsers.add(f.colaboradorId);
-                            }
-                        }
-                    });
-                }
             });
+
+            // 3. Prepare remaining days and collaborators for shuffling
+            const remainingDays = availableDays.filter(day => !assignedDates.has(format(day, 'yyyy-MM-dd')));
+            const remainingCols = ROTATION_POOL.filter(id => !assignedCols.has(id));
+
+            // Shuffle remaining days and collaborators randomly
+            const shuffledDays = [...remainingDays].sort(() => Math.random() - 0.5);
+            const shuffledCols = [...remainingCols].sort(() => Math.random() - 0.5);
+
+            // 4. Map remaining collaborators to remaining days (up to 1 telework per day and per week)
+            for (const day of shuffledDays) {
+                const dayStr = format(day, 'yyyy-MM-dd');
+                
+                // Find a collaborator who is available on this day
+                const availableColIndex = shuffledCols.findIndex(id => {
+                    const s = statusMap.get(`${id}-${dayStr}`);
+                    const isManualPresencial = s?.isManual && s?.status === 'presencial' && !sobrescreverManual;
+                    const isOtherStatus = s && !['presencial', 'teletrabalho'].includes(s.status);
+                    
+                    let isOnVacation = false;
+                    if (feriasProgramadas) {
+                        isOnVacation = feriasProgramadas.some(f => 
+                            f.status !== 'cancelado' &&
+                            f.colaboradorId === id && 
+                            f.parcelas?.some((p: any) => p.dataInicio && p.dataFim && dayStr >= p.dataInicio && dayStr <= p.dataFim)
+                        );
+                    }
+                    
+                    return !isManualPresencial && !isOtherStatus && !isOnVacation;
+                });
+                
+                if (availableColIndex !== -1) {
+                    const colId = shuffledCols[availableColIndex];
+                    weekTeleworkAssignments.set(dayStr, colId);
+                    shuffledCols.splice(availableColIndex, 1); // remove from available list for this week
+                }
+            }
         }
 
-        // 2. Determine Rotation Persons (up to maxTeletrabalho who get teletrabalho)
-        const rotationPersonIds = new Set<string>();
-        
-        // Add manual teleworkers first to count them towards the limit
-        manualTeleworkers.forEach(id => {
-            if (rotationPersonIds.size < maxTeletrabalho) {
-                rotationPersonIds.add(id);
-                weekTeleworkCount.set(id, (weekTeleworkCount.get(id) || 0) + 1);
-            }
-        });
-
-        let attempts = 0;
-        while (attempts < ROTATION_POOL.length && rotationPersonIds.size < maxTeletrabalho) {
-            const candidateId = ROTATION_POOL[rotationIndex % ROTATION_POOL.length];
-            if (!unavailableUsers.has(candidateId) && !manualTeleworkers.has(candidateId)) {
-                rotationPersonIds.add(candidateId);
-                weekTeleworkCount.set(candidateId, (weekTeleworkCount.get(candidateId) || 0) + 1);
-            }
-            rotationIndex++;
-            attempts++;
-        }
-
-        // 3. Generate Statuses
+        // 5. Generate Statuses
         colaboradores.forEach(col => {
             // Check if on vacation in programadas
             let isOnVacation = false;
@@ -180,7 +171,7 @@ export const calculateRotationMatrix = (
             // Padrão é presencial.
             let status: 'presencial' | 'teletrabalho' = 'presencial';
 
-            if (rotationPersonIds.has(col.id)) {
+            if (weekTeleworkAssignments.get(dateStr) === col.id) {
                 status = 'teletrabalho';
             }
 
