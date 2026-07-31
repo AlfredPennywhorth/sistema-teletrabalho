@@ -3,7 +3,8 @@ import {
     isSaturday,
     isSunday,
     format,
-    startOfDay
+    startOfDay,
+    startOfWeek
 } from 'date-fns';
 import { StatusDiario, Feriado, Colaborador } from '../types';
 
@@ -39,6 +40,9 @@ export const calculateRotationMatrix = (
     const statusMap = new Map<string, StatusDiario>();
     currentData.forEach(s => statusMap.set(`${s.colaboradorId}-${s.data}`, s));
 
+    let currentWeekKey = '';
+    const weekTeleworkCount = new Map<string, number>();
+
     while (currentDate <= end) {
         const dateStr = format(currentDate, 'yyyy-MM-dd');
         const isWknd = isWeekendDay(currentDate);
@@ -57,9 +61,40 @@ export const calculateRotationMatrix = (
             continue;
         }
 
+        // Track and reset weekly telework counts
+        const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Monday
+        const weekKey = format(weekStart, 'yyyy-MM-dd');
+        
+        if (weekKey !== currentWeekKey) {
+            currentWeekKey = weekKey;
+            weekTeleworkCount.clear();
+            
+            // Scan current week's Mon-Fri for any manual/preserved telework days
+            for (let offset = 0; offset < 5; offset++) {
+                const dayOfWk = addDays(weekStart, offset);
+                const dayOfWkStr = format(dayOfWk, 'yyyy-MM-dd');
+                ROTATION_POOL.forEach(id => {
+                    const s = statusMap.get(`${id}-${dayOfWkStr}`);
+                    if (s) {
+                        const checkManual = s.isManual && !sobrescreverManual;
+                        if (checkManual && s.status === 'teletrabalho') {
+                            weekTeleworkCount.set(id, (weekTeleworkCount.get(id) || 0) + 1);
+                        }
+                    }
+                });
+            }
+        }
+
         // 1. Identify Unavailable Users (Vacation, etc.) and Manual Teleworkers
         const unavailableUsers = new Set<string>();
         const manualTeleworkers = new Set<string>();
+
+        // Exclude collaborators who already reached 1 telework this week
+        ROTATION_POOL.forEach(id => {
+            if ((weekTeleworkCount.get(id) || 0) >= 1) {
+                unavailableUsers.add(id);
+            }
+        });
 
         ROTATION_POOL.forEach(id => {
             const s = statusMap.get(`${id}-${dateStr}`);
@@ -95,6 +130,7 @@ export const calculateRotationMatrix = (
         manualTeleworkers.forEach(id => {
             if (rotationPersonIds.size < maxTeletrabalho) {
                 rotationPersonIds.add(id);
+                weekTeleworkCount.set(id, (weekTeleworkCount.get(id) || 0) + 1);
             }
         });
 
@@ -103,6 +139,7 @@ export const calculateRotationMatrix = (
             const candidateId = ROTATION_POOL[rotationIndex % ROTATION_POOL.length];
             if (!unavailableUsers.has(candidateId) && !manualTeleworkers.has(candidateId)) {
                 rotationPersonIds.add(candidateId);
+                weekTeleworkCount.set(candidateId, (weekTeleworkCount.get(candidateId) || 0) + 1);
             }
             rotationIndex++;
             attempts++;
