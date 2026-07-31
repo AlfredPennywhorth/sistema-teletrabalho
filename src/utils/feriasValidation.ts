@@ -9,7 +9,7 @@ export interface ValidationResult {
 
 export function validateFerias(
   ferias: Omit<Ferias, 'id' | 'status'>,
-  feriados: Feriado[]
+  feriados: Feriado[] = []
 ): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -40,6 +40,8 @@ export function validateFerias(
   const parcelasOrdenadas = [...parcelasValidas].sort(
     (a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime()
   );
+
+  const safeFeriados = feriados || [];
 
   parcelasOrdenadas.forEach((p, i) => {
     const dInicio = parseISO(p.dataInicio);
@@ -82,9 +84,9 @@ export function validateFerias(
       const next1 = format(addDays(dInicio, 1), 'yyyy-MM-dd');
       const next2 = format(addDays(dInicio, 2), 'yyyy-MM-dd');
 
-      const isHol = feriados.some(f => f.data === dateStr);
-      const isVespera1 = feriados.some(f => f.data === next1);
-      const isVespera2 = feriados.some(f => f.data === next2);
+      const isHol = safeFeriados.some(f => f.data === dateStr);
+      const isVespera1 = safeFeriados.some(f => f.data === next1);
+      const isVespera2 = safeFeriados.some(f => f.data === next2);
 
       if (isHol) {
         errors.push(`Parcela ${i + 1} não pode iniciar em feriado.`);

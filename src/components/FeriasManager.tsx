@@ -114,6 +114,11 @@ export function FeriasManager() {
     };
 
     const validateForm = () => {
+        if (!selectedColaborador) {
+            setErrors(['Selecione um colaborador antes de salvar.']);
+            return false;
+        }
+
         const result = validateFerias({
             colaboradorId: selectedColaborador,
             periodoAquisitivoInicio: periodoInicio,
@@ -125,7 +130,7 @@ export function FeriasManager() {
             antecipar13,
             parcelas,
             observacao
-        }, feriados);
+        }, feriados || []);
 
         setErrors(result.errors);
         setWarnings(result.warnings);
@@ -420,20 +425,21 @@ export function FeriasManager() {
                                                             <>
                                                                 <button
                                                                     onClick={() => handleEditFerias(f)}
+                                                                    disabled={!editCheck.editable}
                                                                     className={cn(
                                                                         "p-1 rounded transition-colors inline-flex",
                                                                         editCheck.editable 
-                                                                            ? "text-slate-400 hover:text-blue-600 hover:bg-blue-50" 
-                                                                            : "text-slate-200 cursor-not-allowed"
+                                                                            ? "text-blue-500 hover:text-blue-700 hover:bg-blue-50" 
+                                                                            : "text-slate-300 cursor-not-allowed opacity-50"
                                                                     )}
-                                                                    title={editCheck.editable ? "Editar férias" : editCheck.reason}
+                                                                    title={editCheck.editable ? "Editar férias" : (editCheck.reason || 'Não editável')}
                                                                 >
                                                                     <Pencil className="w-4 h-4" />
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleCancel(f.id)}
                                                                     className="p-1 text-slate-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-colors inline-flex"
-                                                                    title="Cancelar férias"
+                                                                    title="Cancelar programação de férias"
                                                                 >
                                                                     <Trash2 className="w-4 h-4" />
                                                                 </button>
