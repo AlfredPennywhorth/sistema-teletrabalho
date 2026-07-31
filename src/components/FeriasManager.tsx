@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { Ferias, FeriasStatus, ParcelaFerias } from '../types';
 import { getFerias, saveFerias, cancelFerias } from '../services/feriasService';
+import { setRegistrosBatch } from '../services/firestoreService';
 import { Loader2, Calendar as CalendarIcon, AlertTriangle, RefreshCcw, Plus, Trash2 } from 'lucide-react';
 import { calculateRotationMatrix } from '../services/rotationService';
 import { addDays, differenceInDays, format, getDay, isBefore, isValid, parseISO } from 'date-fns';
@@ -203,22 +204,31 @@ export function FeriasManager() {
         
         if (!window.confirm(`Isso irá aplicar ${programadas.length} agendamentos de férias e recalcular o rodízio. Registros manuais (folga/atestado/etc) serão preservados. Deseja continuar?`)) return;
         
-        const startDate = new Date();
-        const endDate = addDays(startDate, 90);
-        
-        const newMatrix = calculateRotationMatrix(
-            statusDiarios,
-            feriados,
-            colaboradores,
-            startDate,
-            endDate,
-            programadas,
-            modalMaxTeletrabalho
-        );
-        
-        syncStatusDiarios(newMatrix);
-        setShowRegerarModal(false);
-        alert("Escala regerada com sucesso!");
+        setLoading(true);
+        try {
+            const startDate = new Date();
+            const endDate = addDays(startDate, 90);
+            
+            const newMatrix = calculateRotationMatrix(
+                statusDiarios,
+                feriados,
+                colaboradores,
+                startDate,
+                endDate,
+                programadas,
+                modalMaxTeletrabalho
+            );
+            
+            await setRegistrosBatch(newMatrix);
+            syncStatusDiarios(newMatrix);
+            setShowRegerarModal(false);
+            alert("Escala regerada com sucesso!");
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao salvar escala no banco de dados.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (loading) {
