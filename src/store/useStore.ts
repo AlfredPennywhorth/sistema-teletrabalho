@@ -42,8 +42,8 @@ interface AppState {
   setSelectedDepartamento: (departamento: string) => void;
 
   // Rotation
-  recalculateRotation: (startDate: string) => Promise<void>;
-
+  recalculateRotation: (startDate: string, maxTeletrabalho?: number) => Promise<void>;
+  
   // Sync State
   isSyncing: boolean;
   setIsSyncing: (syncing: boolean) => void;
@@ -238,7 +238,7 @@ export const useStore = create<AppState>()((set, get) => ({
   setSelectedDepartamento: (departamento) => set({ selectedDepartamento: departamento }),
 
   // Rotation Logic
-  recalculateRotation: async (startDate: string) => {
+  recalculateRotation: async (startDate: string, maxTeletrabalho: number = 1) => {
     const start = parseISO(startDate);
     const end = endOfYear(start);
 
@@ -249,7 +249,9 @@ export const useStore = create<AppState>()((set, get) => ({
         get().feriados,
         get().colaboradores,
         start,
-        end
+        end,
+        undefined,
+        maxTeletrabalho
       );
 
       await fsSetRegistrosBatch(newStatuses);

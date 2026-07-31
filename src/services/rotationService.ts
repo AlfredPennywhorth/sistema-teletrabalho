@@ -16,7 +16,9 @@ export const calculateRotationMatrix = (
     feriados: Feriado[],
     colaboradores: Colaborador[],
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    feriasProgramadas?: any[],
+    maxTeletrabalho: number = 1
 ): StatusDiario[] => {
     const newStatuses: StatusDiario[] = [];
     let rotationIndex = 0;
@@ -66,39 +68,72 @@ export const calculateRotationMatrix = (
             }
         });
 
-        // 2. Determine Rotation Person (the ONE who gets teletrabalho)
-        let rotationPersonId = '';
+        // Also check vacation bookings (feriasProgramadas)
+        if (feriasProgramadas) {
+            feriasProgramadas.forEach(f => {
+                if (f.status !== 'cancelado' && f.parcelas) {
+                    f.parcelas.forEach((p: any) => {
+                        if (p.dataInicio && p.dataFim) {
+                            if (dateStr >= p.dataInicio && dateStr <= p.dataFim) {
+                                unavailableUsers.add(f.colaboradorId);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // 2. Determine Rotation Persons (up to maxTeletrabalho who get teletrabalho)
+        const rotationPersonIds = new Set<string>();
         let attempts = 0;
         
-        while (attempts < ROTATION_POOL.length) {
+        while (attempts < ROTATION_POOL.length && rotationPersonIds.size < maxTeletrabalho) {
             const candidateId = ROTATION_POOL[rotationIndex % ROTATION_POOL.length];
             if (!unavailableUsers.has(candidateId)) {
-                rotationPersonId = candidateId;
-                rotationIndex++;
-                break;
-            } else {
-                rotationIndex++;
+                rotationPersonIds.add(candidateId);
             }
+            rotationIndex++;
             attempts++;
         }
 
         // 3. Generate Statuses
         colaboradores.forEach(col => {
+            // Check if on vacation in programadas
+            let isOnVacation = false;
+            if (feriasProgramadas) {
+                isOnVacation = feriasProgramadas.some(f => 
+                    f.status !== 'cancelado' &&
+                    f.colaboradorId === col.id && 
+                    f.parcelas?.some((p: any) => p.dataInicio && p.dataFim && dateStr >= p.dataInicio && dateStr <= p.dataFim)
+                );
+            }
+
+            if (isOnVacation) {
+                newStatuses.push({
+                    id: `${col.id}-${dateStr}`,
+                    colaboradorId: col.id,
+                    data: dateStr,
+                    status: 'ferias',
+                    observacao: 'Férias Programadas'
+                });
+                return;
+            }
+
             const existing = statusMap.get(`${col.id}-${dateStr}`);
-            // Preserva registros manuais ou ausências
+            // Preserva registros manuais ou ausências (diferentes de presencial/teletrabalho)
             if (existing && !['presencial', 'teletrabalho'].includes(existing.status)) {
                 newStatuses.push(existing);
                 return;
             }
 
-            // Padrão é presencial. Apenas o rotationPersonId ganha teletrabalho.
+            // Padrão é presencial.
             let status: 'presencial' | 'teletrabalho' = 'presencial';
 
-            if (col.id === rotationPersonId) {
+            if (rotationPersonIds.has(col.id)) {
                 status = 'teletrabalho';
             }
 
-            // O Ouvidor nunca pode estar em teletrabalho, mesmo que estivesse no pool
+            // O Ouvidor nunca pode estar em teletrabalho
             if (col.id === FIXED_PERSON_ID) {
                 status = 'presencial';
             }
@@ -108,7 +143,6 @@ export const calculateRotationMatrix = (
                 colaboradorId: col.id,
                 data: dateStr,
                 status,
-                // Preserva a observação se já existia (registro manual)
                 observacao: existing?.observacao
             });
         });

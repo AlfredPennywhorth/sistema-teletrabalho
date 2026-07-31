@@ -11,6 +11,7 @@ export function FeriasManager() {
     const [feriasList, setFeriasList] = useState<Ferias[]>([]);
     const [loading, setLoading] = useState(true);
     const [showRegerarModal, setShowRegerarModal] = useState(false);
+    const [modalMaxTeletrabalho, setModalMaxTeletrabalho] = useState(1);
     
     // Form state
     const [selectedColaborador, setSelectedColaborador] = useState('');
@@ -211,7 +212,8 @@ export function FeriasManager() {
             colaboradores,
             startDate,
             endDate,
-            programadas
+            programadas,
+            modalMaxTeletrabalho
         );
         
         syncStatusDiarios(newMatrix);
@@ -249,6 +251,21 @@ export function FeriasManager() {
                         <div className="bg-amber-50 text-amber-800 p-4 rounded-lg mb-4 text-sm flex gap-3">
                             <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                             <p>Serão aplicadas as férias com status 'programado' e 'aprovado'. Registros manuais sensíveis não serão perdidos.</p>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+                                Limite de Colaboradores em Teletrabalho
+                            </label>
+                            <select
+                                value={modalMaxTeletrabalho}
+                                onChange={e => setModalMaxTeletrabalho(Number(e.target.value))}
+                                className="w-full border-slate-300 rounded-lg text-sm"
+                            >
+                                <option value={1}>1 Colaborador por dia</option>
+                                <option value={2}>2 Colaboradores por dia</option>
+                                <option value={3}>3 Colaboradores por dia</option>
+                                <option value={4}>4 Colaboradores por dia</option>
+                            </select>
                         </div>
                         <div className="flex justify-end gap-3">
                             <button onClick={() => setShowRegerarModal(false)} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg">Cancelar</button>

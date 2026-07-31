@@ -40,6 +40,7 @@ export function MonthlyCalendar() {
   const [modalStatus, setModalStatus] = useState<StatusType>('presencial');
   const [modalObservacao, setModalObservacao] = useState('');
   const [rotationStartDate, setRotationStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
+  const [maxTeletrabalho, setMaxTeletrabalho] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   
   // Novos estados para Gerenciamento do Dia
@@ -206,7 +207,7 @@ export function MonthlyCalendar() {
 
   const handleRecalculate = () => {
     if (confirm(`Deseja recalcular a escala de rodízio a partir de ${format(parseISO(rotationStartDate), 'dd/MM/yyyy')} até o final do ano?`)) {
-      recalculateRotation(rotationStartDate);
+      recalculateRotation(rotationStartDate, maxTeletrabalho);
       alert('Rodízio recalculado com sucesso!');
     }
   };
@@ -256,6 +257,19 @@ export function MonthlyCalendar() {
             onChange={(e) => setRotationStartDate(e.target.value)}
             className="px-3 py-2 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
           />
+          <label className="text-sm font-medium text-indigo-700 whitespace-nowrap">
+            Limite Teletrabalho:
+          </label>
+          <select
+            value={maxTeletrabalho}
+            onChange={(e) => setMaxTeletrabalho(Number(e.target.value))}
+            className="px-3 py-2 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+          >
+            <option value={1}>1 Colaborador</option>
+            <option value={2}>2 Colaboradores</option>
+            <option value={3}>3 Colaboradores</option>
+            <option value={4}>4 Colaboradores</option>
+          </select>
           <button
             onClick={handleRecalculate}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium whitespace-nowrap"
