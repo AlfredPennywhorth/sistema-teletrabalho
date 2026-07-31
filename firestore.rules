@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Regra padrão de negação de acesso para qualquer rota não mapeada
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Coleção de Colaboradores
+    match /colaboradores/{colaboradorId} {
+      allow read, write: if request.auth != null;
+      // TODO: Futuramente restringir escrita (criação, edição, deleção) apenas para perfis Administrador/Gestor
+    }
+
+    // Coleção de Feriados
+    match /feriados/{feriadoId} {
+      allow read, write: if request.auth != null;
+      // TODO: Futuramente restringir escrita apenas para perfis Administrador/Gestor
+    }
+
+    // Coleção de Férias (ferias)
+    match /ferias/{feriasId} {
+      allow read, create, update: if request.auth != null;
+      // Bloqueio completo de exclusão física de férias - o cancelamento deve ser lógico via status = 'cancelado'
+      allow delete: if false;
+      // TODO: Futuramente restringir criação e edição apenas para perfis Administrador/Gestor
+    }
+
+    // Coleção de Registros (Status Diários de Escala)
+    match /registros/{registroId} {
+      allow read, write: if request.auth != null;
+      // TODO: Futuramente restringir edição e exclusão apenas para perfis de gestão
+    }
+  }
+}

@@ -8,6 +8,7 @@ import {
   Pencil,
   RefreshCw,
   Loader2,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   format,
@@ -47,6 +48,16 @@ export function MonthlyCalendar() {
   const [viewMode, setViewMode] = useState<'day' | 'edit'>('day');
   const [newColaboradorId, setNewColaboradorId] = useState('');
   const [newStatus, setNewStatus] = useState<StatusType>('presencial');
+
+  const currentExistingStatus = useMemo(() => {
+    if (!modalDate || !modalColaborador) return null;
+    const dateStr = format(modalDate, 'yyyy-MM-dd');
+    return statusDiarios.find(s => s.data === dateStr && s.colaboradorId === modalColaborador);
+  }, [modalDate, modalColaborador, statusDiarios]);
+
+  const isEditingDisabled = useMemo(() => {
+    return currentExistingStatus ? ['ferias', 'folga', 'licenca', 'atestado'].includes(currentExistingStatus.status) : false;
+  }, [currentExistingStatus]);
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],
@@ -485,6 +496,12 @@ export function MonthlyCalendar() {
                 {viewMode === 'edit' ? (
                   // MODO EDIÇÃO INDIVIDUAL
                   <div className="space-y-4">
+                    {isEditingDisabled && currentExistingStatus && (
+                      <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg text-xs flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
+                        <span>Este registro de {STATUS_CONFIG[currentExistingStatus.status].label} não pode ser alterado ou apagado pelo calendário.</span>
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">
                         Colaborador
@@ -500,7 +517,8 @@ export function MonthlyCalendar() {
                       <select
                         value={modalStatus}
                         onChange={(e) => setModalStatus(e.target.value as StatusType)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={isEditingDisabled}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
                       >
                         {Object.entries(STATUS_CONFIG).map(([key, config]) => (
                           <option key={key} value={key}>{config.label}</option>
@@ -514,9 +532,10 @@ export function MonthlyCalendar() {
                       <textarea
                         value={modalObservacao}
                         onChange={(e) => setModalObservacao(e.target.value)}
+                        disabled={isEditingDisabled}
                         rows={3}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                        placeholder="Adicione uma observação (opcional)"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-slate-100 disabled:text-slate-500"
+                        placeholder={isEditingDisabled ? "Alteração de observações bloqueada para status sensíveis." : "Adicione uma observação (opcional)"}
                       />
                     </div>
                   </div>
@@ -554,13 +573,6 @@ export function MonthlyCalendar() {
                                     title="Editar status"
                                   >
                                     <RefreshCw className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteStatus(col.id)}
-                                    className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors"
-                                    title="Remover deste dia"
-                                  >
-                                    <X className="w-4 h-4" />
                                   </button>
                                 </div>
                               </div>
@@ -624,43 +636,34 @@ export function MonthlyCalendar() {
                   </div>
                 )}
                 <div role="alert" className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-2">
-                  Exclusão de colaboradores na escala está bloqueada. Use apenas a edição para correções.
+                  O status de teletrabalho e presencial pode ser ajustado. Modificações de férias, folgas e licenças devem ser feitas pelos seus respectivos gerenciadores.
                 </div>
               </div>
-              <div className="flex items-center justify-between p-4 border-t border-slate-200 shrink-0">
+              <div className="flex items-center justify-end p-4 border-t border-slate-200 shrink-0">
                 {viewMode === 'edit' ? (
-                  <>
+                  <div className="flex gap-2">
                     <button
-                      onClick={() => handleDeleteStatus()}
-                      disabled={isSaving}
-                      className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                      onClick={() => {
+                        if (modalColaborador) setViewMode('day');
+                        else setShowModal(false);
+                      }}
+                      className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition-colors text-sm"
                     >
-                      Remover deste dia
+                      Voltar
                     </button>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          if (modalColaborador) setViewMode('day');
-                          else setShowModal(false);
-                        }}
-                        className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition-colors text-sm"
-                      >
-                        Voltar
-                      </button>
-                      <button
-                        onClick={handleSaveStatus}
-                        disabled={isSaving}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50 text-sm"
-                      >
-                        {isSaving ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Plus className="w-4 h-4" />
-                        )}
-                        Salvar
-                      </button>
-                    </div>
-                  </>
+                    <button
+                      onClick={handleSaveStatus}
+                      disabled={isSaving || isEditingDisabled}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2 disabled:opacity-50 text-sm"
+                    >
+                      {isSaving ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
+                      Salvar
+                    </button>
+                  </div>
                 ) : (
                   <div className="w-full flex justify-end">
                     <button

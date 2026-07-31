@@ -4,9 +4,10 @@ import { Ferias, FeriasStatus, ParcelaFerias } from '../types';
 import { getFerias, saveFerias, cancelFerias } from '../services/feriasService';
 import { Loader2, Calendar as CalendarIcon, AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { addDays, differenceInDays, format, getDay, isBefore, isValid, parseISO } from 'date-fns';
+import { validateFerias } from '../utils/feriasValidation';
 
 export function FeriasManager() {
-    const { colaboradores } = useStore();
+    const { colaboradores, feriados } = useStore();
     const [feriasList, setFeriasList] = useState<Ferias[]>([]);
     const [loading, setLoading] = useState(true);
     
@@ -66,94 +67,23 @@ export function FeriasManager() {
     };
 
     const validateForm = () => {
-        const newErrors: string[] = [];
-        const newWarnings: string[] = [];
-        
-        if (!selectedColaborador) newErrors.push('Colaborador é obrigatório.');
-        
-        let totalDias = 0;
-        let has14Days = false;
-        
-        // Ordena parcelas por data de início para validar sobreposição
-        const parcelasValidas = parcelas.filter(p => p.dataInicio && p.dataFim);
-        
-        if (parcelasValidas.length !== parcelas.length) {
-            newErrors.push('Todas as parcelas devem ter data de início e fim preenchidas.');
-        }
+        const result = validateFerias({
+            colaboradorId: selectedColaborador,
+            periodoAquisitivoInicio: periodoInicio,
+            periodoAquisitivoFim: periodoFim,
+            diasDireito,
+            abonoPecuniario,
+            diasAbono,
+            diasDescanso,
+            antecipar13,
+            parcelas,
+            observacao
+        }, feriados);
 
-        const parcelasOrdenadas = [...parcelasValidas].sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
+        setErrors(result.errors);
+        setWarnings(result.warnings);
 
-        parcelasOrdenadas.forEach((p, i) => {
-            const dInicio = parseISO(p.dataInicio);
-            const dFim = parseISO(p.dataFim);
-
-            if (isValid(dInicio) && isValid(dFim)) {
-                if (isBefore(dFim, dInicio)) {
-                    newErrors.push(`Parcela ${i + 1}: Data fim não pode ser anterior à data de início.`);
-                }
-            }
-
-            totalDias += p.dias;
-            if (p.dias >= 14) has14Days = true;
-            if (p.dias > 0 && p.dias < 5) newErrors.push(`Parcela ${i + 1} deve ter no mínimo 5 dias.`);
-            
-            if (i > 0) {
-                const prevFim = parseISO(parcelasOrdenadas[i - 1].dataFim);
-                if (isValid(prevFim) && isValid(dInicio)) {
-                    if (dInicio <= prevFim) {
-                        newErrors.push('Há sobreposição entre períodos de férias. Ajuste as datas antes de salvar.');
-                    }
-                }
-            }
-
-            if (p.dataInicio) {
-                const date = dInicio;
-                const dayOfWeek = getDay(date); // 0=Sun, 1=Mon, ..., 6=Sat
-                if (dayOfWeek === 0 || dayOfWeek === 6) newErrors.push(`Parcela ${i + 1} não pode iniciar no fim de semana.`);
-                if (dayOfWeek === 4 || dayOfWeek === 5) newErrors.push(`Parcela ${i + 1} não pode iniciar em quinta ou sexta-feira.`);
-                
-                // check feriados and vespera
-                const dateStr = format(date, 'yyyy-MM-dd');
-                const next1 = format(addDays(date, 1), 'yyyy-MM-dd');
-                const next2 = format(addDays(date, 2), 'yyyy-MM-dd');
-                
-                const isHol = feriados.some(f => f.data === dateStr);
-                const isVespera1 = feriados.some(f => f.data === next1);
-                const isVespera2 = feriados.some(f => f.data === next2);
-                
-                if (isHol) newErrors.push(`Parcela ${i + 1} não pode iniciar em feriado.`);
-                if (isVespera1 || isVespera2) newErrors.push(`Parcela ${i + 1} não pode iniciar nos 2 dias que antecedem um feriado.`);
-                
-                // Warnings
-                const daysDiff = differenceInDays(date, new Date());
-                if (daysDiff < 30 && daysDiff >= 0) newWarnings.push(`Parcela ${i + 1} inicia em menos de 30 dias.`);
-                
-                if (antecipar13 && date.getMonth() === 0) {
-                    newWarnings.push(`Antecipação de 13º marcada para janeiro (Verificar norma).`);
-                }
-            }
-        });
-        
-        if (totalDias !== diasDescanso) {
-            newErrors.push(`A soma dos dias (${totalDias}) deve ser igual a ${diasDescanso} (Direito: ${diasDireito} - Abono: ${diasAbono}).`);
-        }
-        
-        if (parcelas.length > 1 && !has14Days) {
-            newErrors.push('No fracionamento, ao menos uma parcela deve ter 14 dias ou mais.');
-        }
-
-        if (abonoPecuniario) {
-            const today = new Date();
-            const aquisitivoFim = parseISO(periodoFim);
-            if (isValid(aquisitivoFim) && differenceInDays(aquisitivoFim, today) < 15) {
-                newWarnings.push('Abono pecuniário solicitado com menos de 15 dias do vencimento do período aquisitivo.');
-            }
-        }
-        
-        setErrors(newErrors);
-        setWarnings(newWarnings);
-        
-        return newErrors.length === 0;
+        return result.valid;
     };
 
     const handleSave = async () => {

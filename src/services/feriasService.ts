@@ -1,6 +1,8 @@
-import { collection, doc, setDoc, getDocs, getDoc, updateDoc, query, where, deleteDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Ferias, FeriasStatus } from '../types';
+import { validateFerias } from '../utils/feriasValidation';
+import { getFeriados } from './firestoreService';
 
 export const getFerias = async (): Promise<Ferias[]> => {
     try {
@@ -26,6 +28,13 @@ export const getFeriasByColaborador = async (colaboradorId: string): Promise<Fer
 
 export const saveFerias = async (ferias: Ferias): Promise<void> => {
     try {
+        const feriados = await getFeriados();
+        const validation = validateFerias(ferias, feriados);
+
+        if (!validation.valid) {
+            throw new Error(`Validação de férias inválida: ${validation.errors.join(' | ')}`);
+        }
+
         const docRef = doc(db, 'ferias', ferias.id);
         const dataToSave = { ...ferias };
         
