@@ -71,34 +71,40 @@ export function validateFerias(
     }
 
     if (p.dataInicio) {
-      const dayOfWeek = getDay(dInicio); // 0=Sun, 1=Mon, ..., 6=Sat
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
-        errors.push(`Parcela ${i + 1} não pode iniciar no fim de semana.`);
-      }
-      if (dayOfWeek === 4 || dayOfWeek === 5) {
-        errors.push(`Parcela ${i + 1} não pode iniciar em quinta ou sexta-feira.`);
-      }
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+      const isPast = p.dataInicio <= todayStr;
 
-      // Check feriados e vésperas
-      const dateStr = format(dInicio, 'yyyy-MM-dd');
-      const next1 = format(addDays(dInicio, 1), 'yyyy-MM-dd');
-      const next2 = format(addDays(dInicio, 2), 'yyyy-MM-dd');
+      // Não valida regras de dia/feriado para parcelas já passadas (histórico protegido)
+      if (!isPast) {
+        const dayOfWeek = getDay(dInicio); // 0=Sun, 1=Mon, ..., 6=Sat
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          errors.push(`Parcela ${i + 1} não pode iniciar no fim de semana.`);
+        }
+        if (dayOfWeek === 4 || dayOfWeek === 5) {
+          errors.push(`Parcela ${i + 1} não pode iniciar em quinta ou sexta-feira.`);
+        }
 
-      const isHol = safeFeriados.some(f => f.data === dateStr);
-      const isVespera1 = safeFeriados.some(f => f.data === next1);
-      const isVespera2 = safeFeriados.some(f => f.data === next2);
+        // Check feriados e vésperas
+        const dateStr = format(dInicio, 'yyyy-MM-dd');
+        const next1 = format(addDays(dInicio, 1), 'yyyy-MM-dd');
+        const next2 = format(addDays(dInicio, 2), 'yyyy-MM-dd');
 
-      if (isHol) {
-        errors.push(`Parcela ${i + 1} não pode iniciar em feriado.`);
-      }
-      if (isVespera1 || isVespera2) {
-        errors.push(`Parcela ${i + 1} não pode iniciar nos 2 dias que antecedem um feriado.`);
-      }
+        const isHol = safeFeriados.some(f => f.data === dateStr);
+        const isVespera1 = safeFeriados.some(f => f.data === next1);
+        const isVespera2 = safeFeriados.some(f => f.data === next2);
 
-      // Warnings
-      const daysDiff = differenceInDays(dInicio, new Date());
-      if (daysDiff < 30 && daysDiff >= 0) {
-        warnings.push(`Parcela ${i + 1} inicia em menos de 30 dias.`);
+        if (isHol) {
+          errors.push(`Parcela ${i + 1} não pode iniciar em feriado.`);
+        }
+        if (isVespera1 || isVespera2) {
+          errors.push(`Parcela ${i + 1} não pode iniciar nos 2 dias que antecedem um feriado.`);
+        }
+
+        // Aviso de prazo curto
+        const daysDiff = differenceInDays(dInicio, new Date());
+        if (daysDiff < 30 && daysDiff >= 0) {
+          warnings.push(`Parcela ${i + 1} inicia em menos de 30 dias.`);
+        }
       }
 
       if (antecipar13 && dInicio.getMonth() === 0) {

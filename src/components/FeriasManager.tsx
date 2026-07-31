@@ -20,6 +20,8 @@ export function FeriasManager() {
     const [parcelas, setParcelas] = useState<ParcelaFerias[]>([{ dataInicio: '', dataFim: '', dias: 0 }]);
     const [observacao, setObservacao] = useState('');
     const [editingFeriasId, setEditingFeriasId] = useState<string | null>(null);
+    // Índices de parcelas bloqueadas (já iniciadas) no modo edição
+    const [lockedParcelaIndices, setLockedParcelaIndices] = useState<number[]>([]);
     
     const [errors, setErrors] = useState<string[]>([]);
     const [warnings, setWarnings] = useState<string[]>([]);
@@ -72,9 +74,9 @@ export function FeriasManager() {
             return { editable: false, reason: 'Programações canceladas ou concluídas não podem ser editadas.' };
         }
         const todayStr = format(new Date(), 'yyyy-MM-dd');
-        const hasStarted = ferias.parcelas?.some(p => p.dataInicio && p.dataInicio <= todayStr);
-        if (hasStarted) {
-            return { editable: false, reason: 'Esta programação possui período já iniciado ou concluído. Para preservar o histórico, edite apenas programações futuras ou faça nova reprogramação.' };
+        const allStarted = ferias.parcelas?.every(p => p.dataInicio && p.dataInicio <= todayStr);
+        if (allStarted) {
+            return { editable: false, reason: 'Todas as parcelas já foram iniciadas. Não é possível editar.' };
         }
         return { editable: true };
     };
@@ -88,6 +90,11 @@ export function FeriasManager() {
         if (ferias.status === 'aprovado') {
             alert('Esta programação já está aprovada. Alterações exigem novo recálculo do rodízio no Calendário Mensal.');
         }
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        const locked = ferias.parcelas
+            ?.map((p, i) => (p.dataInicio && p.dataInicio <= todayStr ? i : -1))
+            .filter(i => i >= 0) ?? [];
+        setLockedParcelaIndices(locked);
         setEditingFeriasId(ferias.id);
         setSelectedColaborador(ferias.colaboradorId);
         setPeriodoInicio(ferias.periodoAquisitivoInicio);
@@ -111,6 +118,7 @@ export function FeriasManager() {
         setErrors([]);
         setWarnings([]);
         setEditingFeriasId(null);
+        setLockedParcelaIndices([]);
     };
 
     const validateForm = () => {
@@ -144,6 +152,14 @@ export function FeriasManager() {
         const currentFerias = feriasList.find(f => f.id === editingFeriasId);
         const createdAt = currentFerias?.createdAt || new Date().toISOString();
 
+        // Preserva parcelas passadas exatamente como estão no registro original
+        const parcelasProtegidas = parcelas.map((p, i) => {
+            if (lockedParcelaIndices.includes(i) && currentFerias) {
+                return currentFerias.parcelas[i]; // dado original inalterado
+            }
+            return p;
+        });
+
         const newFerias: Ferias = {
             id: editingFeriasId || crypto.randomUUID(),
             colaboradorId: selectedColaborador,
@@ -154,7 +170,7 @@ export function FeriasManager() {
             diasAbono,
             diasDescanso,
             antecipar13,
-            parcelas,
+            parcelas: parcelasProtegidas,
             status: currentFerias?.status || 'programado',
             observacao,
             createdAt,
@@ -260,18 +276,25 @@ export function FeriasManager() {
                             </div>
                             
                             <div className="space-y-2">
-                                {parcelas.map((p, i) => (
-                                    <div key={i} className="flex items-center gap-2">
-                                        <input type="date" value={p.dataInicio} onChange={e => handleParcelaChange(i, 'dataInicio', e.target.value)} className="w-full border-slate-300 rounded-lg text-xs py-1 px-1.5"/>
-                                        <input type="date" value={p.dataFim} onChange={e => handleParcelaChange(i, 'dataFim', e.target.value)} className="w-full border-slate-300 rounded-lg text-xs py-1 px-1.5"/>
-                                        <span className="text-xs font-medium w-16 text-center shrink-0">{p.dias} dias</span>
-                                        {parcelas.length > 1 && (
-                                            <button onClick={() => removeParcela(i)} className="text-red-500 hover:text-red-700 shrink-0">
-                                                <Trash2 className="w-4 h-4"/>
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
+                                {parcelas.map((p, i) => {
+                                    const isLocked = lockedParcelaIndices.includes(i);
+                                    return (
+                                        <div key={i} className={cn("flex items-center gap-2 rounded-lg p-1", isLocked && "bg-amber-50 border border-amber-200")}>
+                                            {isLocked && (
+                                                <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded shrink-0">PASSADA</span>
+                                            )}
+                                            <input type="date" value={p.dataInicio} onChange={e => handleParcelaChange(i, 'dataInicio', e.target.value)} disabled={isLocked} className={cn("w-full border-slate-300 rounded-lg text-xs py-1 px-1.5", isLocked && "bg-slate-100 text-slate-400 cursor-not-allowed")}/>
+                                            <input type="date" value={p.dataFim} onChange={e => handleParcelaChange(i, 'dataFim', e.target.value)} disabled={isLocked} className={cn("w-full border-slate-300 rounded-lg text-xs py-1 px-1.5", isLocked && "bg-slate-100 text-slate-400 cursor-not-allowed")}/>
+                                            <span className="text-xs font-medium w-16 text-center shrink-0">{p.dias} dias</span>
+                                            {parcelas.length > 1 && !isLocked && (
+                                                <button onClick={() => removeParcela(i)} className="text-red-500 hover:text-red-700 shrink-0">
+                                                    <Trash2 className="w-4 h-4"/>
+                                                </button>
+                                            )}
+                                            {isLocked && <span className="w-5 shrink-0"/>}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
