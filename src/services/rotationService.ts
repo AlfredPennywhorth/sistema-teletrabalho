@@ -152,14 +152,21 @@ export const calculateRotationMatrix = (
                 status = 'presencial';
             }
 
-            newStatuses.push({
+            const newRecord: StatusDiario = {
                 id: `${col.id}-${dateStr}`,
                 colaboradorId: col.id,
                 data: dateStr,
                 status,
-                observacao: existing?.observacao,
-                isManual: existing?.isManual // Maintain flag if present
-            });
+            };
+
+            if (existing?.observacao !== undefined) {
+                newRecord.observacao = existing.observacao;
+            }
+            if (existing?.isManual !== undefined) {
+                newRecord.isManual = existing.isManual;
+            }
+
+            newStatuses.push(newRecord);
         });
 
         currentDate = addDays(currentDate, 1);
