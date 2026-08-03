@@ -8,9 +8,11 @@ import {
 } from 'date-fns';
 import { StatusDiario, Feriado, Colaborador } from '../types';
 
-// Configuration
-const ROTATION_POOL = ['andre', 'virginia', 'carol', 'william'];
-const FIXED_PERSON_ID = 'iuri';
+// Helpers to normalize and check Ouvidor role
+const isOuvidor = (cargo: string): boolean => {
+    if (!cargo) return false;
+    return cargo.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes("ouvidor");
+};
 
 export const calculateRotationMatrix = (
     currentData: StatusDiario[],
@@ -23,7 +25,17 @@ export const calculateRotationMatrix = (
     sobrescreverManual: boolean = false
 ): StatusDiario[] => {
     const newStatuses: StatusDiario[] = [];
-    let rotationIndex = 0;
+    
+    // Filtrar colaboradores ativos
+    const activeColaboradores = colaboradores.filter(c => c.situacao === 'ativo');
+
+    // Determinar o pool de rodízio e o Ouvidor dinamicamente
+    const ouvidorColaborador = activeColaboradores.find(c => isOuvidor(c.cargo));
+    const ouvidorId = ouvidorColaborador ? ouvidorColaborador.id : 'iuri'; // Fallback seguro
+    
+    const dynamicRotationPool = activeColaboradores
+        .filter(c => !isOuvidor(c.cargo))
+        .map(c => c.id);
 
     let currentDate = startOfDay(startDate);
     const end = startOfDay(endDate);
@@ -85,7 +97,7 @@ export const calculateRotationMatrix = (
             // Lock in manual/preserved teleworks first
             availableDays.forEach(day => {
                 const dayStr = format(day, 'yyyy-MM-dd');
-                ROTATION_POOL.forEach(id => {
+                dynamicRotationPool.forEach(id => {
                     const s = statusMap.get(`${id}-${dayStr}`);
                     if (s) {
                         const checkManual = s.isManual && !sobrescreverManual;
@@ -100,7 +112,7 @@ export const calculateRotationMatrix = (
 
             // 3. Prepare remaining days and collaborators for shuffling
             const remainingDays = availableDays.filter(day => !assignedDates.has(format(day, 'yyyy-MM-dd')));
-            const remainingCols = ROTATION_POOL.filter(id => !assignedCols.has(id));
+            const remainingCols = dynamicRotationPool.filter(id => !assignedCols.has(id));
 
             // Shuffle remaining days and collaborators randomly
             const shuffledDays = [...remainingDays].sort(() => Math.random() - 0.5);
@@ -176,7 +188,7 @@ export const calculateRotationMatrix = (
             }
 
             // O Ouvidor nunca pode estar em teletrabalho
-            if (col.id === FIXED_PERSON_ID) {
+            if (col.id === ouvidorId) {
                 status = 'presencial';
             }
 

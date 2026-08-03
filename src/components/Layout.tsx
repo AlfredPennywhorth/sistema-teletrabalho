@@ -16,6 +16,7 @@ import { useStore } from '../store/useStore';
 import { auth } from '../lib/firebase';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { SaveIndicator } from './SaveIndicator';
+import { APP_VERSION } from '../version';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -47,7 +48,10 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         >
           <Menu className="w-6 h-6 text-slate-600" />
         </button>
-        <h1 className="font-semibold text-slate-900">Gestão de Teletrabalho</h1>
+        <h1 className="font-semibold text-slate-900 flex items-center gap-2">
+          Gestão de Teletrabalho
+          <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono border border-slate-200">{APP_VERSION}</span>
+        </h1>
         <div className="w-10" />
       </div>
 
@@ -70,11 +74,14 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
                 <Calendar className="w-5 h-5 text-white" />
               </div>
-              <span className="font-semibold text-slate-900">Teletrabalho</span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-slate-900 leading-tight">Teletrabalho</span>
+                <span className="text-[10px] font-mono text-blue-600 font-semibold">{APP_VERSION}</span>
+              </div>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -137,6 +144,10 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
               <LogOut className="w-4 h-4" />
               <span className="text-sm">Sair</span>
             </button>
+
+            <div className="pt-2 text-center">
+              <span className="text-[10px] text-slate-400 font-mono">Versão {APP_VERSION}</span>
+            </div>
           </div>
         </div>
       </aside>

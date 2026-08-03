@@ -2,11 +2,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { Ferias, FeriasStatus, ParcelaFerias } from '../types';
 import { getFerias, saveFerias, cancelFerias } from '../services/feriasService';
-import { Loader2, Calendar as CalendarIcon, AlertTriangle, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Calendar as CalendarIcon, AlertTriangle, Plus, Trash2, Pencil } from 'lucide-react';
 import { addDays, differenceInDays, format, getDay, isBefore, isValid, parseISO } from 'date-fns';
+import { validateFerias } from '../utils/feriasValidation';
 
 export function FeriasManager() {
-    const { colaboradores } = useStore();
+    const { colaboradores, feriados } = useStore();
     const [feriasList, setFeriasList] = useState<Ferias[]>([]);
     const [loading, setLoading] = useState(true);
     
@@ -18,6 +19,9 @@ export function FeriasManager() {
     const [antecipar13, setAntecipar13] = useState(false);
     const [parcelas, setParcelas] = useState<ParcelaFerias[]>([{ dataInicio: '', dataFim: '', dias: 0 }]);
     const [observacao, setObservacao] = useState('');
+    const [editingFeriasId, setEditingFeriasId] = useState<string | null>(null);
+    // Índices de parcelas bloqueadas (já iniciadas) no modo edição
+    const [lockedParcelaIndices, setLockedParcelaIndices] = useState<number[]>([]);
     
     const [errors, setErrors] = useState<string[]>([]);
     const [warnings, setWarnings] = useState<string[]>([]);
@@ -65,102 +69,65 @@ export function FeriasManager() {
         setParcelas(parcelas.filter((_, i) => i !== index));
     };
 
-    const validateForm = () => {
-        const newErrors: string[] = [];
-        const newWarnings: string[] = [];
-        
-        if (!selectedColaborador) newErrors.push('Colaborador é obrigatório.');
-        
-        let totalDias = 0;
-        let has14Days = false;
-        
-        // Ordena parcelas por data de início para validar sobreposição
-        const parcelasValidas = parcelas.filter(p => p.dataInicio && p.dataFim);
-        
-        if (parcelasValidas.length !== parcelas.length) {
-            newErrors.push('Todas as parcelas devem ter data de início e fim preenchidas.');
+    const isFeriasEditable = (ferias: Ferias) => {
+        if (ferias.status === 'cancelado' || ferias.status === 'concluido') {
+            return { editable: false, reason: 'Programações canceladas ou concluídas não podem ser editadas.' };
         }
-
-        const parcelasOrdenadas = [...parcelasValidas].sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
-
-        parcelasOrdenadas.forEach((p, i) => {
-            const dInicio = parseISO(p.dataInicio);
-            const dFim = parseISO(p.dataFim);
-
-            if (isValid(dInicio) && isValid(dFim)) {
-                if (isBefore(dFim, dInicio)) {
-                    newErrors.push(`Parcela ${i + 1}: Data fim não pode ser anterior à data de início.`);
-                }
-            }
-
-            totalDias += p.dias;
-            if (p.dias >= 14) has14Days = true;
-            if (p.dias > 0 && p.dias < 5) newErrors.push(`Parcela ${i + 1} deve ter no mínimo 5 dias.`);
-            
-            if (i > 0) {
-                const prevFim = parseISO(parcelasOrdenadas[i - 1].dataFim);
-                if (isValid(prevFim) && isValid(dInicio)) {
-                    if (dInicio <= prevFim) {
-                        newErrors.push('Há sobreposição entre períodos de férias. Ajuste as datas antes de salvar.');
-                    }
-                }
-            }
-
-            if (p.dataInicio) {
-                const date = dInicio;
-                const dayOfWeek = getDay(date); // 0=Sun, 1=Mon, ..., 6=Sat
-                if (dayOfWeek === 0 || dayOfWeek === 6) newErrors.push(`Parcela ${i + 1} não pode iniciar no fim de semana.`);
-                if (dayOfWeek === 4 || dayOfWeek === 5) newErrors.push(`Parcela ${i + 1} não pode iniciar em quinta ou sexta-feira.`);
-                
-                // check feriados and vespera
-                const dateStr = format(date, 'yyyy-MM-dd');
-                const next1 = format(addDays(date, 1), 'yyyy-MM-dd');
-                const next2 = format(addDays(date, 2), 'yyyy-MM-dd');
-                
-                const isHol = feriados.some(f => f.data === dateStr);
-                const isVespera1 = feriados.some(f => f.data === next1);
-                const isVespera2 = feriados.some(f => f.data === next2);
-                
-                if (isHol) newErrors.push(`Parcela ${i + 1} não pode iniciar em feriado.`);
-                if (isVespera1 || isVespera2) newErrors.push(`Parcela ${i + 1} não pode iniciar nos 2 dias que antecedem um feriado.`);
-                
-                // Warnings
-                const daysDiff = differenceInDays(date, new Date());
-                if (daysDiff < 30 && daysDiff >= 0) newWarnings.push(`Parcela ${i + 1} inicia em menos de 30 dias.`);
-                
-                if (antecipar13 && date.getMonth() === 0) {
-                    newWarnings.push(`Antecipação de 13º marcada para janeiro (Verificar norma).`);
-                }
-            }
-        });
-        
-        if (totalDias !== diasDescanso) {
-            newErrors.push(`A soma dos dias (${totalDias}) deve ser igual a ${diasDescanso} (Direito: ${diasDireito} - Abono: ${diasAbono}).`);
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        const allStarted = ferias.parcelas?.every(p => p.dataInicio && p.dataInicio <= todayStr);
+        if (allStarted) {
+            return { editable: false, reason: 'Todas as parcelas já foram iniciadas. Não é possível editar.' };
         }
-        
-        if (parcelas.length > 1 && !has14Days) {
-            newErrors.push('No fracionamento, ao menos uma parcela deve ter 14 dias ou mais.');
-        }
-
-        if (abonoPecuniario) {
-            const today = new Date();
-            const aquisitivoFim = parseISO(periodoFim);
-            if (isValid(aquisitivoFim) && differenceInDays(aquisitivoFim, today) < 15) {
-                newWarnings.push('Abono pecuniário solicitado com menos de 15 dias do vencimento do período aquisitivo.');
-            }
-        }
-        
-        setErrors(newErrors);
-        setWarnings(newWarnings);
-        
-        return newErrors.length === 0;
+        return { editable: true };
     };
 
-    const handleSave = async () => {
-        if (!validateForm()) return;
-        
-        const newFerias: Ferias = {
-            id: crypto.randomUUID(),
+    const handleEditFerias = (ferias: Ferias) => {
+        const check = isFeriasEditable(ferias);
+        if (!check.editable) {
+            alert(check.reason);
+            return;
+        }
+        if (ferias.status === 'aprovado') {
+            alert('Esta programação já está aprovada. Alterações exigem novo recálculo do rodízio no Calendário Mensal.');
+        }
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        const locked = ferias.parcelas
+            ?.map((p, i) => (p.dataInicio && p.dataInicio <= todayStr ? i : -1))
+            .filter(i => i >= 0) ?? [];
+        setLockedParcelaIndices(locked);
+        setEditingFeriasId(ferias.id);
+        setSelectedColaborador(ferias.colaboradorId);
+        setPeriodoInicio(ferias.periodoAquisitivoInicio);
+        setPeriodoFim(ferias.periodoAquisitivoFim);
+        setAbonoPecuniario(ferias.abonoPecuniario);
+        setAntecipar13(ferias.antecipar13);
+        setParcelas(ferias.parcelas);
+        setObservacao(ferias.observacao || '');
+        setErrors([]);
+        setWarnings([]);
+    };
+
+    const resetForm = () => {
+        setSelectedColaborador('');
+        setPeriodoInicio('');
+        setPeriodoFim('');
+        setAbonoPecuniario(false);
+        setAntecipar13(false);
+        setParcelas([{ dataInicio: '', dataFim: '', dias: 0 }]);
+        setObservacao('');
+        setErrors([]);
+        setWarnings([]);
+        setEditingFeriasId(null);
+        setLockedParcelaIndices([]);
+    };
+
+    const validateForm = () => {
+        if (!selectedColaborador) {
+            setErrors(['Selecione um colaborador antes de salvar.']);
+            return false;
+        }
+
+        const result = validateFerias({
             colaboradorId: selectedColaborador,
             periodoAquisitivoInicio: periodoInicio,
             periodoAquisitivoFim: periodoFim,
@@ -170,14 +137,56 @@ export function FeriasManager() {
             diasDescanso,
             antecipar13,
             parcelas,
-            status: 'programado',
             observacao
+        }, feriados || []);
+
+        setErrors(result.errors);
+        setWarnings(result.warnings);
+
+        return result.valid;
+    };
+
+    const handleSave = async () => {
+        if (!validateForm()) return;
+        
+        const currentFerias = feriasList.find(f => f.id === editingFeriasId);
+        const createdAt = currentFerias?.createdAt || new Date().toISOString();
+
+        // Preserva parcelas passadas exatamente como estão no registro original
+        const parcelasProtegidas = parcelas.map((p, i) => {
+            if (lockedParcelaIndices.includes(i) && currentFerias) {
+                return currentFerias.parcelas[i]; // dado original inalterado
+            }
+            return p;
+        });
+
+        const newFerias: Ferias = {
+            id: editingFeriasId || crypto.randomUUID(),
+            colaboradorId: selectedColaborador,
+            periodoAquisitivoInicio: periodoInicio,
+            periodoAquisitivoFim: periodoFim,
+            diasDireito,
+            abonoPecuniario,
+            diasAbono,
+            diasDescanso,
+            antecipar13,
+            parcelas: parcelasProtegidas,
+            status: currentFerias?.status || 'programado',
+            observacao,
+            createdAt,
+            updatedAt: new Date().toISOString()
         };
         
         try {
             await saveFerias(newFerias);
-            setFeriasList([...feriasList, newFerias]);
-            alert('Férias programadas com sucesso. Recalcule o rodízio na aba Calendário Mensal para aplicar as mudanças.');
+            if (editingFeriasId) {
+                setFeriasList(prev => prev.map(f => f.id === editingFeriasId ? newFerias : f));
+                alert('Programação de férias atualizada com sucesso. Recalcule o rodízio na aba Calendário Mensal para aplicar as mudanças na escala.');
+            } else {
+                setFeriasList([...feriasList, newFerias]);
+                alert('Férias programadas com sucesso. Recalcule o rodízio na aba Calendário Mensal para aplicar as mudanças.');
+            }
+            resetForm();
         } catch (error) {
             alert('Erro ao salvar férias.');
         }
@@ -214,12 +223,19 @@ export function FeriasManager() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Formulário de Cadastro Compacto */}
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 className="font-semibold text-base mb-3 text-slate-800">Nova Programação</h3>
+                    <h3 className="font-semibold text-base mb-3 text-slate-800">
+                        {editingFeriasId ? 'Editar Programação' : 'Nova Programação'}
+                    </h3>
                     
                     <div className="space-y-3">
                         <div>
                             <label className="block text-xs font-medium text-slate-600 mb-1">Colaborador</label>
-                            <select value={selectedColaborador} onChange={e => setSelectedColaborador(e.target.value)} className="w-full border-slate-300 rounded-lg text-sm py-1.5 px-2">
+                            <select 
+                                value={selectedColaborador} 
+                                onChange={e => setSelectedColaborador(e.target.value)} 
+                                disabled={!!editingFeriasId}
+                                className="w-full border-slate-300 rounded-lg text-sm py-1.5 px-2 disabled:bg-slate-100 disabled:text-slate-500"
+                            >
                                 <option value="">Selecione...</option>
                                 {colaboradores.map(c => (
                                     <option key={c.id} value={c.id}>{c.nome}</option>
@@ -238,7 +254,7 @@ export function FeriasManager() {
                             </div>
                         </div>
 
-                        <div className="flex gap-4 items-center py-1">
+                         <div className="flex gap-4 items-center py-1">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" checked={abonoPecuniario} onChange={e => setAbonoPecuniario(e.target.checked)} className="rounded text-blue-600 w-4 h-4"/>
                                 <span className="text-xs font-medium text-slate-700">Abono Pecuniário (10 dias)</span>
@@ -260,18 +276,25 @@ export function FeriasManager() {
                             </div>
                             
                             <div className="space-y-2">
-                                {parcelas.map((p, i) => (
-                                    <div key={i} className="flex items-center gap-2">
-                                        <input type="date" value={p.dataInicio} onChange={e => handleParcelaChange(i, 'dataInicio', e.target.value)} className="w-full border-slate-300 rounded-lg text-xs py-1 px-1.5"/>
-                                        <input type="date" value={p.dataFim} onChange={e => handleParcelaChange(i, 'dataFim', e.target.value)} className="w-full border-slate-300 rounded-lg text-xs py-1 px-1.5"/>
-                                        <span className="text-xs font-medium w-16 text-center shrink-0">{p.dias} dias</span>
-                                        {parcelas.length > 1 && (
-                                            <button onClick={() => removeParcela(i)} className="text-red-500 hover:text-red-700 shrink-0">
-                                                <Trash2 className="w-4 h-4"/>
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
+                                {parcelas.map((p, i) => {
+                                    const isLocked = lockedParcelaIndices.includes(i);
+                                    return (
+                                        <div key={i} className={cn("flex items-center gap-2 rounded-lg p-1", isLocked && "bg-amber-50 border border-amber-200")}>
+                                            {isLocked && (
+                                                <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded shrink-0">PASSADA</span>
+                                            )}
+                                            <input type="date" value={p.dataInicio} onChange={e => handleParcelaChange(i, 'dataInicio', e.target.value)} disabled={isLocked} className={cn("w-full border-slate-300 rounded-lg text-xs py-1 px-1.5", isLocked && "bg-slate-100 text-slate-400 cursor-not-allowed")}/>
+                                            <input type="date" value={p.dataFim} onChange={e => handleParcelaChange(i, 'dataFim', e.target.value)} disabled={isLocked} className={cn("w-full border-slate-300 rounded-lg text-xs py-1 px-1.5", isLocked && "bg-slate-100 text-slate-400 cursor-not-allowed")}/>
+                                            <span className="text-xs font-medium w-16 text-center shrink-0">{p.dias} dias</span>
+                                            {parcelas.length > 1 && !isLocked && (
+                                                <button onClick={() => removeParcela(i)} className="text-red-500 hover:text-red-700 shrink-0">
+                                                    <Trash2 className="w-4 h-4"/>
+                                                </button>
+                                            )}
+                                            {isLocked && <span className="w-5 shrink-0"/>}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -291,9 +314,16 @@ export function FeriasManager() {
                             </div>
                         )}
 
-                        <button onClick={handleSave} className="w-full bg-slate-900 text-white font-medium py-1.5 rounded-lg hover:bg-slate-800 text-sm">
-                            Salvar Programação
-                        </button>
+                        <div className="flex gap-2">
+                            {editingFeriasId && (
+                                <button onClick={resetForm} className="w-1/2 border border-slate-300 text-slate-700 font-medium py-1.5 rounded-lg hover:bg-slate-50 text-sm">
+                                    Cancelar Edição
+                                </button>
+                            )}
+                            <button onClick={handleSave} className={cn("text-white font-medium py-1.5 rounded-lg text-sm", editingFeriasId ? "w-1/2 bg-blue-600 hover:bg-blue-700" : "w-full bg-slate-900 hover:bg-slate-800")}>
+                                {editingFeriasId ? 'Salvar Alterações' : 'Salvar Programação'}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -368,6 +398,7 @@ export function FeriasManager() {
                                     })
                                     .map(f => {
                                         const colaborador = colaboradores.find(c => c.id === f.colaboradorId);
+                                        const editCheck = isFeriasEditable(f);
                                         return (
                                             <tr key={f.id} className={cn(
                                                 "hover:bg-slate-50/50 transition-colors",
@@ -412,15 +443,32 @@ export function FeriasManager() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-2.5 text-center">
-                                                    {f.status !== 'cancelado' && (
-                                                        <button
-                                                            onClick={() => handleCancel(f.id)}
-                                                            className="p-1 text-slate-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-colors inline-flex"
-                                                            title="Cancelar férias"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    )}
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        {f.status !== 'cancelado' && f.status !== 'concluido' && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleEditFerias(f)}
+                                                                    disabled={!editCheck.editable}
+                                                                    className={cn(
+                                                                        "p-1 rounded transition-colors inline-flex",
+                                                                        editCheck.editable 
+                                                                            ? "text-blue-500 hover:text-blue-700 hover:bg-blue-50" 
+                                                                            : "text-slate-300 cursor-not-allowed opacity-50"
+                                                                    )}
+                                                                    title={editCheck.editable ? "Editar férias" : (editCheck.reason || 'Não editável')}
+                                                                >
+                                                                    <Pencil className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleCancel(f.id)}
+                                                                    className="p-1 text-slate-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-colors inline-flex"
+                                                                    title="Cancelar programação de férias"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );

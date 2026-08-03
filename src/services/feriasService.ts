@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs, getDoc, updateDoc, query, where, deleteDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, query, where, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Ferias, FeriasStatus } from '../types';
 

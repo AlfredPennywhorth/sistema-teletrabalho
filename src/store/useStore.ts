@@ -90,6 +90,9 @@ export const useStore = create<AppState>()((set, get) => ({
     try {
       await fsAddColaborador(colaborador);
       set((state) => ({ colaboradores: [...state.colaboradores, colaborador] }));
+    } catch (error) {
+      console.error('Erro ao adicionar colaborador:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       set({ isSyncing: false });
     }
@@ -105,6 +108,9 @@ export const useStore = create<AppState>()((set, get) => ({
       try {
         await fsUpdateColaborador(target);
         set({ colaboradores: updated });
+      } catch (error) {
+        console.error('Erro ao atualizar colaborador:', error);
+        alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
       } finally {
         set({ isSyncing: false });
       }
@@ -117,6 +123,9 @@ export const useStore = create<AppState>()((set, get) => ({
       set((state) => ({
         colaboradores: state.colaboradores.filter((c) => c.id !== id),
       }));
+    } catch (error) {
+      console.error('Erro ao deletar colaborador:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       set({ isSyncing: false });
     }
@@ -135,6 +144,9 @@ export const useStore = create<AppState>()((set, get) => ({
         );
         return { statusDiarios: [...filtered, status] };
       });
+    } catch (error) {
+      console.error('Erro ao adicionar status diário:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       set({ isSyncing: false });
     }
@@ -152,6 +164,9 @@ export const useStore = create<AppState>()((set, get) => ({
           s.id === id ? updated : s
         ),
       }));
+    } catch (error) {
+      console.error('Erro ao atualizar status diário:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       setTimeout(() => set({ isSyncing: false }), 800);
     }
@@ -163,6 +178,9 @@ export const useStore = create<AppState>()((set, get) => ({
       set((state) => ({
         statusDiarios: state.statusDiarios.filter((s) => s.id !== id),
       }));
+    } catch (error) {
+      console.error('Erro ao deletar status diário:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       setTimeout(() => set({ isSyncing: false }), 800);
     }
@@ -189,6 +207,9 @@ export const useStore = create<AppState>()((set, get) => ({
     try {
       await fsAddFeriado(feriado);
       set((state) => ({ feriados: [...state.feriados, feriado] }));
+    } catch (error) {
+      console.error('Erro ao adicionar feriado:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       set({ isSyncing: false });
     }
@@ -202,6 +223,9 @@ export const useStore = create<AppState>()((set, get) => ({
         const uniqueNewFeriados = newFeriados.filter((f) => !existingDates.has(f.data));
         return { feriados: [...state.feriados, ...uniqueNewFeriados] };
       });
+    } catch (error) {
+      console.error('Erro ao adicionar feriados em lote:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       set({ isSyncing: false });
     }
@@ -218,6 +242,9 @@ export const useStore = create<AppState>()((set, get) => ({
           f.id === id ? updated : f
         ),
       }));
+    } catch (error) {
+      console.error('Erro ao atualizar feriado:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       set({ isSyncing: false });
     }
@@ -229,6 +256,9 @@ export const useStore = create<AppState>()((set, get) => ({
       set((state) => ({
         feriados: state.feriados.filter((f) => f.id !== id),
       }));
+    } catch (error) {
+      console.error('Erro ao deletar feriado:', error);
+      alert('Não foi possível salvar as alterações. Verifique sua conexão e tente novamente.');
     } finally {
       set({ isSyncing: false });
     }
@@ -278,6 +308,9 @@ export const useStore = create<AppState>()((set, get) => ({
         });
         return { statusDiarios: [...keptStatuses, ...newStatuses] };
       });
+    } catch (error) {
+      console.error('Erro ao recalcular rodízio:', error);
+      alert('A escala não foi recalculada. Nenhum dado foi alterado.');
     } finally {
       setTimeout(() => set({ isSyncing: false }), 800);
     }
