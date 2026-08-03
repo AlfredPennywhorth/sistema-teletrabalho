@@ -429,5 +429,3 @@ export async function backfillVacationRecords() {
     console.log(`✅ SINCRONIZAÇÃO DE FÉRIAS CONCLUÍDA: ${totalCount} registros atualizados.`);
     return totalCount;
 }
-    return totalCount;
-}
