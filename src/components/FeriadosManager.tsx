@@ -47,8 +47,11 @@ export function FeriadosManager() {
 
   const years = useMemo(() => {
     const yearsSet = new Set(feriados.map((f) => parseISO(f.data).getFullYear()));
-    yearsSet.add(new Date().getFullYear());
-    yearsSet.add(new Date().getFullYear() + 1);
+    const currentYear = new Date().getFullYear();
+    // Inclui ano atual e até 5 anos futuros para importação sem travas
+    for (let offset = 0; offset <= 5; offset++) {
+      yearsSet.add(currentYear + offset);
+    }
     return [...yearsSet].sort((a, b) => b - a);
   }, [feriados]);
 
