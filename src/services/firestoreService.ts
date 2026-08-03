@@ -375,50 +375,49 @@ export async function migrateData(
  */
 import { addDays, eachDayOfInterval, format, parseISO } from 'date-fns';
 
+import { getFerias } from './feriasService';
+
 export async function backfillVacationRecords() {
-    console.log('👷 Iniciando Backfill de Registros de Férias...');
+    console.log('👷 Iniciando Sincronização Dinâmica de Registros de Férias...');
     
-    // Cronograma oficial (conforme definido no plano de negócio)
-    const officialVacations = [
-        { colaboradorId: 'carol', start: '2026-03-02', days: 12 },
-        { colaboradorId: 'carol', start: '2026-11-03', days: 18 },
-        { colaboradorId: 'andre', start: '2026-07-13', days: 12 },
-        { colaboradorId: 'andre', start: '2026-12-14', days: 18 },
-        { colaboradorId: 'virginia', start: '2026-03-16', days: 15 },
-        { colaboradorId: 'virginia', start: '2026-11-23', days: 15 },
-        { colaboradorId: 'iuri', start: '2026-08-06', days: 30 },
-        { colaboradorId: 'william', start: '2026-06-08', days: 30 },
-    ];
+    // Busca programações dinâmicas do Firestore
+    const feriasList = await getFerias();
+    const activeFerias = feriasList.filter(f => f.status === 'programado' || f.status === 'aprovado');
 
     let currentBatch = writeBatch(db);
     let totalCount = 0;
     let batchCount = 0;
 
-    for (const v of officialVacations) {
-        const start = parseISO(v.start);
-        const end = addDays(start, v.days - 1);
-        const interval = eachDayOfInterval({ start, end });
+    for (const f of activeFerias) {
+        if (!f.parcelas) continue;
+        for (const p of f.parcelas) {
+            if (!p.dataInicio || !p.dataFim) continue;
+            const start = parseISO(p.dataInicio);
+            const end = parseISO(p.dataFim);
+            if (!isValid(start) || !isValid(end) || isBefore(end, start)) continue;
 
-        for (const day of interval) {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            const docId = `${v.colaboradorId}-${dateStr}`;
-            const docRef = doc(db, COLLECTIONS.REGISTROS, docId);
-            
-            // Força a criação do registro de férias para este dia.
-            currentBatch.set(docRef, {
-                id: docId,
-                colaboradorId: v.colaboradorId,
-                data: dateStr,
-                status: 'ferias'
-            });
+            const interval = eachDayOfInterval({ start, end });
+            for (const day of interval) {
+                const dateStr = format(day, 'yyyy-MM-dd');
+                const docId = `${f.colaboradorId}-${dateStr}`;
+                const docRef = doc(db, COLLECTIONS.REGISTROS, docId);
+                
+                currentBatch.set(docRef, {
+                    id: docId,
+                    colaboradorId: f.colaboradorId,
+                    data: dateStr,
+                    status: 'ferias',
+                    observacao: 'Férias Programadas'
+                });
 
-            totalCount++;
-            batchCount++;
+                totalCount++;
+                batchCount++;
 
-            if (batchCount >= 450) {
-                await currentBatch.commit();
-                currentBatch = writeBatch(db);
-                batchCount = 0;
+                if (batchCount >= 450) {
+                    await currentBatch.commit();
+                    currentBatch = writeBatch(db);
+                    batchCount = 0;
+                }
             }
         }
     }
@@ -427,6 +426,6 @@ export async function backfillVacationRecords() {
         await currentBatch.commit();
     }
 
-    console.log(`✅ BACKFILL CONCLUÍDO: ${totalCount} registros de férias garantidos.`);
+    console.log(`✅ SINCRONIZAÇÃO DE FÉRIAS CONCLUÍDA: ${totalCount} registros atualizados.`);
     return totalCount;
 }
