@@ -7,7 +7,7 @@ import { addDays, differenceInDays, format, getDay, isBefore, isValid, parseISO 
 import { validateFerias } from '../utils/feriasValidation';
 
 export function FeriasManager() {
-    const { colaboradores, feriados } = useStore();
+    const { colaboradores, feriados, recalculateRotation } = useStore();
     const [feriasList, setFeriasList] = useState<Ferias[]>([]);
     const [loading, setLoading] = useState(true);
     
@@ -179,15 +179,20 @@ export function FeriasManager() {
         
         try {
             await saveFerias(newFerias);
+            // Sincroniza e recalcula a escala expurgando programações obsoletas
+            const currentYearStart = format(new Date(), 'yyyy-01-01');
+            await recalculateRotation(currentYearStart, 1, false);
+
             if (editingFeriasId) {
                 setFeriasList(prev => prev.map(f => f.id === editingFeriasId ? newFerias : f));
-                alert('Programação de férias atualizada com sucesso. Recalcule o rodízio na aba Calendário Mensal para aplicar as mudanças na escala.');
+                alert('Programação de férias atualizada e escala sincronizada com sucesso!');
             } else {
                 setFeriasList([...feriasList, newFerias]);
-                alert('Férias programadas com sucesso. Recalcule o rodízio na aba Calendário Mensal para aplicar as mudanças.');
+                alert('Férias programadas e escala sincronizada com sucesso!');
             }
             resetForm();
         } catch (error) {
+            console.error(error);
             alert('Erro ao salvar férias.');
         }
     };
@@ -196,8 +201,10 @@ export function FeriasManager() {
         if (!window.confirm('Tem certeza que deseja cancelar esta programação de férias?')) return;
         try {
             await cancelFerias(id);
+            const currentYearStart = format(new Date(), 'yyyy-01-01');
+            await recalculateRotation(currentYearStart, 1, false);
             setFeriasList(prev => prev.map(f => f.id === id ? { ...f, status: 'cancelado' } : f));
-            alert('Férias canceladas. Recalcule o rodízio na aba Calendário Mensal para atualizar a escala.');
+            alert('Férias canceladas e escala atualizada com sucesso!');
         } catch (error) {
             console.error(error);
             alert('Erro ao cancelar férias.');

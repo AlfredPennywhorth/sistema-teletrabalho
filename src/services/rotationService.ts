@@ -62,10 +62,31 @@ export const calculateRotationMatrix = (
 
         if (isWknd || isHol) {
             // Em finais de semana e feriados, não há rodízio.
-            // Mas PRECISAMOS preservar os status de férias/folga/licença/atestado/outro que já existem.
+            // Mas preservamos licenças/atestados/folgas e atribuímos férias programadas vigentes.
             colaboradores.forEach(col => {
+                let isOnVacation = false;
+                if (feriasProgramadas) {
+                    isOnVacation = feriasProgramadas.some(f => 
+                        f.status !== 'cancelado' &&
+                        f.colaboradorId === col.id && 
+                        f.parcelas?.some((p: any) => p.dataInicio && p.dataFim && dateStr >= p.dataInicio && dateStr <= p.dataFim)
+                    );
+                }
+
+                if (isOnVacation) {
+                    newStatuses.push({
+                        id: `${col.id}-${dateStr}`,
+                        colaboradorId: col.id,
+                        data: dateStr,
+                        status: 'ferias',
+                        observacao: 'Férias Programadas'
+                    });
+                    return;
+                }
+
                 const existing = statusMap.get(`${col.id}-${dateStr}`);
-                if (existing && !['presencial', 'teletrabalho'].includes(existing.status)) {
+                // Preserva ausências (folga, licença, atestado, etc.), ignorando status 'ferias' antigo que já não vigora
+                if (existing && existing.status !== 'ferias' && !['presencial', 'teletrabalho'].includes(existing.status)) {
                     newStatuses.push(existing);
                 }
             });
@@ -126,7 +147,7 @@ export const calculateRotationMatrix = (
                 const availableColIndex = shuffledCols.findIndex(id => {
                     const s = statusMap.get(`${id}-${dayStr}`);
                     const isManualPresencial = s?.isManual && s?.status === 'presencial' && !sobrescreverManual;
-                    const isOtherStatus = s && !['presencial', 'teletrabalho'].includes(s.status);
+                    const isOtherStatus = s && !['presencial', 'teletrabalho', 'ferias'].includes(s.status);
                     
                     let isOnVacation = false;
                     if (feriasProgramadas) {
@@ -173,9 +194,10 @@ export const calculateRotationMatrix = (
 
             const existing = statusMap.get(`${col.id}-${dateStr}`);
             const checkManual = existing?.isManual && !sobrescreverManual;
+            const isObsoleteVacation = existing?.status === 'ferias';
             
-            // Preserva registros manuais ou ausências (diferentes de presencial/teletrabalho)
-            if (existing && (checkManual || !['presencial', 'teletrabalho'].includes(existing.status))) {
+            // Preserva registros manuais ou ausências (diferentes de presencial/teletrabalho), ignorando férias obsoletas
+            if (existing && !isObsoleteVacation && (checkManual || !['presencial', 'teletrabalho'].includes(existing.status))) {
                 newStatuses.push(existing);
                 return;
             }
