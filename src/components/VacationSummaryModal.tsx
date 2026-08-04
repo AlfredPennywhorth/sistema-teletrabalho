@@ -1,8 +1,9 @@
-import { X } from 'lucide-react';
+import { useState } from 'react';
+import { X, RefreshCw, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useStore } from '../store/useStore';
-import { STATUS_CONFIG } from '../types';
+import { purgeObsoleteVacationRecords } from '../services/firestoreService';
 
 interface VacationSummaryModalProps {
     isOpen: boolean;
@@ -10,9 +11,24 @@ interface VacationSummaryModalProps {
 }
 
 export function VacationSummaryModal({ isOpen, onClose }: VacationSummaryModalProps) {
-    const { statusDiarios, colaboradores } = useStore();
+    const { statusDiarios, colaboradores, recalculateRotation } = useStore();
+    const [syncing, setSyncing] = useState(false);
 
     if (!isOpen) return null;
+
+    const handleSync = async () => {
+        setSyncing(true);
+        try {
+            const purged = await purgeObsoleteVacationRecords();
+            await recalculateRotation(format(new Date(), 'yyyy-01-01'), 1, false);
+            alert(`Sincronização concluída! ${purged} registro(s) de férias obsoletos removidos do banco.`);
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao sincronizar férias.');
+        } finally {
+            setSyncing(false);
+        }
+    };
 
     // Filter only vacations for 2026 (or current year context if needed, but assuming 2026 for now)
     const vacationRecords = statusDiarios.filter(s => s.status === 'ferias');
@@ -31,7 +47,18 @@ export function VacationSummaryModal({ isOpen, onClose }: VacationSummaryModalPr
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl">
                 <div className="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-xl">
-                    <h2 className="text-lg font-bold text-slate-800">Resumo de Férias 2026</h2>
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-bold text-slate-800">Resumo de Férias 2026</h2>
+                        <button
+                            onClick={handleSync}
+                            disabled={syncing}
+                            className="flex items-center gap-1.5 px-3 py-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-lg text-xs font-medium transition-colors shadow-sm"
+                            title="Purga férias antigas do banco de dados que não pertencem ao módulo de Gestão de Férias"
+                        >
+                            {syncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                            <span>{syncing ? 'Sincronizando...' : 'Sincronizar & Limpar Banco'}</span>
+                        </button>
+                    </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
                         <X className="w-5 h-5 text-slate-500" />
                     </button>

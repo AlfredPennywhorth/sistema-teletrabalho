@@ -270,8 +270,72 @@ export async function fixCorruptedData() {
 }
 
 /**
+ * PURGE OBSOLETE VACATION RECORDS: Examines all records in Firestore with status 'ferias'
+ * and deletes any document whose date is not part of an active programmed vacation.
+ */
+export async function purgeObsoleteVacationRecords() {
+    console.log('🧹 Expurando registros de férias obsoletos do Firestore...');
+    try {
+        const allFerias = await getFerias();
+        const activeFerias = allFerias.filter(f => f.status === 'programado' || f.status === 'aprovado');
+        
+        // Build set of valid "colaboradorId-yyyy-MM-dd" strings
+        const validVacationDays = new Set<string>();
+        activeFerias.forEach(f => {
+            f.parcelas?.forEach(p => {
+                if (p.dataInicio && p.dataFim) {
+                    const start = parseISO(p.dataInicio);
+                    const end = parseISO(p.dataFim);
+                    if (isValid(start) && isValid(end) && !isBefore(end, start)) {
+                        const days = eachDayOfInterval({ start, end });
+                        days.forEach(d => {
+                            validVacationDays.add(`${f.colaboradorId}-${format(d, 'yyyy-MM-dd')}`);
+                        });
+                    }
+                }
+            });
+        });
+
+        const registros = await getRegistros();
+        let batch = writeBatch(db);
+        let count = 0;
+        let purgedCount = 0;
+
+        for (const r of registros) {
+            if (r.status === 'ferias') {
+                const key = `${r.colaboradorId}-${r.data}`;
+                if (!validVacationDays.has(key)) {
+                    console.warn(`🗑️ Removendo registro de férias obsoleto do Firestore: ${key}`);
+                    const docRef = doc(db, COLLECTIONS.REGISTROS, r.id);
+                    batch.delete(docRef);
+                    count++;
+                    purgedCount++;
+                    if (count >= 400) {
+                        await batch.commit();
+                        batch = writeBatch(db);
+                        count = 0;
+                    }
+                }
+            }
+        }
+
+        if (count > 0) {
+            await batch.commit();
+        }
+
+        if (purgedCount > 0) {
+            console.log(`✅ EXPURGO DE FÉRIAS CONCLUÍDO: ${purgedCount} registros obsoletos deletados do Firestore.`);
+        }
+        return purgedCount;
+    } catch (error) {
+        console.error('Erro ao expurgar férias obsoletas:', error);
+        return 0;
+    }
+}
+
+/**
  * PURGE LEGACY DATA: Agressively removes any record that doesn't follow the
- * standard `${colaboradorId}-${data}` ID format.
+ * standard `${colaboradorId}-${data}` ID format and cleans obsolete vacations.
  */
 export async function purgeLegacyData() {
     console.log('🔍 Iniciando Auditoria e Limpeza Agressiva de Registros Legados...');
@@ -302,6 +366,9 @@ export async function purgeLegacyData() {
     if (totalPurged > 0 && count > 0) {
         await batch.commit();
     }
+
+    // Expurga férias obsoletas no Firestore
+    await purgeObsoleteVacationRecords();
 
     if (totalPurged > 0) {
         console.log(`✅ LIMPEZA CONCLUÍDA: ${totalPurged} registros legados removidos.`);
