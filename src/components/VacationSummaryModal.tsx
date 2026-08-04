@@ -100,25 +100,35 @@ export function VacationSummaryModal({ isOpen, onClose }: VacationSummaryModalPr
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                    {Object.entries(months).sort().map(([month, recs]) => (
-                                        <div key={month} className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                                            <div className="font-semibold text-xs text-slate-600 mb-2 flex justify-between items-center">
-                                                {format(parseISO(month + '-01'), 'MMMM', { locale: ptBR })}
-                                                <span className="bg-white px-1.5 py-0.5 rounded text-[10px] shadow-sm border border-slate-100">{recs.length}d</span>
-                                            </div>
-                                            <div className="flex flex-wrap gap-1">
-                                                {recs.map(r => (
-                                                    <span
-                                                        key={r.id}
-                                                        title={r.data}
-                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-white text-slate-700 border border-slate-200 shadow-sm"
-                                                    >
-                                                        {r.data.substring(8)}
+                                    {Object.entries(months).sort().map(([month, recs]) => {
+                                        const year = month.substring(0, 4);
+                                        const isDiffYear = year !== '2026';
+                                        
+                                        return (
+                                            <div key={month} className={`p-3 rounded-lg border ${isDiffYear ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100'}`}>
+                                                <div className={`font-semibold text-xs mb-2 flex justify-between items-start ${isDiffYear ? 'text-amber-800' : 'text-slate-600'}`}>
+                                                    <div className="flex flex-col">
+                                                        {isDiffYear && <span className="text-[9px] font-bold opacity-70 leading-tight uppercase tracking-wider">{year}</span>}
+                                                        <span className="capitalize">{format(parseISO(month + '-01'), 'MMMM', { locale: ptBR })}</span>
+                                                    </div>
+                                                    <span className={`px-1.5 py-0.5 rounded text-[10px] shadow-sm border mt-0.5 ${isDiffYear ? 'bg-amber-100 border-amber-200 text-amber-800' : 'bg-white border-slate-100'}`}>
+                                                        {recs.length}d
                                                     </span>
-                                                ))}
+                                                </div>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {recs.map(r => (
+                                                        <span
+                                                            key={r.id}
+                                                            title={r.data}
+                                                            className={`text-[10px] px-1.5 py-0.5 rounded border shadow-sm ${isDiffYear ? 'bg-amber-100/50 text-amber-900 border-amber-200' : 'bg-white text-slate-700 border-slate-200'}`}
+                                                        >
+                                                            {r.data.substring(8)}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         );

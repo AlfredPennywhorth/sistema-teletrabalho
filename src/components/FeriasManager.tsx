@@ -185,7 +185,7 @@ export function FeriasManager() {
         });
 
         const newFerias: Ferias = {
-            id: editingFeriasId || crypto.randomUUID(),
+            id: editingFeriasId || (window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : Date.now().toString() + Math.random().toString(36).substring(2, 9)),
             colaboradorId: selectedColaborador,
             periodoAquisitivoInicio: periodoInicio,
             periodoAquisitivoFim: periodoFim,
