@@ -2,7 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { Ferias, FeriasStatus, ParcelaFerias } from '../types';
 import { getFerias, saveFerias, cancelFerias } from '../services/feriasService';
-import { Loader2, Calendar as CalendarIcon, AlertTriangle, Plus, Trash2, Pencil } from 'lucide-react';
+import { purgeObsoleteVacationRecords } from '../services/firestoreService';
+import { VacationSummaryModal } from './VacationSummaryModal';
+import { Loader2, Calendar as CalendarIcon, AlertTriangle, Plus, Trash2, Pencil, Filter, RefreshCw } from 'lucide-react';
 import { addDays, differenceInDays, format, getDay, isBefore, isValid, parseISO } from 'date-fns';
 import { validateFerias } from '../utils/feriasValidation';
 
@@ -10,6 +12,8 @@ export function FeriasManager() {
     const { colaboradores, feriados, recalculateRotation } = useStore();
     const [feriasList, setFeriasList] = useState<Ferias[]>([]);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
+    const [showVacationSummary, setShowVacationSummary] = useState(false);
     
     // Form state
     const [selectedColaborador, setSelectedColaborador] = useState('');
@@ -27,13 +31,33 @@ export function FeriasManager() {
     const [warnings, setWarnings] = useState<string[]>([]);
 
     useEffect(() => {
-        const fetchFerias = async () => {
+        const fetchAndSyncFerias = async () => {
             const data = await getFerias();
             setFeriasList(data);
             setLoading(false);
+            // Executa expurgo automático em segundo plano ao abrir a tela
+            try {
+                await purgeObsoleteVacationRecords();
+            } catch (err) {
+                console.error('Erro ao expurgar férias em segundo plano:', err);
+            }
         };
-        fetchFerias();
+        fetchAndSyncFerias();
     }, []);
+
+    const handleSync = async () => {
+        setSyncing(true);
+        try {
+            const purged = await purgeObsoleteVacationRecords();
+            await recalculateRotation(format(new Date(), 'yyyy-01-01'), 1, false);
+            alert(`Sincronização concluída! ${purged} registro(s) de férias obsoletos removidos do banco.`);
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao sincronizar férias.');
+        } finally {
+            setSyncing(false);
+        }
+    };
 
     const diasDireito = 30;
     const diasAbono = abonoPecuniario ? 10 : 0;
@@ -223,8 +247,30 @@ export function FeriasManager() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-slate-800">Gestão de Férias</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-800">Gestão de Férias</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Programação, validação de regras internas e sincronização oficial de férias</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleSync}
+                        disabled={syncing}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-purple-50 hover:bg-purple-100 disabled:opacity-50 text-purple-700 border border-purple-200 rounded-lg text-xs font-semibold transition-colors shadow-sm"
+                        title="Purga férias obsoletas e recalcula a escala no banco de dados"
+                    >
+                        {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 text-purple-600" />}
+                        <span>{syncing ? 'Sincronizando...' : 'Sincronizar & Limpar Banco'}</span>
+                    </button>
+                    <button
+                        onClick={() => setShowVacationSummary(true)}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm"
+                        title="Visualizar Resumo de Férias 2026"
+                    >
+                        <Filter className="w-4 h-4" />
+                        <span>Resumo de Férias</span>
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -485,6 +531,11 @@ export function FeriasManager() {
                     </table>
                 </div>
             </div>
+
+            <VacationSummaryModal
+                isOpen={showVacationSummary}
+                onClose={() => setShowVacationSummary(false)}
+            />
         </div>
     );
 }

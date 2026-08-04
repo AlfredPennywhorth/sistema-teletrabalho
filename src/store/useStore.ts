@@ -191,12 +191,7 @@ export const useStore = create<AppState>()((set, get) => ({
     );
   },
   syncStatusDiarios: (firestoreStatus) => {
-    set((state) => {
-      const statusMap = new Map<string, StatusDiario>();
-      state.statusDiarios.forEach(s => statusMap.set(`${s.colaboradorId}-${s.data}`, s));
-      firestoreStatus.forEach(fs => statusMap.set(`${fs.colaboradorId}-${fs.data}`, fs));
-      return { statusDiarios: Array.from(statusMap.values()) };
-    });
+    set({ statusDiarios: firestoreStatus });
   },
 
   // Feriados

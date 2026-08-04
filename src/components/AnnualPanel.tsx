@@ -410,14 +410,6 @@ export function AnnualPanel() {
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Exportar</span>
           </button>
-          <button
-            onClick={() => setShowVacationSummary(true)}
-            className="p-2 sm:px-4 sm:py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium flex items-center gap-2"
-            title="Resumo de Férias"
-          >
-            <Filter className="w-4 h-4" />
-            <span className="hidden sm:inline">Férias</span>
-          </button>
         </div>
       </div>
 
@@ -522,13 +514,7 @@ export function AnnualPanel() {
               </div>
             );
           })}
-        </div>
       </div>
-
-      <VacationSummaryModal
-        isOpen={showVacationSummary}
-        onClose={() => setShowVacationSummary(false)}
-      />
     </div>
   );
 }
