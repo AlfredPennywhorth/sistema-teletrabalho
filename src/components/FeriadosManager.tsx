@@ -155,7 +155,17 @@ export function FeriadosManager() {
           <h1 className="text-2xl font-bold text-slate-900">Feriados</h1>
           <p className="text-slate-500 mt-1">Gerencie os feriados e pontes</p>
         </div>
-        <div className="flex gap-2 self-start">
+        <div className="flex items-center gap-2 self-start">
+          <select
+            value={filterAno}
+            onChange={(e) => setFilterAno(e.target.value)}
+            className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            title="Selecione o ano para buscar feriados online"
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
           <button
             onClick={async () => {
               setLoadingFetch(true);
@@ -194,7 +204,7 @@ export function FeriadosManager() {
             disabled={loadingFetch}
             className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium flex items-center gap-2 disabled:opacity-50"
           >
-            {loadingFetch ? <Loader2 className="w-5 h-5 animate-spin" /> : <DownloadCloud className="w-5 h-5" />}
+            {loadingFetch ? <Loader2 className="w-5 h-5 animate-spin" /> : <DownloadCloud className="w-5 h-5 text-blue-600" />}
             Buscar Online ({filterAno})
           </button>
           <button
