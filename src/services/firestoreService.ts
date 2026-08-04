@@ -276,8 +276,13 @@ export async function fixCorruptedData() {
 export async function purgeObsoleteVacationRecords() {
     console.log('🧹 Expurando registros de férias obsoletos do Firestore...');
     try {
+        const norm = (str?: string) => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
         const allFerias = await getFerias();
-        const activeFerias = allFerias.filter(f => f.status === 'programado' || f.status === 'aprovado');
+        const activeFerias = allFerias.filter(f => {
+            const s = norm(f.status);
+            return s === 'programado' || s === 'aprovado';
+        });
         
         // Build set of valid "colaboradorId-yyyy-MM-dd" strings (normalized lowercase)
         const validVacationDays = new Set<string>();
@@ -303,8 +308,8 @@ export async function purgeObsoleteVacationRecords() {
         let purgedCount = 0;
 
         for (const r of registros) {
-            // Checa se o registro é férias (case-insensitive)
-            if (r.status?.toLowerCase() === 'ferias') {
+            // Checa se o registro é férias (suporta 'ferias', 'Férias', 'férias', 'FERIAS', etc.)
+            if (norm(r.status) === 'ferias') {
                 const colId = (r.colaboradorId || '').trim().toLowerCase();
                 const key = `${colId}-${r.data}`;
                 if (!validVacationDays.has(key)) {

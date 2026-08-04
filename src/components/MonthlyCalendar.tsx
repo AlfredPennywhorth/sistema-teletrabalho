@@ -416,15 +416,13 @@ export function MonthlyCalendar() {
                   >
                     {format(day, 'd')}
                   </button>
-                  {isWorkingDay && (
-                    <button
-                      onClick={() => handleEditDayClick(day)}
-                      className="p-1 rounded hover:bg-slate-200/70 transition-colors"
-                      title="Editar escala do dia"
-                    >
-                      <Pencil className="w-3.5 h-3.5 text-slate-500" />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleEditDayClick(day)}
+                    className="p-1 rounded hover:bg-slate-200/70 transition-colors"
+                    title="Editar escala do dia"
+                  >
+                    <Pencil className="w-3.5 h-3.5 text-slate-500" />
+                  </button>
 
                   {holiday && (
                     <div className="text-[10px] text-red-600 font-medium leading-tight text-right w-full pr-1">
@@ -438,8 +436,6 @@ export function MonthlyCalendar() {
                     if (selectedStatus && dayData?.status !== selectedStatus) return null;
                     if (!dayData && selectedStatus) return null;
 
-                    // Show only if it's a working day (hide weekends/holidays to reduce visual pollution)
-                    if (!isWorkingDay) return null;
                     if (!dayData) return null;
 
                     return (
