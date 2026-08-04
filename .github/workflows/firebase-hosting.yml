@@ -73,4 +73,3 @@ jobs:
           projectId: sistema-teletrabalho-496119
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-# Trigger deploy with service account JSON key
