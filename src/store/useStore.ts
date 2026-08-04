@@ -3,7 +3,8 @@ import type { Colaborador, StatusDiario, Feriado, User } from '../types';
 import { 
   addColaborador as fsAddColaborador, updateColaborador as fsUpdateColaborador, deleteColaborador as fsDeleteColaborador,
   addFeriado as fsAddFeriado, setFeriadosBatch as fsAddFeriadosBatch, updateFeriado as fsUpdateFeriado, deleteFeriado as fsDeleteFeriado,
-  updateStatusDiario as fsUpdateStatus, deleteStatusDiario as fsDeleteStatus, setRegistrosBatch as fsSetRegistrosBatch
+  updateStatusDiario as fsUpdateStatus, deleteStatusDiario as fsDeleteStatus, setRegistrosBatch as fsSetRegistrosBatch,
+  purgeObsoleteVacationRecords, getRegistros
 } from '../services/firestoreService';
 import { calculateRotationMatrix } from '../services/rotationService';
 import { getFerias } from '../services/feriasService';
@@ -270,6 +271,9 @@ export const useStore = create<AppState>()((set, get) => ({
 
     set({ isSyncing: true });
     try {
+      // 0. Purga todos os registros obsoletos de férias (incluindo fins de semana e feriados) do Firestore
+      await purgeObsoleteVacationRecords();
+
       // 1. Fetch vacations from Firestore
       const allFerias = await getFerias();
       
@@ -292,17 +296,9 @@ export const useStore = create<AppState>()((set, get) => ({
 
       await fsSetRegistrosBatch(newStatuses);
 
-      const affectedColIds = new Set(newStatuses.map(s => s.colaboradorId));
-      const rangeDates = new Set(newStatuses.map(s => s.data));
-
-      set((state) => {
-        const keptStatuses = state.statusDiarios.filter(s => {
-          const isAffectedCol = affectedColIds.has(s.colaboradorId);
-          const isInRange = rangeDates.has(s.data);
-          return !(isAffectedCol && isInRange);
-        });
-        return { statusDiarios: [...keptStatuses, ...newStatuses] };
-      });
+      // Recarrega todos os registros limpos do Firestore para garantir 100% de sincronismo sem lixo em memória
+      const updatedRegistros = await getRegistros();
+      get().syncStatusDiarios(updatedRegistros);
     } catch (error) {
       console.error('Erro ao recalcular rodízio:', error);
       alert('A escala não foi recalculada. Nenhum dado foi alterado.');

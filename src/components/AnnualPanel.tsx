@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -17,6 +17,7 @@ import { useStore } from '../store/useStore';
 import { STATUS_CONFIG, type StatusType, type StatusDiario } from '../types';
 import { cn } from '../utils/cn';
 import { VacationSummaryModal } from './VacationSummaryModal';
+import { purgeObsoleteVacationRecords } from '../services/firestoreService';
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -29,6 +30,11 @@ export function AnnualPanel() {
   const [selectedColaborador, setSelectedColaborador] = useState<string>('');
   const [selectedDepartamento, setSelectedDepartamento] = useState<string>('');
   const [showVacationSummary, setShowVacationSummary] = useState(false);
+
+  useEffect(() => {
+    // Purga em segundo plano registros legados de férias em fins de semana/feriados
+    purgeObsoleteVacationRecords().catch(err => console.error('Erro no expurgo do Painel Anual:', err));
+  }, []);
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],

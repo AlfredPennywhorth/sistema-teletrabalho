@@ -279,9 +279,10 @@ export async function purgeObsoleteVacationRecords() {
         const allFerias = await getFerias();
         const activeFerias = allFerias.filter(f => f.status === 'programado' || f.status === 'aprovado');
         
-        // Build set of valid "colaboradorId-yyyy-MM-dd" strings
+        // Build set of valid "colaboradorId-yyyy-MM-dd" strings (normalized lowercase)
         const validVacationDays = new Set<string>();
         activeFerias.forEach(f => {
+            const colId = (f.colaboradorId || '').trim().toLowerCase();
             f.parcelas?.forEach(p => {
                 if (p.dataInicio && p.dataFim) {
                     const start = parseISO(p.dataInicio);
@@ -289,7 +290,7 @@ export async function purgeObsoleteVacationRecords() {
                     if (isValid(start) && isValid(end) && !isBefore(end, start)) {
                         const days = eachDayOfInterval({ start, end });
                         days.forEach(d => {
-                            validVacationDays.add(`${f.colaboradorId}-${format(d, 'yyyy-MM-dd')}`);
+                            validVacationDays.add(`${colId}-${format(d, 'yyyy-MM-dd')}`);
                         });
                     }
                 }
@@ -302,10 +303,12 @@ export async function purgeObsoleteVacationRecords() {
         let purgedCount = 0;
 
         for (const r of registros) {
-            if (r.status === 'ferias') {
-                const key = `${r.colaboradorId}-${r.data}`;
+            // Checa se o registro é férias (case-insensitive)
+            if (r.status?.toLowerCase() === 'ferias') {
+                const colId = (r.colaboradorId || '').trim().toLowerCase();
+                const key = `${colId}-${r.data}`;
                 if (!validVacationDays.has(key)) {
-                    console.warn(`🗑️ Removendo registro de férias obsoleto do Firestore: ${key}`);
+                    console.warn(`🗑️ Removendo registro de férias obsoleto do Firestore (incluindo fins de semana/feriados): ID=${r.id}`);
                     const docRef = doc(db, COLLECTIONS.REGISTROS, r.id);
                     batch.delete(docRef);
                     count++;
