@@ -516,5 +516,6 @@ export function AnnualPanel() {
           })}
       </div>
     </div>
-  );
+  </div>
+);
 }
