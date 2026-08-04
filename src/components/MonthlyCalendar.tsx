@@ -55,9 +55,7 @@ export function MonthlyCalendar() {
     return statusDiarios.find(s => s.data === dateStr && s.colaboradorId === modalColaborador);
   }, [modalDate, modalColaborador, statusDiarios]);
 
-  const isEditingDisabled = useMemo(() => {
-    return currentExistingStatus ? ['ferias', 'folga', 'licenca', 'atestado'].includes(currentExistingStatus.status) : false;
-  }, [currentExistingStatus]);
+  const isEditingDisabled = false;
 
   const departments = useMemo(
     () => [...new Set(colaboradores.map((c) => c.departamento))],
@@ -638,6 +636,18 @@ export function MonthlyCalendar() {
               <div className="flex items-center justify-end p-4 border-t border-slate-200 shrink-0">
                 {viewMode === 'edit' ? (
                   <div className="flex gap-2">
+                    {currentExistingStatus && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteStatus()}
+                        disabled={isSaving}
+                        className="px-4 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg font-medium text-sm transition-colors flex items-center gap-1.5"
+                        title="Excluir o registro deste dia do banco de dados"
+                      >
+                        <Trash2 className="w-4 h-4 text-rose-600" />
+                        <span>Excluir</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         if (modalColaborador) setViewMode('day');

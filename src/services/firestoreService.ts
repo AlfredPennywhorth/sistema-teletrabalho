@@ -279,16 +279,33 @@ export async function purgeObsoleteVacationRecords() {
         const norm = (str?: string) => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
         const allFerias = await getFerias();
-        const activeFerias = allFerias.filter(f => {
-            const s = norm(f.status);
-            return s === 'programado' || s === 'aprovado';
-        });
         
-        // Build set of valid "colaboradorId-yyyy-MM-dd" strings (normalized lowercase)
+        // Agrupa programações de férias por colaborador
+        const feriasByCol = new Map<string, Ferias[]>();
+        allFerias.forEach(f => {
+            const s = norm(f.status);
+            if (s === 'programado' || s === 'aprovado') {
+                const colId = norm(f.colaboradorId);
+                if (!feriasByCol.has(colId)) feriasByCol.set(colId, []);
+                feriasByCol.get(colId)!.push(f);
+            }
+        });
+
+        // Para cada colaborador com múltiplas programações ativas, mantém apenas a mais recente e cancela as anteriores no Firestore
+        const batchCancel = writeBatch(db);
+        let batchCancelCount = 0;
         const validVacationDays = new Set<string>();
-        activeFerias.forEach(f => {
-            const colId = (f.colaboradorId || '').trim().toLowerCase();
-            f.parcelas?.forEach(p => {
+
+        for (const [colId, list] of feriasByCol.entries()) {
+            list.sort((a, b) => {
+                const dateA = a.updatedAt || a.createdAt || '';
+                const dateB = b.updatedAt || b.createdAt || '';
+                return dateB.localeCompare(dateA);
+            });
+
+            // A mais recente é a oficial ativa
+            const activeDoc = list[0];
+            activeDoc.parcelas?.forEach(p => {
                 if (p.dataInicio && p.dataFim) {
                     const start = parseISO(p.dataInicio);
                     const end = parseISO(p.dataFim);
@@ -300,17 +317,30 @@ export async function purgeObsoleteVacationRecords() {
                     }
                 }
             });
-        });
 
+            // Cancela programações antigas sobrepostas no banco
+            for (let i = 1; i < list.length; i++) {
+                const oldDoc = list[i];
+                console.warn(`⚠️ Cancelando programação de férias legada no Firestore: ID=${oldDoc.id}`);
+                const docRef = doc(db, COLLECTIONS.FERIAS, oldDoc.id);
+                batchCancel.update(docRef, { status: 'cancelado', updatedAt: new Date().toISOString() });
+                batchCancelCount++;
+            }
+        }
+
+        if (batchCancelCount > 0) {
+            await batchCancel.commit();
+        }
+
+        // Agora expurga da coleção 'registros' todos os dias que não pertencem à programação oficial ativa
         const registros = await getRegistros();
         let batch = writeBatch(db);
         let count = 0;
         let purgedCount = 0;
 
         for (const r of registros) {
-            // Checa se o registro é férias (suporta 'ferias', 'Férias', 'férias', 'FERIAS', etc.)
             if (norm(r.status) === 'ferias') {
-                const colId = (r.colaboradorId || '').trim().toLowerCase();
+                const colId = norm(r.colaboradorId);
                 const key = `${colId}-${r.data}`;
                 if (!validVacationDays.has(key)) {
                     console.warn(`🗑️ Removendo registro de férias obsoleto do Firestore (incluindo fins de semana/feriados): ID=${r.id}`);
