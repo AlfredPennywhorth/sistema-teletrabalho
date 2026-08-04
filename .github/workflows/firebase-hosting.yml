@@ -68,8 +68,6 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SISTEMA_TELETRABALHO_496119 || secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SISTEMA_TELETRABALHO_496119 }}'
           channelId: live
           projectId: sistema-teletrabalho-496119
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
