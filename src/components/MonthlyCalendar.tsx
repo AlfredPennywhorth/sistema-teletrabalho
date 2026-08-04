@@ -6,6 +6,7 @@ import {
   X,
   Plus,
   Pencil,
+  Trash2,
   RefreshCw,
   Loader2,
   AlertTriangle,

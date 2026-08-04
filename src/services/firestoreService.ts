@@ -13,7 +13,9 @@ import {
     type DocumentData
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Colaborador, Feriado, StatusDiario } from '../types';
+import { Colaborador, Feriado, StatusDiario, Ferias } from '../types';
+import { parseISO, format, eachDayOfInterval, isBefore, isValid } from 'date-fns';
+import { getFerias } from './feriasService';
 
 const COLLECTIONS = {
     COLABORADORES: 'colaboradores',
