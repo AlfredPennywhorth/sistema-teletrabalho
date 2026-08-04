@@ -70,6 +70,6 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SISTEMA_TELETRABALHO_496119 || secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
-          projectId: sistema-teletrabalho-496119
+          projectId: '${{ secrets.VITE_FIREBASE_PROJECT_ID || "sistema-teletrabalho-v2" }}'
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
