@@ -21,6 +21,7 @@ const COLLECTIONS = {
     COLABORADORES: 'colaboradores',
     FERIADOS: 'feriados',
     REGISTROS: 'registros', // StatusDiario
+    FERIAS: 'ferias',
 };
 
 // --- Colaboradores ---

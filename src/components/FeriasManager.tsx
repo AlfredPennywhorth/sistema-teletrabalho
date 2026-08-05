@@ -161,7 +161,9 @@ export function FeriasManager() {
             diasDescanso,
             antecipar13,
             parcelas,
-            observacao
+            observacao,
+            createdAt: '',
+            updatedAt: ''
         }, feriados || []);
 
         setErrors(result.errors);
@@ -445,9 +447,9 @@ export function FeriasManager() {
                             ) : (
                                 [...feriasList]
                                     .sort((a, b) => {
-                                        const dateA = a.parcelas?.[0]?.dataInicio || a.periodoAquisitivoInicio || '';
-                                        const dateB = b.parcelas?.[0]?.dataInicio || b.periodoAquisitivoInicio || '';
-                                        return dateB.localeCompare(dateA);
+                                        const nomeA = colaboradores.find(c => c.id === a.colaboradorId)?.nome || '';
+                                        const nomeB = colaboradores.find(c => c.id === b.colaboradorId)?.nome || '';
+                                        return nomeA.localeCompare(nomeB);
                                     })
                                     .map(f => {
                                         const colaborador = colaboradores.find(c => c.id === f.colaboradorId);

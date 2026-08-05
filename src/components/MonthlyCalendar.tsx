@@ -40,6 +40,7 @@ export function MonthlyCalendar() {
   const [modalDate, setModalDate] = useState<Date | null>(null);
   const [modalColaborador, setModalColaborador] = useState<string>('');
   const [modalStatus, setModalStatus] = useState<StatusType>('presencial');
+  const [modalMeioPeriodo, setModalMeioPeriodo] = useState<'manha' | 'tarde' | ''>('');
   const [modalObservacao, setModalObservacao] = useState('');
   const [rotationStartDate, setRotationStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
   const [maxTeletrabalho, setMaxTeletrabalho] = useState(1);
@@ -49,6 +50,7 @@ export function MonthlyCalendar() {
   const [viewMode, setViewMode] = useState<'day' | 'edit'>('day');
   const [newColaboradorId, setNewColaboradorId] = useState('');
   const [newStatus, setNewStatus] = useState<StatusType>('presencial');
+  const [newMeioPeriodo, setNewMeioPeriodo] = useState<'manha' | 'tarde' | ''>('');
 
   const currentExistingStatus = useMemo(() => {
     if (!modalDate || !modalColaborador) return null;
@@ -117,9 +119,11 @@ export function MonthlyCalendar() {
     if (existingStatus) {
       setModalStatus(existingStatus.status);
       setModalObservacao(existingStatus.observacao || '');
+      setModalMeioPeriodo(existingStatus.meioPeriodo || '');
     } else {
       setModalStatus('presencial');
       setModalObservacao('');
+      setModalMeioPeriodo('');
     }
     setShowModal(true);
   };
@@ -130,6 +134,7 @@ export function MonthlyCalendar() {
     setViewMode('day');
     setNewColaboradorId('');
     setNewStatus('presencial');
+    setNewMeioPeriodo('');
     setShowModal(true);
   };
 
@@ -152,6 +157,9 @@ export function MonthlyCalendar() {
       
       if (modalObservacao) {
         statusData.observacao = modalObservacao;
+      }
+      if (modalMeioPeriodo) {
+        statusData.meioPeriodo = modalMeioPeriodo;
       }
       
       await addStatusDiario(statusData);
@@ -203,10 +211,14 @@ export function MonthlyCalendar() {
         status: newStatus,
         isManual: true,
       };
+      if (newMeioPeriodo) {
+        statusData.meioPeriodo = newMeioPeriodo;
+      }
       
       await addStatusDiario(statusData);
       setNewColaboradorId('');
       setNewStatus('presencial');
+      setNewMeioPeriodo('');
     } catch (error: any) {
       console.error('Erro ao adicionar colaborador:', error);
       alert('Erro ao adicionar no banco de dados.');
@@ -442,14 +454,21 @@ export function MonthlyCalendar() {
                         key={col.id}
                         onClick={() => handleDayClick(day, col)}
                         className={cn(
-                          'w-full px-1 py-0.5 text-[10px] rounded text-left truncate transition-colors',
-                          dayData
-                            ? cn(STATUS_CONFIG[dayData.status].bgColor, STATUS_CONFIG[dayData.status].color, 'hover:opacity-80')
-                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                          'w-full px-1 py-0.5 text-[10px] rounded text-left truncate transition-colors relative overflow-hidden',
+                          (!dayData || !dayData.meioPeriodo) && (dayData ? cn(STATUS_CONFIG[dayData.status].bgColor, STATUS_CONFIG[dayData.status].color, 'hover:opacity-80') : 'bg-slate-100 text-slate-500 hover:bg-slate-200'),
+                          dayData?.meioPeriodo && 'hover:opacity-80'
                         )}
-                        title={`${col.nome}${dayData ? ` - ${STATUS_CONFIG[dayData.status].label}` : ''}`}
+                        title={`${col.nome}${dayData ? ` - ${STATUS_CONFIG[dayData.status].label}${dayData.meioPeriodo ? ` (${dayData.meioPeriodo})` : ''}` : ''}`}
                       >
-                        {col.nome.split(' ')[0]}
+                        {dayData?.meioPeriodo && (
+                          <div className="absolute inset-0 flex flex-col z-0">
+                            <div className={cn("flex-1", dayData.meioPeriodo === 'manha' ? STATUS_CONFIG[dayData.status].bgColor : 'bg-teal-100')} />
+                            <div className={cn("flex-1", dayData.meioPeriodo === 'tarde' ? STATUS_CONFIG[dayData.status].bgColor : 'bg-teal-100')} />
+                          </div>
+                        )}
+                        <span className={cn("relative z-10", dayData?.meioPeriodo ? STATUS_CONFIG[dayData.status].color : "")}>
+                          {col.nome.split(' ')[0]}
+                        </span>
                       </button>
                     );
                   })}
@@ -509,16 +528,28 @@ export function MonthlyCalendar() {
                       <label className="block text-sm font-medium text-slate-700 mb-1">
                         Status
                       </label>
-                      <select
-                        value={modalStatus}
-                        onChange={(e) => setModalStatus(e.target.value as StatusType)}
-                        disabled={isEditingDisabled}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
-                      >
-                        {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                          <option key={key} value={key}>{config.label}</option>
-                        ))}
-                      </select>
+                      <div className="flex gap-2">
+                        <select
+                          value={modalStatus}
+                          onChange={(e) => setModalStatus(e.target.value as StatusType)}
+                          disabled={isEditingDisabled}
+                          className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
+                        >
+                          {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                            <option key={key} value={key}>{config.label}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={modalMeioPeriodo}
+                          onChange={(e) => setModalMeioPeriodo(e.target.value as any)}
+                          disabled={isEditingDisabled}
+                          className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
+                        >
+                          <option value="">Dia Inteiro</option>
+                          <option value="manha">Apenas Manhã</option>
+                          <option value="tarde">Apenas Tarde</option>
+                        </select>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -552,9 +583,16 @@ export function MonthlyCalendar() {
                               <div key={col.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
                                 <div className="flex flex-col">
                                   <span className="text-sm font-medium text-slate-900">{col.nome}</span>
-                                  <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-full w-fit mt-1", STATUS_CONFIG[data.status].bgColor, STATUS_CONFIG[data.status].color)}>
-                                    {STATUS_CONFIG[data.status].label}
-                                  </span>
+                                  <div className="flex gap-1 items-center mt-1">
+                                    <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-full w-fit", STATUS_CONFIG[data.status].bgColor, STATUS_CONFIG[data.status].color)}>
+                                      {STATUS_CONFIG[data.status].label}
+                                    </span>
+                                    {data.meioPeriodo && (
+                                      <span className="text-[9px] text-slate-500 uppercase font-semibold">
+                                        ({data.meioPeriodo})
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="flex gap-1">
                                   <button
@@ -609,6 +647,15 @@ export function MonthlyCalendar() {
                             {Object.entries(STATUS_CONFIG).map(([key, config]) => (
                               <option key={key} value={key}>{config.label}</option>
                             ))}
+                          </select>
+                          <select
+                            value={newMeioPeriodo}
+                            onChange={(e) => setNewMeioPeriodo(e.target.value as any)}
+                            className="w-32 px-2 py-2 border border-slate-200 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Dia Inteiro</option>
+                            <option value="manha">Manhã</option>
+                            <option value="tarde">Tarde</option>
                           </select>
                           <button
                             onClick={handleAddColaboradorToDay}

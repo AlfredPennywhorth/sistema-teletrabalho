@@ -31,6 +31,7 @@ export interface StatusDiario {
   status: StatusType;
   observacao?: string;
   isManual?: boolean;
+  meioPeriodo?: 'manha' | 'tarde';
 }
 
 export interface Feriado {
