@@ -461,7 +461,7 @@ export function MonthlyCalendar() {
                         title={`${col.nome}${dayData ? ` - ${STATUS_CONFIG[dayData.status].label}${dayData.meioPeriodo ? ` (${dayData.meioPeriodo})` : ''}` : ''}`}
                       >
                         {dayData?.meioPeriodo && (
-                          <div className="absolute inset-0 flex flex-col z-0">
+                          <div className="absolute inset-0 flex flex-row z-0">
                             <div className={cn("flex-1", dayData.meioPeriodo === 'manha' ? STATUS_CONFIG[dayData.status].bgColor : 'bg-teal-100')} />
                             <div className={cn("flex-1", dayData.meioPeriodo === 'tarde' ? STATUS_CONFIG[dayData.status].bgColor : 'bg-teal-100')} />
                           </div>
