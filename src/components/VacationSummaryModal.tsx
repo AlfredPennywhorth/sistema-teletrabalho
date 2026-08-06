@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, RefreshCw, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useStore } from '../store/useStore';
 import { purgeObsoleteVacationRecords } from '../services/firestoreService';
+import { getFerias } from '../services/feriasService';
+import { Ferias } from '../types';
 
 interface VacationSummaryModalProps {
     isOpen: boolean;
@@ -13,6 +15,15 @@ interface VacationSummaryModalProps {
 export function VacationSummaryModal({ isOpen, onClose }: VacationSummaryModalProps) {
     const { statusDiarios, colaboradores, recalculateRotation } = useStore();
     const [syncing, setSyncing] = useState(false);
+    const [activeFerias, setActiveFerias] = useState<Ferias[]>([]);
+
+    useEffect(() => {
+        if (isOpen) {
+            getFerias().then(ferias => {
+                setActiveFerias(ferias.filter(f => f.status === 'programado' || f.status === 'aprovado'));
+            });
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -94,9 +105,23 @@ export function VacationSummaryModal({ isOpen, onClose }: VacationSummaryModalPr
                                             <p className="text-xs text-slate-500">{col.departamento}</p>
                                         </div>
                                     </div>
-                                    <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium border border-purple-200">
-                                        Total: {totalDays} dias
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        {(() => {
+                                            const colabFerias = activeFerias.filter(f => f.colaboradorId === col.id);
+                                            const diasAbonoTotal = colabFerias.reduce((acc, f) => acc + (f.abonoPecuniario ? (f.diasAbono || 0) : 0), 0);
+                                            if (diasAbonoTotal > 0) {
+                                                return (
+                                                    <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium border border-amber-200" title="Dias vendidos (Abono Pecuniário)">
+                                                        +{diasAbonoTotal} dias abono
+                                                    </span>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium border border-purple-200">
+                                            Total: {totalDays} dias
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
