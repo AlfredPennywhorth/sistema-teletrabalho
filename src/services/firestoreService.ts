@@ -269,6 +269,29 @@ export async function fixCorruptedData() {
         await batch.commit();
         console.warn('⚠️ DADOS NORMALIZADOS: Alguns registros foram corrigidos ou migrados no Firestore.');
     }
+
+    // 5. Fix Virginia Vacation
+    const allFerias = await getFerias();
+    const virginiaFerias = allFerias.find(f => f.colaboradorId === 'virginia' && (f.status === 'programado' || f.status === 'aprovado'));
+    
+    if (virginiaFerias && virginiaFerias.parcelas) {
+        let changedVacation = false;
+        virginiaFerias.parcelas.forEach(p => {
+            if (p.dataInicio === '2026-06-01' && p.dataFim === '2026-06-15') {
+                p.dataInicio = '2026-03-16';
+                p.dataFim = '2026-03-30';
+                changedVacation = true;
+            }
+        });
+        if (changedVacation) {
+            const batchUpdate = writeBatch(db);
+            const ref = doc(db, COLLECTIONS.FERIAS, virginiaFerias.id);
+            batchUpdate.update(ref, { parcelas: virginiaFerias.parcelas, updatedAt: new Date().toISOString() });
+            await batchUpdate.commit();
+            console.warn('⚠️ FÉRIAS VIRGINIA ATUALIZADAS NO FIRESTORE!');
+        }
+    }
+
     return modified;
 }
 

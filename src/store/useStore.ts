@@ -8,7 +8,7 @@ import {
 } from '../services/firestoreService';
 import { calculateRotationMatrix } from '../services/rotationService';
 import { getFerias } from '../services/feriasService';
-import { parseISO, endOfYear } from 'date-fns';
+import { parseISO, endOfYear, addYears } from 'date-fns';
 
 interface AppState {
   // User
@@ -267,7 +267,7 @@ export const useStore = create<AppState>()((set, get) => ({
   // Rotation Logic
   recalculateRotation: async (startDate: string, maxTeletrabalho: number = 1, sobrescreverManual: boolean = false) => {
     const start = parseISO(startDate);
-    const end = endOfYear(start);
+    const end = endOfYear(addYears(start, 1));
 
     set({ isSyncing: true });
     try {
